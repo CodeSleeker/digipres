@@ -16,13 +16,22 @@ import { useCraftScroll } from "../hooks/use-craft-scroll";
  * Rotating tools (assembled → separated on scroll). `data-craft-*` attributes
  * drive useCraftScroll; the `craft-tool*` marker classes let the hook locate
  * elements. Structural (not business) content, so tool glyphs live here.
+ *
+ * ⚠ TRANSFORM CHANNEL — do not "tidy" these into `-translate-x-1/2`.
+ * Tailwind v4 compiles translate utilities to the standalone `translate:` CSS
+ * property, which COMPOSES with `transform:` rather than overriding it. Every
+ * element whose transform useCraftScroll rewrites must therefore declare its
+ * base centering as `[transform:…]`, so the hook's inline transform replaces it
+ * instead of stacking on top (that stacking centered them twice, throwing each
+ * icon off by half its own width). Elements the hook does NOT transform — the
+ * ambient glow and the cross lines — keep the normal Tailwind utilities.
  */
 const TOOLS = [
   {
     icon: "⚡",
     marker: "craft-tool--clippers",
     position:
-      "top-5 left-1/2 -translate-x-1/2 max-[768px]:top-[10px] max-[480px]:top-[5px]",
+      "top-5 left-1/2 [transform:translateX(-50%)] max-[768px]:top-[10px] max-[480px]:top-[5px]",
     speed: "1.2",
     dir: "y",
     sign: "-1",
@@ -31,7 +40,7 @@ const TOOLS = [
     icon: "✂",
     marker: "craft-tool--scissors",
     position:
-      "top-1/2 left-5 -translate-y-1/2 max-[768px]:left-[10px] max-[480px]:left-[5px]",
+      "top-1/2 left-5 [transform:translateY(-50%)] max-[768px]:left-[10px] max-[480px]:left-[5px]",
     speed: "1.0",
     dir: "x",
     sign: "-1",
@@ -40,7 +49,7 @@ const TOOLS = [
     icon: "🪒",
     marker: "craft-tool--razor",
     position:
-      "top-1/2 right-5 -translate-y-1/2 max-[768px]:right-[10px] max-[480px]:right-[5px]",
+      "top-1/2 right-5 [transform:translateY(-50%)] max-[768px]:right-[10px] max-[480px]:right-[5px]",
     speed: "0.8",
     dir: "x",
     sign: "1",
@@ -49,7 +58,7 @@ const TOOLS = [
     icon: "▥",
     marker: "craft-tool--comb",
     position:
-      "bottom-5 left-1/2 -translate-x-1/2 max-[768px]:bottom-[10px] max-[480px]:bottom-[5px]",
+      "bottom-5 left-1/2 [transform:translateX(-50%)] max-[768px]:bottom-[10px] max-[480px]:bottom-[5px]",
     speed: "1.1",
     dir: "y",
     sign: "1",
@@ -57,12 +66,12 @@ const TOOLS = [
 ] as const;
 
 const LABEL_POSITION: Record<CraftLabelPosition, string> = {
-  top: "craft-label--top top-[13%] left-1/2 -translate-x-1/2 text-center max-[480px]:top-[10%]",
-  left: "craft-label--left top-1/2 left-[20%] -translate-y-1/2 max-[768px]:left-[4%]",
+  top: "craft-label--top top-[13%] left-1/2 [transform:translateX(-50%)] text-center max-[480px]:top-[10%]",
+  left: "craft-label--left top-1/2 left-[20%] [transform:translateY(-50%)] max-[768px]:left-[4%]",
   right:
-    "craft-label--right top-1/2 right-[20%] -translate-y-1/2 text-right max-[768px]:right-[4%]",
+    "craft-label--right top-1/2 right-[20%] [transform:translateY(-50%)] text-right max-[768px]:right-[4%]",
   bottom:
-    "craft-label--bottom bottom-[8%] left-1/2 -translate-x-1/2 text-center max-[480px]:bottom-[12%]",
+    "craft-label--bottom bottom-[8%] left-1/2 [transform:translateX(-50%)] text-center max-[480px]:bottom-[12%]",
 };
 
 export function Craft({ business }: { business: BusinessProfile }) {
@@ -90,11 +99,11 @@ export function Craft({ business }: { business: BusinessProfile }) {
         </div>
 
         {/* Rings */}
-        <div className="craft-ring pointer-events-none absolute left-1/2 top-1/2 z-[2] h-[160px] w-[160px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/[0.12] will-change-[transform,opacity] max-[768px]:h-[120px] max-[768px]:w-[120px] max-[480px]:h-[90px] max-[480px]:w-[90px]" />
-        <div className="craft-ring craft-ring--outer pointer-events-none absolute left-1/2 top-1/2 z-[2] h-[240px] w-[240px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/[0.06] will-change-[transform,opacity] max-[768px]:h-[180px] max-[768px]:w-[180px] max-[480px]:h-[140px] max-[480px]:w-[140px]" />
+        <div className="craft-ring pointer-events-none absolute left-1/2 top-1/2 z-[2] h-[160px] w-[160px] [transform:translate(-50%,-50%)] rounded-full border border-gold/[0.12] will-change-[transform,opacity] max-[768px]:h-[120px] max-[768px]:w-[120px] max-[480px]:h-[90px] max-[480px]:w-[90px]" />
+        <div className="craft-ring craft-ring--outer pointer-events-none absolute left-1/2 top-1/2 z-[2] h-[240px] w-[240px] [transform:translate(-50%,-50%)] rounded-full border border-gold/[0.06] will-change-[transform,opacity] max-[768px]:h-[180px] max-[768px]:w-[180px] max-[480px]:h-[140px] max-[480px]:w-[140px]" />
 
         {/* Portrait crossfade */}
-        <div className="craft-portrait pointer-events-none absolute left-1/2 top-1/2 z-[1] h-[160px] w-[160px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full will-change-transform max-[768px]:h-[120px] max-[768px]:w-[120px] max-[480px]:h-[90px] max-[480px]:w-[90px]">
+        <div className="craft-portrait pointer-events-none absolute left-1/2 top-1/2 z-[1] h-[160px] w-[160px] [transform:translate(-50%,-50%)] overflow-hidden rounded-full will-change-transform max-[768px]:h-[120px] max-[768px]:w-[120px] max-[480px]:h-[90px] max-[480px]:w-[90px]">
           {/* Decorative crossfade flourish (pointer-events-none): alt="". */}
           <TenantImage
             src={craft.portraitBefore}
@@ -156,7 +165,7 @@ export function Craft({ business }: { business: BusinessProfile }) {
         ))}
 
         {/* CTA */}
-        <div className="craft-cta absolute inset-x-0 bottom-[clamp(3rem,8vh,5rem)] z-[5] translate-y-5 text-center opacity-0 will-change-[transform,opacity]">
+        <div className="craft-cta absolute inset-x-0 bottom-[clamp(3rem,8vh,5rem)] z-[5] [transform:translateY(1.25rem)] text-center opacity-0 will-change-[transform,opacity]">
           <p className="mb-6 font-display text-[1.1rem] italic text-gray max-[768px]:text-[0.95rem]">
             {craft.ctaText}
           </p>
