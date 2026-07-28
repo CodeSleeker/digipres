@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { AuthShell } from "@/components/marketing/auth-shell";
+import { BRAND } from "@/components/marketing/theme";
 import { ResetForm } from "./reset-form";
 
 export const metadata: Metadata = {
-  title: "Set new password · Admin",
+  title: "Set new password · Aliamz Digital",
   robots: { index: false, follow: false },
 };
 
@@ -24,31 +26,23 @@ export default async function ResetPasswordPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-black px-6 py-16">
-      <div className="w-full max-w-sm border border-dark-border bg-dark p-8">
-        <div className="mb-8 text-center">
-          <h1 className="font-heading text-[1.6rem] tracking-[2px] text-white">
-            SET NEW PASSWORD
-          </h1>
-          <p className="mt-2 text-[0.85rem] text-gray">
-            Choose a new password for your account.
-          </p>
+    <AuthShell
+      title="Set new password"
+      subtitle="Choose a new password for your account."
+    >
+      {hasSession ? (
+        <ResetForm />
+      ) : (
+        <div className={`text-sm leading-relaxed ${BRAND.muted}`}>
+          <p>This reset link is invalid or has expired.</p>
+          <Link
+            href="/forgot-password"
+            className={`mt-6 inline-block ${BRAND.link}`}
+          >
+            Request a new link
+          </Link>
         </div>
-
-        {hasSession ? (
-          <ResetForm />
-        ) : (
-          <div className="text-center text-sm text-gray-light">
-            <p>This reset link is invalid or has expired.</p>
-            <Link
-              href="/forgot-password"
-              className="mt-6 inline-block text-xs uppercase tracking-[2px] text-gold hover:text-gold-light"
-            >
-              Request a new link
-            </Link>
-          </div>
-        )}
-      </div>
-    </main>
+      )}
+    </AuthShell>
   );
 }

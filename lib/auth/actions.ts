@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { landingPathFor } from "./landing-path";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { siteBaseUrl } from "@/lib/tenant/urls";
@@ -62,9 +63,12 @@ export async function login(
     };
   }
 
+  // Platform staff belong in the portal, tenant owners in their back office.
+  const destination = await landingPathFor(supabase, data.user.id);
+
   // Drop any cached anonymous renders now that the user is authenticated.
   revalidatePath("/", "layout");
-  redirect("/admin");
+  redirect(destination);
 }
 
 export type ForgotState = { error?: string; sent?: boolean };
@@ -132,8 +136,12 @@ export async function updatePassword(
     return { error: "Could not update your password. Please try again." };
   }
 
+  // Same routing rule as sign-in — a staff member setting their password for
+  // the first time lands in the portal, not on an empty tenant dashboard.
+  const destination = await landingPathFor(supabase, user.id);
+
   revalidatePath("/", "layout");
-  redirect("/admin");
+  redirect(destination);
 }
 
 /**

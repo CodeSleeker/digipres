@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 /** Paths that require an authenticated user. */
-const PROTECTED_PREFIXES = ["/admin"];
+const PROTECTED_PREFIXES = ["/admin", "/platform"];
 const LOGIN_PATH = "/login";
 
 /**
@@ -12,7 +12,8 @@ const LOGIN_PATH = "/login";
  *  1. Refresh the Supabase session and keep the auth cookies in sync between the
  *     request and the response (this is what makes sessions persist across
  *     navigations and server renders).
- *  2. Gate protected routes: send unauthenticated users hitting /admin to /login,
+ *  2. Gate protected routes: send unauthenticated users hitting /admin or
+ *     /platform to /login,
  *     and send already-authenticated users away from /login.
  *
  * `supabase.auth.getUser()` MUST be called here — it validates the token with

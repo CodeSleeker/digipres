@@ -3,14 +3,9 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { requestPasswordReset, type ForgotState } from "@/lib/auth/actions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { BRAND } from "@/components/marketing/theme";
 
 const initialState: ForgotState = {};
-
-const fieldClass =
-  "h-auto w-full rounded-none border border-dark-border bg-charcoal px-4 py-3 text-sm text-white shadow-none outline-none transition-colors focus-visible:border-gold focus-visible:ring-0";
 
 export function ForgotForm() {
   const [state, formAction, isPending] = useActionState(
@@ -20,15 +15,12 @@ export function ForgotForm() {
 
   if (state.sent) {
     return (
-      <div className="text-center text-sm text-gray-light">
+      <div className={`text-sm leading-relaxed ${BRAND.muted}`}>
         <p>
           If an account exists for that email, a password-reset link is on its
           way. Check your inbox (and spam).
         </p>
-        <Link
-          href="/login"
-          className="mt-6 inline-block text-xs uppercase tracking-[2px] text-gold hover:text-gold-light"
-        >
+        <Link href="/login" className={`mt-6 inline-block ${BRAND.link}`}>
           ← Back to sign in
         </Link>
       </div>
@@ -38,42 +30,36 @@ export function ForgotForm() {
   return (
     <form action={formAction} className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
-        <Label
-          htmlFor="email"
-          className="text-[0.7rem] uppercase tracking-[2px] text-gray"
-        >
+        <label htmlFor="email" className={BRAND.label}>
           Email
-        </Label>
-        <Input
+        </label>
+        <input
           id="email"
           name="email"
           type="email"
           required
           autoComplete="email"
           placeholder="you@business.com"
-          className={fieldClass}
+          className={BRAND.field}
         />
       </div>
 
       {state.error && (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-sm text-[#a8353a]">
           {state.error}
         </p>
       )}
 
-      <Button
+      <button
         type="submit"
         disabled={isPending}
         aria-busy={isPending}
-        className="mt-1 w-full rounded-none bg-gold font-heading tracking-[2px] text-black hover:bg-gold-light"
+        className={`mt-1 ${BRAND.button}`}
       >
-        {isPending ? "SENDING…" : "SEND RESET LINK"}
-      </Button>
+        {isPending ? "Sending…" : "Send reset link"}
+      </button>
 
-      <Link
-        href="/login"
-        className="text-center text-xs uppercase tracking-[2px] text-gray hover:text-gold"
-      >
+      <Link href="/login" className={`text-center text-sm ${BRAND.quietLink}`}>
         ← Back to sign in
       </Link>
     </form>

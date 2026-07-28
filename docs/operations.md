@@ -22,6 +22,10 @@ an existing user keeps their password, an existing business is left untouched,
 and the `platform_admins` upsert is a no-op when the role is already granted.
 Flags: `--admin-password`, `--demo-slug`, `--demo-owner-email`.
 
+The email may also be given positionally (`npm run seed -- you@example.com`) or
+as `SEED_ADMIN_EMAIL` — npm sometimes swallows the `--admin-email` flag name and
+forwards only its value, so every spelling is accepted.
+
 This replaces the manual flow (dashboard user + hand-written SQL insert with a
 copy-pasted UUID) — the UUID mismatch that flow invites is the failure the
 script exists to prevent.

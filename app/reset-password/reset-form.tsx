@@ -2,14 +2,9 @@
 
 import { useActionState } from "react";
 import { updatePassword, type ResetState } from "@/lib/auth/actions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { BRAND } from "@/components/marketing/theme";
 
 const initialState: ResetState = {};
-
-const fieldClass =
-  "h-auto w-full rounded-none border border-dark-border bg-charcoal px-4 py-3 text-sm text-white shadow-none outline-none transition-colors focus-visible:border-gold focus-visible:ring-0";
 
 export function ResetForm() {
   const [state, formAction, isPending] = useActionState(
@@ -20,13 +15,10 @@ export function ResetForm() {
   return (
     <form action={formAction} className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
-        <Label
-          htmlFor="password"
-          className="text-[0.7rem] uppercase tracking-[2px] text-gray"
-        >
+        <label htmlFor="password" className={BRAND.label}>
           New password
-        </Label>
-        <Input
+        </label>
+        <input
           id="password"
           name="password"
           type="password"
@@ -34,18 +26,15 @@ export function ResetForm() {
           minLength={8}
           autoComplete="new-password"
           placeholder="••••••••"
-          className={fieldClass}
+          className={BRAND.field}
         />
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label
-          htmlFor="confirm"
-          className="text-[0.7rem] uppercase tracking-[2px] text-gray"
-        >
+        <label htmlFor="confirm" className={BRAND.label}>
           Confirm password
-        </Label>
-        <Input
+        </label>
+        <input
           id="confirm"
           name="confirm"
           type="password"
@@ -53,24 +42,24 @@ export function ResetForm() {
           minLength={8}
           autoComplete="new-password"
           placeholder="••••••••"
-          className={fieldClass}
+          className={BRAND.field}
         />
       </div>
 
       {state.error && (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-sm text-[#a8353a]">
           {state.error}
         </p>
       )}
 
-      <Button
+      <button
         type="submit"
         disabled={isPending}
         aria-busy={isPending}
-        className="mt-1 w-full rounded-none bg-gold font-heading tracking-[2px] text-black hover:bg-gold-light"
+        className={`mt-1 ${BRAND.button}`}
       >
-        {isPending ? "SAVING…" : "SET NEW PASSWORD"}
-      </Button>
+        {isPending ? "Saving…" : "Set new password"}
+      </button>
     </form>
   );
 }
