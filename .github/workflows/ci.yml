@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
 
 # Dummy Supabase env so the app builds and the server boots without secrets.
