@@ -2,6 +2,7 @@ import { getPlatformHealth } from "@/features/platform/queries";
 import {
   CRON_STALE_AFTER_MINUTES,
   RETENTION_STALE_AFTER_MINUTES,
+  formatAge,
 } from "@/lib/platform/health";
 import { StatTile } from "../_components/stat-tile";
 
@@ -48,16 +49,12 @@ export default async function PlatformHealthPage() {
       <section className="grid gap-4 sm:grid-cols-3">
         <StatTile
           label="Last processor run"
-          value={
-            health.minutesSinceLastRun === null
-              ? "Never"
-              : `${health.minutesSinceLastRun}m ago`
-          }
+          value={formatAge(health.minutesSinceLastRun)}
           tone={health.cronStale ? "danger" : "default"}
           hint={
             health.cronStale
-              ? `No run in over ${CRON_STALE_AFTER_MINUTES} minutes — check the cron`
-              : `Last status: ${health.lastRun?.status ?? "—"}`
+              ? `No run in over ${Math.round(CRON_STALE_AFTER_MINUTES / 60)}h — check the cron`
+              : `Runs daily · last status: ${health.lastRun?.status ?? "—"}`
           }
         />
         <StatTile
@@ -84,11 +81,7 @@ export default async function PlatformHealthPage() {
         />
         <StatTile
           label="Last retention purge"
-          value={
-            health.minutesSinceRetention === null
-              ? "Never"
-              : `${Math.floor(health.minutesSinceRetention / 60)}h ago`
-          }
+          value={formatAge(health.minutesSinceRetention)}
           // Nightly job; a day and a half without one means it stopped.
           tone={
             health.minutesSinceRetention === null ||

@@ -61,11 +61,17 @@ later requires a redeploy.
 | `RETENTION_*_DAYS`                                                          | optional; defaults 90/90/730                                                                            |
 
 Deploy. `vercel.json` registers the two cron jobs automatically:
-review-automation every 15 min, retention nightly 03:20.
+review-automation daily 02:00 UTC, retention daily 03:20 UTC.
+
+> **Free (Hobby) plan:** Vercel permits only **once-per-day** cron schedules,
+> which is why both jobs are daily. On a paid plan you can tighten
+> review-automation (e.g. every 15 minutes) — if you do, also lower
+> `CRON_STALE_AFTER_MINUTES` in `lib/platform/health.ts` so a dead scheduler is
+> flagged promptly.
 
 ## 4. DNS (Cloudflare)
 
-> **Cloudflare-registered domains and wildcards:** Vercel issues a *wildcard*
+> **Cloudflare-registered domains and wildcards:** Vercel issues a _wildcard_
 > certificate (`*.yourdomain.com`) only when the domain uses **Vercel's
 > nameservers** — and a domain registered at Cloudflare must keep Cloudflare's
 > nameservers. So the one-record wildcard shortcut is unavailable; **tenant
@@ -77,10 +83,10 @@ In **Vercel → Project → Domains** add `aliamzdigital.com` and
 `www.aliamzdigital.com`. Vercel shows the exact record values to create; in
 Cloudflare DNS they are typically:
 
-| Record | Host | Value | Proxy |
-| --- | --- | --- | --- |
-| CNAME | `@` (apex — Cloudflare flattens it) | `cname.vercel-dns.com` | **DNS-only (gray cloud)** |
-| CNAME | `www` | `cname.vercel-dns.com` | DNS-only |
+| Record | Host                                | Value                  | Proxy                     |
+| ------ | ----------------------------------- | ---------------------- | ------------------------- |
+| CNAME  | `@` (apex — Cloudflare flattens it) | `cname.vercel-dns.com` | **DNS-only (gray cloud)** |
+| CNAME  | `www`                               | `cname.vercel-dns.com` | DNS-only                  |
 
 DNS-only is the simplest correct setup with Vercel (Vercel then terminates TLS
 and issues certificates itself).
@@ -110,7 +116,7 @@ Then verify, in order:
 | ------------------------------------------------------ | ------------------------------------------------------------------------------------ |
 | `https://aliamzdigital.com/`                           | Marketing landing page (not a barber site)                                           |
 | `/login` → sign in → `/platform`                       | Portal loads (you're super_admin)                                                    |
-| `/platform/health`                                     | Scheduler/capability tiles; after ≤15 min, "Last processor run" shows a time         |
+| `/platform/health`                                     | Scheduler/capability tiles; "Last processor run" fills in after the first daily run  |
 | `/s/anything-unknown`                                  | 404                                                                                  |
 | `curl -I https://aliamzdigital.com/api/jobs/retention` | **401** (secret enforced)                                                            |
 | Security headers                                       | `curl -sI https://aliamzdigital.com/ \| grep -i content-security` → no `unsafe-eval` |

@@ -60,8 +60,8 @@ can't be added transactionally (`0008`).
 
 | Job               | Route                         | Schedule (vercel.json) | Guard                                |
 | ----------------- | ----------------------------- | ---------------------- | ------------------------------------ |
-| Review automation | `/api/jobs/review-automation` | every 15 min           | `Authorization: Bearer $CRON_SECRET` |
-| Retention purge   | `/api/jobs/retention`         | nightly 03:20          | same                                 |
+| Review automation | `/api/jobs/review-automation` | daily 02:00 UTC        | `Authorization: Bearer $CRON_SECRET` |
+| Retention purge   | `/api/jobs/retention`         | daily 03:20 UTC        | same                                 |
 
 Both fail **closed** when `CRON_SECRET` is unset (401). Their last runs are
 visible at `/platform/health`; retention windows come from

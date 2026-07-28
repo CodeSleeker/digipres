@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { deriveBrand, resolveBrand } from "@/lib/website/build-profile";
-import { loadTemplate, isValidTemplate, isValidTheme } from "@/templates/registry";
+import {
+  loadTemplate,
+  isValidTemplate,
+  isValidTheme,
+} from "@/templates/registry";
 import type { BusinessProfile } from "@/types/business";
 import type { Business } from "@/types/business-entity";
 
@@ -81,22 +85,35 @@ describe("resolveBrand", () => {
   });
 });
 
-describe("template registry", () => {
-  it("resolves the barber template", async () => {
-    const template = await loadTemplate("barber-luxury");
-    expect(template.code).toBe("barber-luxury");
-    expect(template.Component).toBeTypeOf("function");
-    expect(template.defaultProfile.brand.namePrimary).toBeTruthy();
-  });
+// These dynamically import a whole template (every section + next/image), so
+// first-load transform cost can exceed the 5s default when the full suite is
+// transforming in parallel. The assertions are about resolution, not speed.
+const TEMPLATE_LOAD_TIMEOUT_MS = 30_000;
 
-  it("falls back for an unknown or missing code rather than throwing", async () => {
-    await expect(loadTemplate("does-not-exist")).resolves.toMatchObject({
-      code: "barber-luxury",
-    });
-    await expect(loadTemplate(null)).resolves.toMatchObject({
-      code: "barber-luxury",
-    });
-  });
+describe("template registry", () => {
+  it(
+    "resolves the barber template",
+    async () => {
+      const template = await loadTemplate("barber-luxury");
+      expect(template.code).toBe("barber-luxury");
+      expect(template.Component).toBeTypeOf("function");
+      expect(template.defaultProfile.brand.namePrimary).toBeTruthy();
+    },
+    TEMPLATE_LOAD_TIMEOUT_MS,
+  );
+
+  it(
+    "falls back for an unknown or missing code rather than throwing",
+    async () => {
+      await expect(loadTemplate("does-not-exist")).resolves.toMatchObject({
+        code: "barber-luxury",
+      });
+      await expect(loadTemplate(null)).resolves.toMatchObject({
+        code: "barber-luxury",
+      });
+    },
+    TEMPLATE_LOAD_TIMEOUT_MS,
+  );
 
   it("validates template/theme pairs", () => {
     expect(isValidTemplate("barber-luxury")).toBe(true);
