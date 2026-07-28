@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, Json } from "@/types/database";
+import type { BusinessStatusEnum, Database, Json } from "@/types/database";
 import type {
   Business,
   BusinessBrand,
@@ -19,10 +19,7 @@ import {
   type ContactContent,
   type FooterContent,
 } from "@/types/website-content";
-import {
-  EMPTY_ONBOARDING,
-  type OnboardingProgress,
-} from "@/types/onboarding";
+import { EMPTY_ONBOARDING, type OnboardingProgress } from "@/types/onboarding";
 
 type BusinessRow = Database["public"]["Tables"]["businesses"]["Row"];
 type BusinessInsert = Database["public"]["Tables"]["businesses"]["Insert"];
@@ -65,11 +62,19 @@ export class BusinessRepository {
     return (data ?? []).map((r) => ({ slug: r.slug, updatedAt: r.updated_at }));
   }
 
+  /**
+   * PUBLIC tenant lookup. Only `active` businesses resolve — a `draft` tenant
+   * hasn't launched and a `suspended` one has had service stopped, so neither
+   * should serve a website. The caller renders a 404, exactly as for an unknown
+   * slug. Owner/staff lookups use findById / findByOwnerId, which ignore status
+   * so the back office can still explain the state.
+   */
   async findBySlug(slug: string): Promise<Business | null> {
     const { data, error } = await this.supabase
       .from("businesses")
       .select("*")
       .eq("slug", slug)
+      .eq("status", "active")
       .is("deleted_at", null)
       .maybeSingle();
     if (error) throw error;
@@ -101,10 +106,7 @@ export class BusinessRepository {
     return (data?.length ?? 0) > 0;
   }
 
-  async insert(
-    ownerId: string,
-    input: CreateBusinessInput,
-  ): Promise<Business> {
+  async insert(ownerId: string, input: CreateBusinessInput): Promise<Business> {
     const row: BusinessInsert = {
       owner_id: ownerId,
       name: input.name,
@@ -147,8 +149,7 @@ export class BusinessRepository {
       patch.cover_image_url = input.coverImageUrl;
     if (input.category !== undefined) patch.category = input.category;
     if (input.ownerName !== undefined) patch.owner_name = input.ownerName;
-    if (input.hours !== undefined)
-      patch.hours = input.hours as unknown as Json;
+    if (input.hours !== undefined) patch.hours = input.hours as unknown as Json;
     if (input.googleReviewUrl !== undefined)
       patch.google_review_url = input.googleReviewUrl;
     if (input.facebookUrl !== undefined) patch.facebook_url = input.facebookUrl;
@@ -203,7 +204,22 @@ export class BusinessRepository {
     return toDomain(data);
   }
 
-  /** Soft delete — sets deleted_at, keeping the row for history. */
+  /**
+   * Lifecycle control (draft / active / suspended).
+   *
+   * Callers must pass a SERVICE-ROLE client: the only UPDATE policy on
+   * `businesses` is owner-scoped, so a staff session would match zero rows and
+   * fail silently. Authorization is enforced in features/platform/lifecycle.ts.
+   */
+  async setStatus(id: string, status: BusinessStatusEnum): Promise<void> {
+    const { error } = await this.supabase
+      .from("businesses")
+      .update({ status })
+      .eq("id", id)
+      .is("deleted_at", null);
+    if (error) throw error;
+  }
+
   async softDelete(id: string): Promise<void> {
     const { error } = await this.supabase
       .from("businesses")

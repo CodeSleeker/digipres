@@ -6,6 +6,8 @@ import {
 } from "@/features/platform/queries";
 import { BillingPanel } from "./_components/billing-panel";
 import { startImpersonation } from "@/features/platform/impersonation";
+import { getPlatformRole } from "@/lib/auth/require-platform-admin";
+import { LifecyclePanel } from "./_components/lifecycle-panel";
 import { onboardingPercentage } from "@/types/onboarding";
 import { StatTile } from "../../_components/stat-tile";
 
@@ -15,14 +17,15 @@ export default async function PlatformBusinessDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ billingError?: string }>;
+  searchParams: Promise<{ billingError?: string; lifecycleError?: string }>;
 }) {
   const { id } = await params;
-  const { billingError } = await searchParams;
+  const { billingError, lifecycleError } = await searchParams;
   const { business, counts, domains } = await getPlatformBusiness(id);
   if (!business) notFound();
 
   const billing = await getBusinessBilling(id);
+  const role = await getPlatformRole();
 
   const facts: [string, string][] = [
     ["Slug", `/${business.slug}`],
@@ -151,6 +154,17 @@ export default async function PlatformBusinessDetailPage({
           </Link>
         </div>
       </section>
+
+      {lifecycleError && (
+        <p
+          role="alert"
+          className="border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+        >
+          {lifecycleError}
+        </p>
+      )}
+
+      {role && <LifecyclePanel business={business} role={role} />}
     </div>
   );
 }

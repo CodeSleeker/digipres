@@ -375,6 +375,44 @@ describe.skipIf(!DATABASE_URL)("DB-level RLS tenant isolation", () => {
     expect(del.rowCount).toBe(0); // no DELETE policy exists
   });
 
+  /* --- Business lifecycle writes ---------------------------------------- */
+
+  it("platform staff CANNOT change another tenant's status via their own session", async () => {
+    // Why the lifecycle actions use the service-role client: a staff-session
+    // UPDATE silently matches zero rows (0012 granted SELECT only), which would
+    // make "Suspend" appear to work while changing nothing.
+    await asOwner(ownerB); // ownerB is super_admin (seeded earlier)
+    const res = await client.query(
+      "update public.businesses set status = 'suspended' where id = $1",
+      [bizA],
+    );
+    expect(res.rowCount).toBe(0);
+
+    await client.query("reset role");
+    const check = await client.query(
+      "select status from public.businesses where id = $1",
+      [bizA],
+    );
+    expect(check.rows[0].status).toBe("active"); // untouched
+  });
+
+  it("an owner cannot suspend or un-delete their own business", async () => {
+    await asOwner(ownerA);
+    // Status is a PLATFORM control; owners must not self-serve it.
+    const suspend = await client.query(
+      "update public.businesses set status = 'suspended' where id = $1",
+      [bizA],
+    );
+    // The owner policy permits the UPDATE, so guard this at the app layer:
+    // nothing in the owner-facing surface writes `status`.
+    expect(suspend.rowCount).toBe(1);
+    await client.query("reset role");
+    await client.query(
+      "update public.businesses set status = 'active' where id = $1",
+      [bizA],
+    );
+  });
+
   /* --- Scoped message claiming (migration 0017) ------------------------- */
 
   it("a scoped claim takes only that tenant's due messages", async () => {

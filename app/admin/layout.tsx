@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getOwnerContext } from "@/lib/tenant/business-context";
+import { SuspendedNotice } from "./_components/suspended-notice";
 import { logout } from "@/lib/auth/actions";
 import { WEBSITE_SECTIONS } from "@/types/website-content";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,15 @@ export default async function AdminLayout({
   const features = businessId
     ? (await getEntitlement(supabase, businessId)).features
     : defaultFeatures();
+
+  // A business that isn't `active` gets a notice instead of the dashboard —
+  // rendered in place rather than redirected, so there's no loop and the owner
+  // keeps the header (and the way to sign out). Staff acting as the tenant are
+  // exempt: they need the real dashboard to fix whatever caused it.
+  const blocked =
+    business && business.status !== "active" && !isImpersonating
+      ? business.status
+      : null;
 
   return (
     <div className="flex min-h-screen bg-black text-white">
@@ -156,7 +166,13 @@ export default async function AdminLayout({
             </Button>
           </form>
         </header>
-        <main className="p-8">{children}</main>
+        <main className="p-8">
+          {blocked && business ? (
+            <SuspendedNotice businessName={business.name} status={blocked} />
+          ) : (
+            children
+          )}
+        </main>
       </div>
     </div>
   );

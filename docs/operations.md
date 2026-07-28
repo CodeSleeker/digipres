@@ -26,6 +26,39 @@ This replaces the manual flow (dashboard user + hand-written SQL insert with a
 copy-pasted UUID) — the UUID mismatch that flow invites is the failure the
 script exists to prevent.
 
+## Client lifecycle: suspend, reactivate, remove
+
+From **`/platform/businesses/<id>` → Lifecycle**:
+
+| Action         | Who                  | Effect                                                                                                      |
+| -------------- | -------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Suspend**    | super_admin, support | Public site 404s; owner sees a notice instead of the dashboard. Nothing deleted, slug retained. Reversible. |
+| **Reactivate** | super_admin, support | Back to normal service.                                                                                     |
+| **Remove**     | **super_admin only** | Soft delete. Requires typing the slug to confirm. Frees the slug and the owner account for reuse.           |
+
+All three are written to the audit log. Suspension is the right tool for
+non-payment; removal is for ending the relationship.
+
+**Why these writes use the service-role client:** the only `UPDATE` policy on
+`businesses` is owner-scoped (`owner_id = auth.uid()`), and migration 0012 gave
+platform staff `SELECT` only. A staff-session update would match **zero rows and
+report success** — a silent no-op. Authorization is therefore enforced in the
+app (`requirePlatformWriter` / `requireSuperAdmin`), and both halves of this are
+covered by DB-level tests.
+
+**Undo a removal** (soft delete keeps the row):
+
+```sql
+update public.businesses set deleted_at = null where slug = 'ronies';
+```
+
+**Hard delete** is deliberately not in the UI — it cascades across customers,
+appointments, review_messages, domains, subscriptions and features:
+
+```sql
+delete from public.businesses where slug = 'ronies';   -- irreversible
+```
+
 ## Migrations: forward-only, with compensating rollbacks
 
 Migrations `0001`–`0018` are **forward-only by policy**. There are no `down`
