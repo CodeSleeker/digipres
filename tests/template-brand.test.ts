@@ -1,0 +1,107 @@
+import { describe, it, expect } from "vitest";
+import { deriveBrand, resolveBrand } from "@/lib/website/build-profile";
+import { loadTemplate, isValidTemplate, isValidTheme } from "@/templates/registry";
+import type { BusinessProfile } from "@/types/business";
+import type { Business } from "@/types/business-entity";
+
+const base = {
+  brand: { namePrimary: "RONIE'S", nameAccent: "BARBER", initial: "R" },
+} as unknown as BusinessProfile;
+
+const business = (over: Partial<Business> = {}): Business =>
+  ({ name: "Acme Construction", brand: null, ...over }) as unknown as Business;
+
+describe("deriveBrand", () => {
+  it("splits a multi-word name into primary + accent", () => {
+    expect(deriveBrand("Ronies Barber")).toEqual({
+      namePrimary: "RONIES",
+      nameAccent: "BARBER",
+      initial: "R",
+    });
+  });
+
+  it("keeps all but the last word as the primary", () => {
+    expect(deriveBrand("ABC Construction Co")).toEqual({
+      namePrimary: "ABC CONSTRUCTION",
+      nameAccent: "CO",
+      initial: "A",
+    });
+  });
+
+  it("handles a single-word name", () => {
+    expect(deriveBrand("Ronies")).toEqual({
+      namePrimary: "RONIES",
+      nameAccent: "",
+      initial: "R",
+    });
+  });
+
+  it("returns null for an empty name", () => {
+    expect(deriveBrand("   ")).toBeNull();
+  });
+});
+
+describe("resolveBrand", () => {
+  it("prefers an explicit override", () => {
+    const result = resolveBrand(
+      base,
+      business({
+        brand: { namePrimary: "THE", nameAccent: "SHOP", initial: "T" },
+      }),
+    );
+    expect(result).toEqual({
+      namePrimary: "THE",
+      nameAccent: "SHOP",
+      initial: "T",
+    });
+  });
+
+  it("derives from the business name — so a second tenant is NOT branded as the first", () => {
+    const result = resolveBrand(base, business({ name: "Acme Construction" }));
+    expect(result).toEqual({
+      namePrimary: "ACME",
+      nameAccent: "CONSTRUCTION",
+      initial: "A",
+    });
+    expect(result.namePrimary).not.toBe("RONIE'S"); // the template's demo brand
+  });
+
+  it("falls back to the template default when the name is unusable", () => {
+    expect(resolveBrand(base, business({ name: "" }))).toEqual(base.brand);
+  });
+
+  it("backfills a missing initial from the primary", () => {
+    const result = resolveBrand(
+      base,
+      business({
+        brand: { namePrimary: "ZED", nameAccent: "", initial: "" },
+      }),
+    );
+    expect(result.initial).toBe("Z");
+  });
+});
+
+describe("template registry", () => {
+  it("resolves the barber template", async () => {
+    const template = await loadTemplate("barber-luxury");
+    expect(template.code).toBe("barber-luxury");
+    expect(template.Component).toBeTypeOf("function");
+    expect(template.defaultProfile.brand.namePrimary).toBeTruthy();
+  });
+
+  it("falls back for an unknown or missing code rather than throwing", async () => {
+    await expect(loadTemplate("does-not-exist")).resolves.toMatchObject({
+      code: "barber-luxury",
+    });
+    await expect(loadTemplate(null)).resolves.toMatchObject({
+      code: "barber-luxury",
+    });
+  });
+
+  it("validates template/theme pairs", () => {
+    expect(isValidTemplate("barber-luxury")).toBe(true);
+    expect(isValidTemplate("nope")).toBe(false);
+    expect(isValidTheme("barber-luxury", "default")).toBe(true);
+    expect(isValidTheme("barber-luxury", "neon")).toBe(false);
+  });
+});

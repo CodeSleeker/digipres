@@ -1,0 +1,234 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ═══════════════════════════════════════════════════════════════
+   THEME TOKENS — Barber / "Luxury" template
+   Ported 1:1 from templates/barber/html/mockup.html (:root)
+   Exposed as Tailwind v4 utilities: bg-gold, text-cream, font-heading,
+   animate-marquee, etc.
+═══════════════════════════════════════════════════════════════ */
+@theme {
+  /* Brand palette */
+  --color-gold: #c9a96e;
+  --color-gold-light: #e8d5a8;
+  --color-gold-dark: #8b7340;
+  --color-black: #0a0a0a;
+  --color-charcoal: #141414;
+  --color-dark: #1a1a1a;
+  --color-dark-card: #1e1e1e;
+  --color-dark-border: #2a2a2a;
+  --color-gray: #888888;
+  --color-gray-light: #aaaaaa;
+  --color-white: #f5f5f5;
+  --color-cream: #e8e0d0;
+
+  /* Typography (wired to next/font CSS variables in layout.tsx) */
+  --font-heading: var(--font-bebas), sans-serif;
+  --font-display: var(--font-playfair), serif;
+  --font-body: var(--font-inter), sans-serif;
+
+  /* Animations */
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-cta: float 3s ease-in-out infinite;
+  --animate-marquee: marquee 25s linear infinite;
+  --animate-pulse-glow: pulse-glow 8s ease-in-out infinite;
+  --animate-scroll-anim: scroll-anim 2s ease-in-out infinite;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-12px);
+    }
+  }
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      opacity: 0.5;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.15);
+    }
+  }
+  @keyframes scroll-anim {
+    0% {
+      top: -100%;
+    }
+    100% {
+      top: 100%;
+    }
+  }
+}
+
+/* Non-utility custom properties (used via arbitrary values, e.g. py-[var(--section-pad)]) */
+:root {
+  --section-pad: clamp(4rem, 8vw, 8rem);
+  --container: min(90rem, 92%);
+}
+
+@media (max-width: 480px) {
+  :root {
+    --container: 90%;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   shadcn/ui token layer (kept so ui primitives render in-theme)
+═══════════════════════════════════════════════════════════════ */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: #0a0a0a;
+  --foreground: #f5f5f5;
+  --card: #1a1a1a;
+  --card-foreground: #f5f5f5;
+  --popover: #141414;
+  --popover-foreground: #f5f5f5;
+  --primary: #c9a96e;
+  --primary-foreground: #0a0a0a;
+  --secondary: #1e1e1e;
+  --secondary-foreground: #f5f5f5;
+  --muted: #1a1a1a;
+  --muted-foreground: #888888;
+  --accent: #1e1e1e;
+  --accent-foreground: #c9a96e;
+  --destructive: #b02020;
+  --border: #2a2a2a;
+  --input: #2a2a2a;
+  --ring: #c9a96e;
+  --sidebar: #0a0a0a;
+  --sidebar-foreground: #f5f5f5;
+  --sidebar-primary: #c9a96e;
+  --sidebar-primary-foreground: #0a0a0a;
+  --sidebar-accent: #1e1e1e;
+  --sidebar-accent-foreground: #c9a96e;
+  --sidebar-border: #2a2a2a;
+  --sidebar-ring: #c9a96e;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE — ported from mockup reset/base
+═══════════════════════════════════════════════════════════════ */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background: var(--color-black);
+    color: var(--color-white);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  body {
+    background: var(--color-black);
+    color: var(--color-white);
+  }
+
+  /* Film-grain overlay (mockup body::after) */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITIES — layout + scroll-reveal helpers that are awkward as
+   inline arbitrary values.
+═══════════════════════════════════════════════════════════════ */
+@utility site-container {
+  width: var(--container);
+  margin-inline: auto;
+}
+
+/* Scroll-reveal (toggled by useScrollReveal via IntersectionObserver) */
+@utility reveal {
+  opacity: 0;
+  transform: translateY(50px);
+  transition:
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 {
+  transition-delay: 0.1s;
+}
+.reveal-delay-2 {
+  transition-delay: 0.2s;
+}
+.reveal-delay-3 {
+  transition-delay: 0.3s;
+}
+.reveal-delay-4 {
+  transition-delay: 0.4s;
+}
+.reveal-delay-5 {
+  transition-delay: 0.5s;
+}
+
+@media (max-width: 768px) {
+  .reveal {
+    transform: translateY(30px);
+  }
+
+  /* Disable floating animation on mobile (mockup parity) */
+  .animate-float,
+  .animate-float-cta {
+    animation: none;
+  }
+}
