@@ -16,8 +16,8 @@ import Link from "next/link";
 
 const CONTACT = {
   // TODO(aliamz): replace placeholders with the real contact details.
-  email: "hello@aliamzdigital.example",
-  phone: "+00 000 000 0000",
+  email: "hello@aliamz.com",
+  phone: "+639977436111",
 };
 
 const CAPABILITIES = [
