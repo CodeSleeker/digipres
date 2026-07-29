@@ -178,6 +178,33 @@ export const productsSchema = z.object({
     .min(1, "Add at least one product."),
 });
 
+// ── Testimonials ─────────────────────────────────────────────────────────────
+export const testimonialsSchema = z.object({
+  heading: headingSchema,
+  items: z
+    .array(
+      z.object({
+        // A real number, not a coerced one: `z.coerce` widens the schema's INPUT
+        // type to `unknown`, which no longer matches the form's value type. The
+        // <select> converts with `valueAsNumber` instead, so both sides agree.
+        //
+        // Bounded to the five stars the card can draw — it renders one glyph per
+        // unit, so an unbounded value would paint an arbitrarily long row.
+        rating: z
+          .number({ message: "Choose 1–5 stars." })
+          .int("Choose a whole number of stars.")
+          .min(1, "Choose 1–5 stars.")
+          .max(5, "Choose 1–5 stars."),
+        text: requiredText("Quote is required.").max(600),
+        author: requiredText("Author name is required."),
+        meta: text.max(120),
+        // `initials` is intentionally absent — derived from `author` when the
+        // profile is built, so it can never drift from the name beside it.
+      }),
+    )
+    .min(1, "Add at least one testimonial."),
+});
+
 // ── Gallery ──────────────────────────────────────────────────────────────────
 export const gallerySchema = z.object({
   heading: headingSchema,
@@ -186,6 +213,11 @@ export const gallerySchema = z.object({
       z.object({
         title: requiredText("Title is required."),
         by: text.max(120),
+        // Blank becomes undefined so the template renders no empty line.
+        caption: text
+          .max(200)
+          .transform((value) => (value === "" ? undefined : value))
+          .optional(),
         image: imageRef,
         wide: z.boolean().optional(),
       }),
@@ -235,6 +267,7 @@ export const SECTION_SCHEMA = {
   barbers: barbersSchema,
   gallery: gallerySchema,
   products: productsSchema,
+  testimonials: testimonialsSchema,
   contact: contactSchema,
   footer: footerSchema,
 } satisfies Record<WebsiteSection, z.ZodTypeAny>;
@@ -245,5 +278,6 @@ export type ServicesFormValues = z.infer<typeof servicesSchema>;
 export type BarbersFormValues = z.infer<typeof barbersSchema>;
 export type GalleryFormValues = z.infer<typeof gallerySchema>;
 export type ProductsFormValues = z.infer<typeof productsSchema>;
+export type TestimonialsFormValues = z.infer<typeof testimonialsSchema>;
 export type ContactFormValues = z.infer<typeof contactSchema>;
 export type FooterFormValues = z.infer<typeof footerSchema>;

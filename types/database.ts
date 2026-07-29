@@ -72,6 +72,7 @@ export interface Database {
           google_review_url: string | null;
           facebook_url: string | null;
           instagram_url: string | null;
+          tiktok_url: string | null;
           website_url: string | null;
           hero_content: Json | null;
           about_content: Json | null;
@@ -79,6 +80,7 @@ export interface Database {
           barbers_content: Json | null;
           gallery_content: Json | null;
           products_content: Json | null;
+          testimonials_content: Json | null;
           contact_content: Json | null;
           footer_content: Json | null;
           google_onboarding: Json | null;
@@ -107,6 +109,7 @@ export interface Database {
           google_review_url?: string | null;
           facebook_url?: string | null;
           instagram_url?: string | null;
+          tiktok_url?: string | null;
           website_url?: string | null;
           hero_content?: Json | null;
           about_content?: Json | null;
@@ -114,6 +117,7 @@ export interface Database {
           barbers_content?: Json | null;
           gallery_content?: Json | null;
           products_content?: Json | null;
+          testimonials_content?: Json | null;
           contact_content?: Json | null;
           footer_content?: Json | null;
           google_onboarding?: Json | null;
@@ -142,6 +146,7 @@ export interface Database {
           google_review_url?: string | null;
           facebook_url?: string | null;
           instagram_url?: string | null;
+          tiktok_url?: string | null;
           website_url?: string | null;
           hero_content?: Json | null;
           about_content?: Json | null;
@@ -149,6 +154,7 @@ export interface Database {
           barbers_content?: Json | null;
           gallery_content?: Json | null;
           products_content?: Json | null;
+          testimonials_content?: Json | null;
           contact_content?: Json | null;
           footer_content?: Json | null;
           google_onboarding?: Json | null;

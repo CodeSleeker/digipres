@@ -16,6 +16,7 @@ import {
   TextField,
   useCmsSubmit,
 } from "./form-kit";
+import { ImageField } from "./image-field";
 
 /**
  * The team section. Each member's social links are entered as plain profile
@@ -24,8 +25,10 @@ import {
  */
 export function BarbersForm({
   defaultValues,
+  businessId,
 }: {
   defaultValues: BarbersFormValues;
+  businessId: string | null;
 }) {
   const form = useForm<BarbersFormValues>({
     resolver: zodResolver(barbersSchema),
@@ -59,7 +62,12 @@ export function BarbersForm({
                 label="Role (e.g. Senior Barber)"
               />
             </div>
-            <TextField form={form} name={`items.${i}.image`} label="Photo URL" />
+            <ImageField
+              form={form}
+              name={`items.${i}.image`}
+              label="Photo"
+              businessId={businessId}
+            />
             <TextAreaField
               form={form}
               name={`items.${i}.bio`}

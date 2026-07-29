@@ -73,7 +73,9 @@ export function LandingPage() {
         Skip to content
       </a>
 
-      <header className="border-b border-[#e8e4dc]">
+      {/* Pinned. Needs its own opaque background — once content scrolls beneath
+          a sticky header, inheriting the page colour is no longer enough. */}
+      <header className="sticky top-0 z-40 border-b border-[#e8e4dc] bg-[#faf9f7]">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
           <span className="text-sm font-semibold uppercase tracking-[0.35em]">
             Aliamz<span className="text-[#6f5b2d]"> Digital</span>
@@ -89,7 +91,7 @@ export function LandingPage() {
         </div>
       </header>
 
-      <main id="main">
+      <main id="main" className="scroll-mt-20">
         {/* Hero */}
         <section className="relative overflow-hidden">
           {/* The one eye-catching flourish: a soft gold glow behind the headline. */}
@@ -186,7 +188,9 @@ export function LandingPage() {
         <section
           id="contact"
           aria-labelledby="contact-heading"
-          className="border-t border-[#e8e4dc] scroll-mt-8"
+          // scroll-mt clears the sticky header — without it "Get started" lands
+          // with the heading tucked underneath.
+          className="scroll-mt-20 border-t border-[#e8e4dc]"
         >
           <div className="mx-auto max-w-5xl px-6 py-20 text-center max-[640px]:py-14">
             <h2

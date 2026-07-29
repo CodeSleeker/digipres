@@ -51,6 +51,7 @@ export interface Business {
   googleReviewUrl: string | null;
   facebookUrl: string | null;
   instagramUrl: string | null;
+  tiktokUrl: string | null;
   websiteUrl: string | null;
   /** Editable per-section website content (null members fall back to defaults). */
   content: WebsiteContent;

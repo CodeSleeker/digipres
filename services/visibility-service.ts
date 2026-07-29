@@ -283,6 +283,7 @@ function baselineChecks(): VisibilityCheck[] {
     googleReviewUrl: null,
     facebookUrl: null,
     instagramUrl: null,
+    tiktokUrl: null,
     websiteUrl: null,
     content: {
       hero: null,
@@ -291,6 +292,7 @@ function baselineChecks(): VisibilityCheck[] {
       barbers: null,
       gallery: null,
       products: null,
+      testimonials: null,
       contact: null,
       footer: null,
     },

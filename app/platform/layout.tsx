@@ -22,7 +22,9 @@ export default async function PlatformLayout({
 
   return (
     <div className="flex min-h-screen bg-black text-white">
-      <aside className="flex w-60 shrink-0 flex-col gap-6 border-r border-dark-border p-6">
+      {/* Pinned nav — see the note in app/admin/layout.tsx for why `self-start`
+          is required for `sticky` to do anything inside a flex row. */}
+      <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col gap-6 self-start overflow-y-auto border-r border-dark-border p-6">
         <Link
           href="/platform"
           className="font-heading text-lg tracking-[2px] text-gold"

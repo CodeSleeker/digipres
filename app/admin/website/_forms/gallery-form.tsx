@@ -16,11 +16,14 @@ import {
   TextField,
   useCmsSubmit,
 } from "./form-kit";
+import { ImageField } from "./image-field";
 
 export function GalleryForm({
   defaultValues,
+  businessId,
 }: {
   defaultValues: GalleryFormValues;
+  businessId: string | null;
 }) {
   const form = useForm<GalleryFormValues>({
     resolver: zodResolver(gallerySchema),
@@ -46,7 +49,12 @@ export function GalleryForm({
             title={`Item ${i + 1}`}
             onRemove={() => items.remove(i)}
           >
-            <TextField form={form} name={`items.${i}.image`} label="Image URL" />
+            <ImageField
+              form={form}
+              name={`items.${i}.image`}
+              label="Photo"
+              businessId={businessId}
+            />
             <div className="grid gap-3 sm:grid-cols-2">
               <TextField form={form} name={`items.${i}.title`} label="Title" />
               <TextField
@@ -55,6 +63,12 @@ export function GalleryForm({
                 label="Credit (e.g. By Ronie)"
               />
             </div>
+            <TextField
+              form={form}
+              name={`items.${i}.caption`}
+              label="Caption (optional)"
+              placeholder="Happy client — fresh skin fade"
+            />
             <CheckField
               form={form}
               name={`items.${i}.wide`}
@@ -64,7 +78,13 @@ export function GalleryForm({
         ))}
         <AddButton
           onClick={() =>
-            items.append({ title: "", by: "", image: "", wide: false })
+            items.append({
+              title: "",
+              by: "",
+              caption: "",
+              image: "",
+              wide: false,
+            })
           }
         >
           Add gallery item

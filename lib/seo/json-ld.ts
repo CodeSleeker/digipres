@@ -62,6 +62,7 @@ export function buildLocalBusinessJsonLd(
   const sameAs = [
     business.facebookUrl,
     business.instagramUrl,
+    business.tiktokUrl,
     business.websiteUrl,
   ].filter((v): v is string => Boolean(v));
   if (sameAs.length) data.sameAs = sameAs;

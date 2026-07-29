@@ -62,6 +62,7 @@ export const TEMPLATES: TemplateOption[] = [
       "barbers",
       "gallery",
       "products",
+      "testimonials",
       "contact",
       "footer",
     ],

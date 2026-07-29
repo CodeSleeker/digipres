@@ -29,9 +29,26 @@ const optionalText = z.preprocess(
   emptyToUndefined,
   z.string().trim().max(2000).optional(),
 );
+/**
+ * A web address.
+ *
+ * The scheme check is NOT decoration. Zod's `.url()` only asks whether the
+ * string parses as a URL, and `javascript:alert(1)` parses perfectly well —
+ * these values are rendered as `<a href>` (the footer social icons, the contact
+ * card), so accepting any scheme would make the CMS a stored-XSS vector. Only
+ * http(s) may be stored.
+ */
 const optionalUrl = z.preprocess(
   emptyToUndefined,
-  z.string().url("Enter a valid URL.").max(2048).optional(),
+  z
+    .string()
+    .url("Enter a valid URL.")
+    .max(2048)
+    .refine(
+      (value) => /^https?:\/\//i.test(value),
+      "Links must start with http:// or https://.",
+    )
+    .optional(),
 );
 const optionalEmail = z.preprocess(
   emptyToUndefined,
@@ -79,6 +96,7 @@ export const createBusinessSchema = z.object({
   googleReviewUrl: optionalUrl,
   facebookUrl: optionalUrl,
   instagramUrl: optionalUrl,
+  tiktokUrl: optionalUrl,
   websiteUrl: optionalUrl,
 });
 

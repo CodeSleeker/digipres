@@ -150,6 +150,7 @@ const FIELDS = [
   "googleReviewUrl",
   "facebookUrl",
   "instagramUrl",
+  "tiktokUrl",
   "websiteUrl",
 ] as const;
 

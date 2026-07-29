@@ -13,11 +13,14 @@ import {
   TextField,
   useCmsSubmit,
 } from "./form-kit";
+import { ImageField } from "./image-field";
 
 export function AboutForm({
   defaultValues,
+  businessId,
 }: {
   defaultValues: AboutFormValues;
+  businessId: string | null;
 }) {
   const form = useForm<AboutFormValues>({
     resolver: zodResolver(aboutSchema),
@@ -29,7 +32,12 @@ export function AboutForm({
     <form onSubmit={form.handleSubmit(submit)} className="grid max-w-2xl gap-6">
       <TextField form={form} name="label" label="Eyebrow label" />
       <TextAreaField form={form} name="text" label="Body text" />
-      <TextField form={form} name="image" label="Image URL" />
+      <ImageField
+        form={form}
+        name="image"
+        label="Image"
+        businessId={businessId}
+      />
       <div className="grid gap-3 sm:grid-cols-2">
         <TextField form={form} name="badgeValue" label="Badge value" />
         <TextField form={form} name="badgeLabel" label="Badge label" />

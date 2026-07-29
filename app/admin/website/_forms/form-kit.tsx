@@ -248,7 +248,7 @@ export function SubmitBar({
 }
 
 /** Read a (possibly nested) field's error message from RHF state. */
-function fieldError<T extends FieldValues>(
+export function fieldError<T extends FieldValues>(
   form: UseFormReturn<T>,
   name: Path<T>,
 ): string | undefined {

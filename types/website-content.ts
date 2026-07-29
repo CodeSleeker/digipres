@@ -56,6 +56,24 @@ export interface ProductsContent {
   items: Product[];
 }
 
+/**
+ * One testimonial as STORED. Like `BarberEntry`, deliberately narrower than the
+ * rendered `Testimonial`: the avatar `initials` are a presentation detail
+ * derived from the author's name, not something an owner should have to keep in
+ * sync with it.
+ */
+export interface TestimonialEntry {
+  rating: number;
+  text: string;
+  author: string;
+  meta: string;
+}
+
+export interface TestimonialsContent {
+  heading: SectionHeading;
+  items: TestimonialEntry[];
+}
+
 export interface ContactContent {
   label: string;
   titleLines: string[];
@@ -86,6 +104,7 @@ export interface WebsiteContent {
   barbers: BarbersContent | null;
   gallery: GalleryContent | null;
   products: ProductsContent | null;
+  testimonials: TestimonialsContent | null;
   contact: ContactContent | null;
   footer: FooterContent | null;
 }
@@ -100,6 +119,7 @@ export const WEBSITE_SECTIONS: WebsiteSection[] = [
   "barbers",
   "gallery",
   "products",
+  "testimonials",
   "contact",
   "footer",
 ];
@@ -112,6 +132,7 @@ export const SECTION_COLUMN: Record<WebsiteSection, string> = {
   barbers: "barbers_content",
   gallery: "gallery_content",
   products: "products_content",
+  testimonials: "testimonials_content",
   contact: "contact_content",
   footer: "footer_content",
 };

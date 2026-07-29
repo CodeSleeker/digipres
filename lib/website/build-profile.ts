@@ -1,12 +1,13 @@
 import type {
   Barber,
+  Testimonial,
   BusinessProfile,
   Contact,
   ContactDetail,
   SocialLink,
 } from "@/types/business";
 import type { Business, BusinessHours } from "@/types/business-entity";
-import type { BarberEntry } from "@/types/website-content";
+import type { BarberEntry, TestimonialEntry } from "@/types/website-content";
 
 /**
  * Merge a database Business over the template's default profile to produce the
@@ -41,6 +42,7 @@ export function buildBusinessProfile(
     barbers: buildBarbers(base, business),
     gallery: content.gallery ?? base.gallery,
     products: content.products ?? base.products,
+    testimonials: buildTestimonials(base, business),
     contact: buildContact(base, business),
     footer: buildFooter(base, business),
   };
@@ -150,6 +152,48 @@ export function toBarberEntry(barber: Barber): BarberEntry {
   };
 }
 
+function buildTestimonials(
+  base: BusinessProfile,
+  business: Business,
+): BusinessProfile["testimonials"] {
+  const stored = business.content.testimonials;
+  if (!stored) return base.testimonials;
+  return {
+    heading: stored.heading,
+    items: stored.items.map(toTestimonial),
+  };
+}
+
+export function toTestimonial(entry: TestimonialEntry): Testimonial {
+  return {
+    rating: entry.rating,
+    text: entry.text,
+    author: entry.author,
+    meta: entry.meta,
+    initials: deriveInitials(entry.author),
+  };
+}
+
+/**
+ * Avatar initials for a testimonial — first letter of the first and last words
+ * ("Juan Reyes" → "JR"). Derived rather than stored so the monogram can't end
+ * up disagreeing with the name printed next to it.
+ *
+ * Uses Array.from so a name starting with an astral character (an emoji, or
+ * scripts outside the BMP) yields a whole character rather than half a
+ * surrogate pair, which would render as a replacement glyph.
+ */
+export function deriveInitials(author: string): string {
+  const words = author.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "";
+
+  const first = Array.from(words[0]!)[0] ?? "";
+  if (words.length === 1) return first.toUpperCase();
+
+  const last = Array.from(words[words.length - 1]!)[0] ?? "";
+  return (first + last).toUpperCase();
+}
+
 function buildContact(base: BusinessProfile, business: Business): Contact {
   const c = business.content.contact;
   return {
@@ -186,9 +230,9 @@ function buildContactDetails(
     details.push({ icon: "📱", title: "PHONE", lines: [business.phone] });
   }
 
-  const platforms: string[] = [];
-  if (business.facebookUrl) platforms.push("Facebook");
-  if (business.instagramUrl) platforms.push("Instagram");
+  const platforms = SOCIAL_PLATFORMS.filter((p) => p.url(business)).map(
+    (p) => p.name,
+  );
   if (business.googleReviewUrl) platforms.push("Google");
   if (platforms.length) {
     details.push({
@@ -209,31 +253,38 @@ function buildFooter(base: BusinessProfile, business: Business) {
     columns: f?.columns ?? base.footer.columns,
     copyright: f?.copyright ?? base.footer.copyright,
     credit: f?.credit ?? base.footer.credit,
-    socials: deriveFooterSocials(base, business),
+    socials: deriveFooterSocials(business),
   };
 }
 
-function deriveFooterSocials(
-  base: BusinessProfile,
-  business: Business,
-): SocialLink[] {
-  const socials: SocialLink[] = [];
-  if (business.facebookUrl) {
-    socials.push({
-      label: "FB",
-      href: business.facebookUrl,
-      ariaLabel: "Facebook",
-    });
-  }
-  if (business.instagramUrl) {
-    socials.push({
-      label: "IG",
-      href: business.instagramUrl,
-      ariaLabel: "Instagram",
-    });
-  }
-  return socials.length ? socials : base.footer.socials;
+/**
+ * Footer social icons, one per link the owner actually set.
+ *
+ * There is deliberately NO fallback to the template's own socials: those are
+ * demo data pointing at "#", so falling back published three dead links —
+ * including a TikTok icon — on the site of every business that hadn't filled
+ * them in. An empty row is honest; dead links are not.
+ */
+function deriveFooterSocials(business: Business): SocialLink[] {
+  return SOCIAL_PLATFORMS.flatMap(({ label, name, url }) => {
+    const href = url(business);
+    return href ? [{ label, href, ariaLabel: name }] : [];
+  });
 }
+
+/**
+ * The social platforms the design has a slot for. `label` is the two-letter
+ * monogram the template renders; `name` is what assistive tech announces.
+ */
+const SOCIAL_PLATFORMS: {
+  label: string;
+  name: string;
+  url: (b: Business) => string | null;
+}[] = [
+  { label: "FB", name: "Facebook", url: (b) => b.facebookUrl },
+  { label: "IG", name: "Instagram", url: (b) => b.instagramUrl },
+  { label: "TK", name: "TikTok", url: (b) => b.tiktokUrl },
+];
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 

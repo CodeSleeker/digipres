@@ -113,6 +113,9 @@ export async function saveGallery(formData: FormData) {
 export async function saveProducts(formData: FormData) {
   return saveSection("products", formData);
 }
+export async function saveTestimonials(formData: FormData) {
+  return saveSection("testimonials", formData);
+}
 export async function saveContact(formData: FormData) {
   return saveSection("contact", formData);
 }

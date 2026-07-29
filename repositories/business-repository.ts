@@ -18,6 +18,7 @@ import {
   type BarbersContent,
   type GalleryContent,
   type ProductsContent,
+  type TestimonialsContent,
   type ContactContent,
   type FooterContent,
 } from "@/types/website-content";
@@ -125,6 +126,7 @@ export class BusinessRepository {
       google_review_url: input.googleReviewUrl ?? null,
       facebook_url: input.facebookUrl ?? null,
       instagram_url: input.instagramUrl ?? null,
+      tiktok_url: input.tiktokUrl ?? null,
       website_url: input.websiteUrl ?? null,
     };
 
@@ -157,6 +159,7 @@ export class BusinessRepository {
     if (input.facebookUrl !== undefined) patch.facebook_url = input.facebookUrl;
     if (input.instagramUrl !== undefined)
       patch.instagram_url = input.instagramUrl;
+    if (input.tiktokUrl !== undefined) patch.tiktok_url = input.tiktokUrl;
     if (input.websiteUrl !== undefined) patch.website_url = input.websiteUrl;
 
     const { data, error } = await this.supabase
@@ -250,6 +253,7 @@ function toDomain(row: BusinessRow): Business {
     googleReviewUrl: row.google_review_url,
     facebookUrl: row.facebook_url,
     instagramUrl: row.instagram_url,
+    tiktokUrl: row.tiktok_url,
     websiteUrl: row.website_url,
     content: {
       hero: (row.hero_content as unknown as HeroContent) ?? null,
@@ -258,6 +262,8 @@ function toDomain(row: BusinessRow): Business {
       barbers: (row.barbers_content as unknown as BarbersContent) ?? null,
       gallery: (row.gallery_content as unknown as GalleryContent) ?? null,
       products: (row.products_content as unknown as ProductsContent) ?? null,
+      testimonials:
+        (row.testimonials_content as unknown as TestimonialsContent) ?? null,
       contact: (row.contact_content as unknown as ContactContent) ?? null,
       footer: (row.footer_content as unknown as FooterContent) ?? null,
     },

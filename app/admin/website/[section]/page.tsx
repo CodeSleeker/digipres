@@ -9,6 +9,7 @@ import {
 import type { BusinessProfile } from "@/types/business";
 import { templateSections } from "@/templates/registry";
 import { toBarberEntry } from "@/lib/website/build-profile";
+import { TestimonialsForm } from "../_forms/testimonials-form";
 import { HeroForm } from "../_forms/hero-form";
 import { AboutForm } from "../_forms/about-form";
 import { ServicesForm } from "../_forms/services-form";
@@ -17,6 +18,7 @@ import { GalleryForm } from "../_forms/gallery-form";
 import { ProductsForm } from "../_forms/products-form";
 import { ContactForm } from "../_forms/contact-form";
 import { FooterForm } from "../_forms/footer-form";
+import { SocialLinksForm } from "../_forms/social-links-form";
 
 /**
  * A CMS editor page for one website section. Prefills the form with the stored
@@ -55,7 +57,11 @@ export default async function SectionPage({
           View live ↗
         </a>
       </div>
-      {renderForm(active, base, content, business?.id ?? null)}
+      {renderForm(active, base, content, business?.id ?? null, {
+        facebookUrl: business?.facebookUrl ?? "",
+        instagramUrl: business?.instagramUrl ?? "",
+        tiktokUrl: business?.tiktokUrl ?? "",
+      })}
     </div>
   );
 }
@@ -65,6 +71,11 @@ function renderForm(
   base: BusinessProfile,
   content: WebsiteContent | null,
   businessId: string | null,
+  socialDefaults: {
+    facebookUrl: string;
+    instagramUrl: string;
+    tiktokUrl: string;
+  },
 ) {
   switch (section) {
     case "hero":
@@ -75,7 +86,12 @@ function renderForm(
         />
       );
     case "about":
-      return <AboutForm defaultValues={content?.about ?? base.about} />;
+      return (
+        <AboutForm
+          defaultValues={content?.about ?? base.about}
+          businessId={businessId}
+        />
+      );
     case "services":
       return (
         <ServicesForm defaultValues={content?.services ?? base.services} />
@@ -91,13 +107,39 @@ function renderForm(
               items: base.barbers.items.map(toBarberEntry),
             }
           }
+          businessId={businessId}
         />
       );
     case "gallery":
-      return <GalleryForm defaultValues={content?.gallery ?? base.gallery} />;
+      return (
+        <GalleryForm
+          defaultValues={content?.gallery ?? base.gallery}
+          businessId={businessId}
+        />
+      );
     case "products":
       return (
         <ProductsForm defaultValues={content?.products ?? base.products} />
+      );
+    case "testimonials":
+      // `initials` is derived, so the template default is narrowed rather than
+      // passed through — the form has no field for it.
+      return (
+        <TestimonialsForm
+          defaultValues={
+            content?.testimonials ?? {
+              heading: base.testimonials.heading,
+              items: base.testimonials.items.map(
+                ({ rating, text, author, meta }) => ({
+                  rating,
+                  text,
+                  author,
+                  meta,
+                }),
+              ),
+            }
+          }
+        />
       );
     case "contact":
       return (
@@ -115,16 +157,21 @@ function renderForm(
       );
     case "footer":
       return (
-        <FooterForm
-          defaultValues={
-            content?.footer ?? {
-              description: base.footer.description,
-              columns: base.footer.columns,
-              copyright: base.footer.copyright,
-              credit: base.footer.credit,
+        <div className="grid gap-10">
+          <FooterForm
+            defaultValues={
+              content?.footer ?? {
+                description: base.footer.description,
+                columns: base.footer.columns,
+                copyright: base.footer.copyright,
+                credit: base.footer.credit,
+              }
             }
-          }
-        />
+          />
+          {/* Social links live on the business record, not in footer_content —
+              the contact card and JSON-LD `sameAs` read the same values. */}
+          <SocialLinksForm defaults={socialDefaults} />
+        </div>
       );
   }
 }

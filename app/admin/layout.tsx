@@ -45,7 +45,11 @@ export default async function AdminLayout({
 
   return (
     <div className="flex min-h-screen bg-black text-white">
-      <aside className="flex w-60 shrink-0 flex-col gap-6 border-r border-dark-border p-6">
+      {/* Pinned nav. `self-start` is load-bearing: a flex item stretches to the
+          row's full height by default, and an element already as tall as its
+          container has nothing to stick to. `overflow-y-auto` keeps a long nav
+          (many features + every template section) reachable on short screens. */}
+      <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col gap-6 self-start overflow-y-auto border-r border-dark-border p-6">
         <Link
           href="/admin"
           className="font-heading text-lg tracking-[2px] text-gold"

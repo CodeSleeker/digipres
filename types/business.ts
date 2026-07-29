@@ -118,6 +118,8 @@ export interface Barber {
 export interface GalleryItem {
   title: string;
   by: string;
+  /** Optional line beneath the title, e.g. "Happy client — fresh skin fade". */
+  caption?: string;
   image: string;
   /** Spans two columns in the desktop grid (mockup `.span-2`). */
   wide?: boolean;

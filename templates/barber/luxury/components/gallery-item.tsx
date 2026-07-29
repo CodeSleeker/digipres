@@ -35,7 +35,12 @@ export function GalleryItem({
         <span className="font-heading text-[1.2rem] tracking-[2px]">
           {item.title}
         </span>
-        <span className="text-[0.75rem] uppercase tracking-[2px] text-gold">
+        {item.caption && (
+          <span className="mt-1 text-[0.8rem] font-light leading-snug text-gray-light">
+            {item.caption}
+          </span>
+        )}
+        <span className="mt-1 text-[0.75rem] uppercase tracking-[2px] text-gold">
           {item.by}
         </span>
       </figcaption>
