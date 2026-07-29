@@ -23,6 +23,11 @@ function csp(isDev: boolean): string {
     "frame-ancestors 'none'",
     "form-action 'self'",
     "img-src 'self' https: data: blob:",
+    // The hero scroll-scrub <video> is served from Supabase Storage or a
+    // client-supplied URL. Without an explicit media-src this falls back to
+    // `default-src 'self'` and the video is blocked outright — silently, since
+    // a blocked media load looks identical to a missing file.
+    "media-src 'self' https: data: blob:",
     "font-src 'self'",
     "style-src 'self' 'unsafe-inline'",
     `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,

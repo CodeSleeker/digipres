@@ -5,13 +5,20 @@
  * These pages are the PLATFORM's own face. They deliberately do not use the
  * tenant template palette (dark/gold), which belongs to a client's website.
  *
- * Contrast on `#faf9f7`, all AA or better for their use:
+ * Contrast on the landing surface `#faf9f7`, all AA or better for their use:
  *   ink #1c1a17 ~16:1 · muted #57534a ~7:1 · accent #6f5b2d ~6:1
  * Gold #c9a96e is decorative only — never body text.
  */
 export const BRAND = {
-  page: "bg-[#faf9f7] font-sans text-[#1c1a17]",
-  card: "border border-[#e8e4dc] bg-white",
+  /**
+   * The auth screens sit on a deeper tint than the landing page: a full-viewport
+   * `#faf9f7` behind a white card reads as glare, and the card loses its edge.
+   * Still AA on this tone — muted #57534a ~6.4:1, accent #6f5b2d ~5.3:1.
+   */
+  page: "bg-[#ece8df] font-sans text-[#1c1a17]",
+  /** Border is a step darker than the landing card so the edge survives the
+   *  tinted background it now sits on. */
+  card: "border border-[#d9d4c9] bg-white",
   border: "border-[#e8e4dc]",
   ink: "text-[#1c1a17]",
   muted: "text-[#57534a]",

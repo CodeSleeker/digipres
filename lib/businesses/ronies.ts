@@ -29,6 +29,9 @@ export const ronies: BusinessProfile = {
   ],
   navCta: { label: "BOOK NOW", href: "#contact" },
   hero: {
+    // Scrub source: "frames" (default) or "video". Both are implemented and
+    // interchangeable — see templates/barber/luxury/sections/hero*.tsx.
+    heroMedia: "frames",
     overline: "EST. CAGAYAN DE ORO",
     titleLines: [
       { text: "WHERE" },
@@ -44,8 +47,6 @@ export const ronies: BusinessProfile = {
       { value: "5K+", label: "Happy Clients" },
       { value: "4.9", label: "Google Rating" },
     ],
-    backgroundImage:
-      "https://images.unsplash.com/photo-1585747860019-8084de357de0?w=1920&q=80",
   },
   marquee: [
     "PRECISION CUTS",

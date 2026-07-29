@@ -76,7 +76,9 @@ export interface Database {
           hero_content: Json | null;
           about_content: Json | null;
           services_content: Json | null;
+          barbers_content: Json | null;
           gallery_content: Json | null;
+          products_content: Json | null;
           contact_content: Json | null;
           footer_content: Json | null;
           google_onboarding: Json | null;
@@ -109,7 +111,9 @@ export interface Database {
           hero_content?: Json | null;
           about_content?: Json | null;
           services_content?: Json | null;
+          barbers_content?: Json | null;
           gallery_content?: Json | null;
+          products_content?: Json | null;
           contact_content?: Json | null;
           footer_content?: Json | null;
           google_onboarding?: Json | null;
@@ -142,7 +146,9 @@ export interface Database {
           hero_content?: Json | null;
           about_content?: Json | null;
           services_content?: Json | null;
+          barbers_content?: Json | null;
           gallery_content?: Json | null;
+          products_content?: Json | null;
           contact_content?: Json | null;
           footer_content?: Json | null;
           google_onboarding?: Json | null;

@@ -4,6 +4,7 @@ import type {
   SectionHeading,
   Service,
   GalleryItem,
+  Product,
   BookingOption,
   FooterColumn,
 } from "./business";
@@ -30,6 +31,31 @@ export interface GalleryContent {
   items: GalleryItem[];
 }
 
+/**
+ * One team member as STORED. Deliberately not `Barber`: the rendered type
+ * carries a `socials: SocialLink[]` array whose `label`/`ariaLabel` are
+ * presentation details no owner should have to type. Here we keep the two
+ * profile URLs and derive the rest at render time (lib/website/build-profile).
+ */
+export interface BarberEntry {
+  name: string;
+  role: string;
+  bio: string;
+  image: string;
+  instagramUrl?: string;
+  facebookUrl?: string;
+}
+
+export interface BarbersContent {
+  heading: SectionHeading;
+  items: BarberEntry[];
+}
+
+export interface ProductsContent {
+  heading: SectionHeading;
+  items: Product[];
+}
+
 export interface ContactContent {
   label: string;
   titleLines: string[];
@@ -45,23 +71,35 @@ export interface FooterContent {
   credit: string;
 }
 
-/** The six editable sections, keyed by section name. `null` = use default. */
+/**
+ * Every editable section the platform knows about, keyed by section name.
+ * `null` = use the template default.
+ *
+ * This is the FULL catalogue, not what any one tenant can edit: a template
+ * declares the subset it actually renders (templates/registry.ts → `sections`),
+ * and the CMS navigation and routes are derived from that.
+ */
 export interface WebsiteContent {
   hero: HeroContent | null;
   about: AboutContent | null;
   services: ServicesContent | null;
+  barbers: BarbersContent | null;
   gallery: GalleryContent | null;
+  products: ProductsContent | null;
   contact: ContactContent | null;
   footer: FooterContent | null;
 }
 
 export type WebsiteSection = keyof WebsiteContent;
 
+/** Catalogue order — templates present their own sections in this order. */
 export const WEBSITE_SECTIONS: WebsiteSection[] = [
   "hero",
   "about",
   "services",
+  "barbers",
   "gallery",
+  "products",
   "contact",
   "footer",
 ];
@@ -71,7 +109,9 @@ export const SECTION_COLUMN: Record<WebsiteSection, string> = {
   hero: "hero_content",
   about: "about_content",
   services: "services_content",
+  barbers: "barbers_content",
   gallery: "gallery_content",
+  products: "products_content",
   contact: "contact_content",
   footer: "footer_content",
 };

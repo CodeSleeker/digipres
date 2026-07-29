@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getMyBusiness } from "@/features/business/actions";
 import { getOnboardingView } from "@/features/onboarding/actions";
 import { getDashboardStats } from "@/features/dashboard/actions";
-import { WEBSITE_SECTIONS } from "@/types/website-content";
+import { templateSections } from "@/templates/registry";
 import {
   StatCard,
   CalendarIcon,
@@ -105,7 +105,7 @@ export default async function AdminHome() {
         </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {WEBSITE_SECTIONS.map((section) => (
+        {templateSections(business?.templateCode).map((section) => (
           <Link
             key={section}
             href={`/admin/website/${section}`}

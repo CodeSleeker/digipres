@@ -7,10 +7,14 @@ import {
   type WebsiteSection,
 } from "@/types/website-content";
 import type { BusinessProfile } from "@/types/business";
+import { templateSections } from "@/templates/registry";
+import { toBarberEntry } from "@/lib/website/build-profile";
 import { HeroForm } from "../_forms/hero-form";
 import { AboutForm } from "../_forms/about-form";
 import { ServicesForm } from "../_forms/services-form";
+import { BarbersForm } from "../_forms/barbers-form";
 import { GalleryForm } from "../_forms/gallery-form";
+import { ProductsForm } from "../_forms/products-form";
 import { ContactForm } from "../_forms/contact-form";
 import { FooterForm } from "../_forms/footer-form";
 
@@ -32,6 +36,10 @@ export default async function SectionPage({
   const business = await getMyWebsite();
   const content = business?.content ?? null;
 
+  // A section this tenant's template doesn't render isn't editable — no form,
+  // no route. The save action refuses it too; this is the visible half.
+  if (!templateSections(business?.templateCode).includes(active)) notFound();
+
   return (
     <div className="grid gap-6">
       <div className="flex items-center justify-between">
@@ -47,7 +55,7 @@ export default async function SectionPage({
           View live ↗
         </a>
       </div>
-      {renderForm(active, base, content)}
+      {renderForm(active, base, content, business?.id ?? null)}
     </div>
   );
 }
@@ -56,16 +64,41 @@ function renderForm(
   section: WebsiteSection,
   base: BusinessProfile,
   content: WebsiteContent | null,
+  businessId: string | null,
 ) {
   switch (section) {
     case "hero":
-      return <HeroForm defaultValues={content?.hero ?? base.hero} />;
+      return (
+        <HeroForm
+          defaultValues={content?.hero ?? base.hero}
+          businessId={businessId}
+        />
+      );
     case "about":
       return <AboutForm defaultValues={content?.about ?? base.about} />;
     case "services":
-      return <ServicesForm defaultValues={content?.services ?? base.services} />;
+      return (
+        <ServicesForm defaultValues={content?.services ?? base.services} />
+      );
+    case "barbers":
+      // The template default carries rendered SocialLinks; the form edits bare
+      // profile URLs, so convert when falling back to it.
+      return (
+        <BarbersForm
+          defaultValues={
+            content?.barbers ?? {
+              heading: base.barbers.heading,
+              items: base.barbers.items.map(toBarberEntry),
+            }
+          }
+        />
+      );
     case "gallery":
       return <GalleryForm defaultValues={content?.gallery ?? base.gallery} />;
+    case "products":
+      return (
+        <ProductsForm defaultValues={content?.products ?? base.products} />
+      );
     case "contact":
       return (
         <ContactForm

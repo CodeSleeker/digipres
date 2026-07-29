@@ -165,7 +165,13 @@
     color: var(--color-white);
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
+    /* `overflow-x: hidden` makes the element a scroll container, which silently
+       breaks `position: sticky` descendants in Firefox and Safari — the pinned
+       hero stage depends on it. `clip` prevents horizontal scroll WITHOUT
+       creating a scroll container. The `hidden` line stays directly above as a
+       fallback for browsers that don't support `clip`. Order matters. */
     overflow-x: hidden;
+    overflow-x: clip;
   }
 
   body {

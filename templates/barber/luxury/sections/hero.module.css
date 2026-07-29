@@ -1,0 +1,199 @@
+/*
+ * Scroll-scrubbed hero — a tall track with a pinned stage inside it.
+ *
+ * A CSS module (not globals.css) so the grading maths stays scoped to this
+ * template and never touches the light marketing surface.
+ *
+ * `--hero-progress` (0→1) is written from JS each scroll; every grading value
+ * below reads from it, so the colour ramp is driven entirely by CSS.
+ */
+
+.track {
+  position: relative;
+  /* The surplus over 100vh IS the scrub runway. */
+  height: 320vh;
+  background: #0a0a0a;
+}
+
+.stage {
+  --hero-progress: 0;
+  --hero-media-width: 62%;
+
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Media panel ─────────────────────────────────────────────────────────
+   The panel and its grade overlay share the same box and the same mask, so
+   the left edge dissolves into the page instead of ending in a hard rectangle. */
+.media,
+.grade {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--hero-media-width);
+  mask-image: linear-gradient(to right, transparent 0%, #000 20%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 20%);
+}
+
+.media {
+  z-index: 0;
+}
+
+.frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Faces sit high in the frame. */
+  object-position: center 28%;
+  transform: scale(1.04);
+  /* Ramp: the finished cut reads brighter and richer than the first frame. */
+  filter: brightness(calc(0.52 + var(--hero-progress) * 0.2)) contrast(1.16)
+    saturate(calc(0.8 + var(--hero-progress) * 0.12));
+}
+
+.grade {
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 90% at 60% 30%,
+      rgba(201, 169, 110, 0.12) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      110% 100% at 50% 45%,
+      transparent 38%,
+      rgba(10, 10, 10, 0.62) 100%
+    ),
+    linear-gradient(to bottom, transparent 60%, #0a0a0a 100%);
+}
+
+/* Text scrim — strongest at the start, lifting as the cut progresses. */
+.grade::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(10, 10, 10, 0.8) 0%,
+    rgba(10, 10, 10, 0.3) 38%,
+    transparent 70%
+  );
+  opacity: clamp(0.3, calc((1.05 - var(--hero-progress)) / 0.55), 0.8);
+}
+
+/* ── Copy column ─────────────────────────────────────────────────────────
+   Pinned, so everything here must fit inside 100vh or it is silently clipped.
+   All vertical rhythm is vh-aware for that reason. */
+.copy {
+  position: relative;
+  z-index: 2;
+  /* NB: do NOT set a width here. The element also carries `site-container`,
+     which creates the page gutters via `width: min(90rem, 92%)` +
+     `margin-inline: auto`. Overriding that width makes the copy full-bleed and
+     pins it to the left edge, because auto margins then have nothing to
+     distribute. */
+}
+
+/*
+ * The text column, held clear of the media panel.
+ *
+ * This is a max-width and NOT `padding-right: <percentage>` on .copy: padding
+ * percentages resolve against the CONTAINING BLOCK (the full-viewport .stage),
+ * not against .copy itself — so a 56% padding ate ~1416px of a ~1440px element
+ * and squeezed the headline into a few pixels at the left edge.
+ */
+.column {
+  max-width: min(36rem, 42vw);
+}
+
+.title {
+  font-size: clamp(2.75rem, min(10vw, 13.5vh), 9rem);
+  line-height: 0.95;
+}
+
+.overline {
+  margin-bottom: clamp(0.75rem, 2.2vh, 2rem);
+}
+
+.description {
+  margin-top: clamp(0.75rem, 2.4vh, 2rem);
+  font-size: clamp(0.9rem, 1.9vh, 1rem);
+}
+
+.actions {
+  margin-top: clamp(1rem, 3vh, 2.5rem);
+}
+
+.stats {
+  margin-top: clamp(1rem, 3.5vh, 4rem);
+  padding-top: clamp(0.75rem, 2vh, 2rem);
+}
+
+/* Short viewports: drop the least important row rather than shrinking
+   everything until it's illegible. */
+@media (max-height: 680px) {
+  .stats {
+    display: none;
+  }
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────────────
+   Copy spans the full width, so the media fills the stage and the horizontal
+   scrim is replaced by a vertical one. */
+@media (max-width: 768px) {
+  .track {
+    height: 240vh;
+  }
+
+  .stage {
+    --hero-media-width: 100%;
+    height: 100svh;
+  }
+
+  .media,
+  .grade {
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
+  /* Copy spans the full width on mobile — the media fills the whole stage. */
+  .column {
+    max-width: none;
+  }
+
+  .grade::before {
+    background: linear-gradient(
+      to bottom,
+      rgba(10, 10, 10, 0.55),
+      rgba(10, 10, 10, 0.72) 55%,
+      rgba(10, 10, 10, 0.88)
+    );
+    opacity: 1;
+  }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────────
+   No scrub runway, no pinning: a single static poster of the finished cut. */
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    height: 100vh;
+  }
+
+  .stage {
+    position: relative;
+    height: 100vh;
+  }
+
+  .frame {
+    filter: brightness(0.72) contrast(1.16) saturate(0.92);
+  }
+}

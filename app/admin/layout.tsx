@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getOwnerContext } from "@/lib/tenant/business-context";
 import { SuspendedNotice } from "./_components/suspended-notice";
 import { logout } from "@/lib/auth/actions";
-import { WEBSITE_SECTIONS } from "@/types/website-content";
+import { templateSections } from "@/templates/registry";
 import { Button } from "@/components/ui/button";
 import { ImpersonationBanner } from "./_components/impersonation-banner";
 import { getEntitlement } from "@/features/billing/queries";
@@ -120,7 +120,8 @@ export default async function AdminLayout({
           <div className="mb-1 mt-4 text-[0.65rem] uppercase tracking-[2px] text-gray">
             Website
           </div>
-          {WEBSITE_SECTIONS.map((section) => (
+          {/* Only the sections this tenant's template actually renders. */}
+          {templateSections(business?.templateCode).map((section) => (
             <Link
               key={section}
               href={`/admin/website/${section}`}

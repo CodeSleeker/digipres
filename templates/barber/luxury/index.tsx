@@ -2,9 +2,11 @@ import type { BusinessProfile } from "@/types/business";
 import { ScrollReveal } from "./components/scroll-reveal";
 import { SiteHeader } from "./sections/site-header";
 import { Hero } from "./sections/hero";
+import { HeroVideo } from "./sections/hero-video";
 import { Marquee } from "./sections/marquee";
 import { Services } from "./sections/services";
-import { Craft } from "./sections/craft";
+// Craft is hidden for now — see the note at its render site below.
+// import { Craft } from "./sections/craft";
 import { About } from "./sections/about";
 import { Barbers } from "./sections/barbers";
 import { Gallery } from "./sections/gallery";
@@ -39,10 +41,19 @@ export function LuxuryBarberTemplate({
       </a>
       <SiteHeader business={business} />
       <main id="main">
-        <Hero business={business} />
+        {/* Two interchangeable scrub sources — the client supplies whichever
+            asset they have. Absent `heroMedia` keeps the frame sequence. */}
+        {business.hero.heroMedia === "video" ? (
+          <HeroVideo business={business} />
+        ) : (
+          <Hero business={business} />
+        )}
         <Marquee business={business} />
         <Services business={business} />
-        <Craft business={business} />
+        {/* Craft section temporarily hidden at the client's request. The
+            section, its scroll hook, and its `craft` content all remain intact
+            — restore by uncommenting this line and the import above. */}
+        {/* <Craft business={business} /> */}
         <About business={business} />
         <Barbers business={business} />
         <Gallery business={business} />

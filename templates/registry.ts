@@ -1,5 +1,9 @@
 import type { ComponentType } from "react";
 import type { BusinessProfile } from "@/types/business";
+import {
+  WEBSITE_SECTIONS,
+  type WebsiteSection,
+} from "@/types/website-content";
 
 /**
  * Available website templates and themes.
@@ -18,6 +22,10 @@ import type { BusinessProfile } from "@/types/business";
  * Every template currently receives the same `BusinessProfile`. When industries
  * diverge enough to need their own section shapes, add a `contentSchema` to
  * TemplateDefinition and drive the CMS from it — that's the intended seam.
+ *
+ * `sections` is the first step down that road: it declares which editable
+ * sections a template actually renders, so the CMS only ever offers a tenant
+ * the sections their own site has (a restaurant template has no barbers).
  */
 export interface ThemeOption {
   code: string;
@@ -31,6 +39,12 @@ export interface TemplateOption {
   industry: string;
   description: string;
   themes: ThemeOption[];
+  /**
+   * The editable sections this template renders, in the order the CMS should
+   * present them. Anything omitted is hidden from the navigation AND refused by
+   * the section route — a tenant can't edit content their site never shows.
+   */
+  sections: WebsiteSection[];
 }
 
 export const TEMPLATES: TemplateOption[] = [
@@ -41,6 +55,16 @@ export const TEMPLATES: TemplateOption[] = [
     description:
       "Dark, gold-accented single page: hero, craft, services, gallery, team, contact.",
     themes: [{ code: "default", name: "Gold on Black" }],
+    sections: [
+      "hero",
+      "about",
+      "services",
+      "barbers",
+      "gallery",
+      "products",
+      "contact",
+      "footer",
+    ],
   },
 ];
 
@@ -49,6 +73,22 @@ export const DEFAULT_THEME_CODE = "default";
 
 export function findTemplate(code: string): TemplateOption | null {
   return TEMPLATES.find((t) => t.code === code) ?? null;
+}
+
+/**
+ * The editable sections available to a business on this template.
+ *
+ * An unknown/missing code resolves to the default template — matching
+ * `loadTemplate`, so the CMS always offers exactly the sections of the site
+ * that is actually being rendered. Falls back to the full catalogue only if the
+ * default template itself is missing, which would be a packaging error.
+ */
+export function templateSections(
+  code: string | null | undefined,
+): WebsiteSection[] {
+  const template =
+    findTemplate(code ?? "") ?? findTemplate(DEFAULT_TEMPLATE_CODE);
+  return template?.sections ?? WEBSITE_SECTIONS;
 }
 
 /** A resolved template: the component to render and its default content. */

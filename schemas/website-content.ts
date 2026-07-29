@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { WebsiteSection } from "@/types/website-content";
 import { isSafeImageUrl } from "@/lib/security/css";
+import { isSafeVideoUrl } from "@/lib/security/media";
 
 /**
  * Validation for the Website CMS. Each section schema mirrors the stored JSONB
@@ -36,6 +37,23 @@ const imageRef = z
   .max(2048)
   .refine(isSafeImageUrl, "Enter a valid image URL (https://… or /path).");
 
+/**
+ * An optional public profile link. https-only and empty-normalised: these land
+ * directly in an `<a href>` on the live site, so anything that could carry a
+ * javascript:/data: payload has to be refused HERE — the template renders what
+ * it is given.
+ */
+const optionalProfileUrl = z
+  .string()
+  .trim()
+  .max(2048)
+  .refine(
+    (value) => value === "" || /^https:\/\/[^\s]+$/i.test(value),
+    "Enter an https:// link, or leave it blank.",
+  )
+  .transform((value) => (value === "" ? undefined : value))
+  .optional();
+
 const ctaSchema = z.object({
   label: requiredText("Button label is required."),
   href: link,
@@ -70,7 +88,26 @@ export const heroSchema = z.object({
       }),
     )
     .max(6),
-  backgroundImage: imageRef,
+  /**
+   * Which source drives the scroll-scrub. "frames" uses the template's built-in
+   * WebP sequence; "video" samples an mp4 the owner uploaded or linked.
+   */
+  heroMedia: z.enum(["frames", "video"]).optional(),
+  /**
+   * The scrub video: a Supabase Storage URL from the uploader, or any https URL
+   * the owner pastes. Empty string is normalised to undefined so clearing the
+   * field falls back to the template's own video.
+   */
+  heroVideoUrl: z
+    .string()
+    .trim()
+    .max(2048)
+    .refine(
+      (value) => value === "" || isSafeVideoUrl(value),
+      "Enter a valid video URL (https://… or /path) ending in .mp4 or .webm.",
+    )
+    .transform((value) => (value === "" ? undefined : value))
+    .optional(),
 });
 
 // ── About ────────────────────────────────────────────────────────────────────
@@ -99,6 +136,46 @@ export const servicesSchema = z.object({
       }),
     )
     .min(1, "Add at least one service."),
+});
+
+// ── Barbers (the team) ───────────────────────────────────────────────────────
+export const barbersSchema = z.object({
+  heading: headingSchema,
+  items: z
+    .array(
+      z.object({
+        name: requiredText("Name is required."),
+        role: requiredText("Role is required."),
+        bio: text.max(400),
+        image: imageRef,
+        // Stored as plain URLs; the rendered SocialLink (label + aria-label) is
+        // derived in lib/website/build-profile.ts.
+        instagramUrl: optionalProfileUrl,
+        facebookUrl: optionalProfileUrl,
+      }),
+    )
+    .min(1, "Add at least one team member."),
+});
+
+// ── Products (the shop) ──────────────────────────────────────────────────────
+export const productsSchema = z.object({
+  heading: headingSchema,
+  items: z
+    .array(
+      z.object({
+        icon: requiredText("Icon is required."),
+        name: requiredText("Name is required."),
+        description: requiredText("Description is required."),
+        price: requiredText("Price is required."),
+        // Corner ribbon ("BEST SELLER"). Blank means no ribbon at all, so it is
+        // normalised away rather than stored as an empty badge.
+        tag: text
+          .max(40)
+          .transform((value) => (value === "" ? undefined : value))
+          .optional(),
+      }),
+    )
+    .min(1, "Add at least one product."),
 });
 
 // ── Gallery ──────────────────────────────────────────────────────────────────
@@ -155,7 +232,9 @@ export const SECTION_SCHEMA = {
   hero: heroSchema,
   about: aboutSchema,
   services: servicesSchema,
+  barbers: barbersSchema,
   gallery: gallerySchema,
+  products: productsSchema,
   contact: contactSchema,
   footer: footerSchema,
 } satisfies Record<WebsiteSection, z.ZodTypeAny>;
@@ -163,6 +242,8 @@ export const SECTION_SCHEMA = {
 export type HeroFormValues = z.infer<typeof heroSchema>;
 export type AboutFormValues = z.infer<typeof aboutSchema>;
 export type ServicesFormValues = z.infer<typeof servicesSchema>;
+export type BarbersFormValues = z.infer<typeof barbersSchema>;
 export type GalleryFormValues = z.infer<typeof gallerySchema>;
+export type ProductsFormValues = z.infer<typeof productsSchema>;
 export type ContactFormValues = z.infer<typeof contactSchema>;
 export type FooterFormValues = z.infer<typeof footerSchema>;

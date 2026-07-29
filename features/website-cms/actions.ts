@@ -12,6 +12,7 @@ import { revalidateTenantSite } from "@/lib/tenant/revalidate";
 import { WebsiteContentService } from "@/services/website-content-service";
 import { BusinessError } from "@/services/business-service";
 import { SECTION_SCHEMA } from "@/schemas/website-content";
+import { templateSections } from "@/templates/registry";
 
 /**
  * Server Actions for the Website CMS. The client form serializes its section
@@ -48,6 +49,13 @@ async function saveSection(
     return {
       error: "Create your business profile before editing the website.",
     };
+  }
+
+  // A tenant may only edit sections their template renders. The route hides the
+  // rest, but the action is the actual boundary — hiding a form doesn't stop a
+  // crafted POST from writing content the site would never show.
+  if (!templateSections(context.business?.templateCode).includes(section)) {
+    return { error: "That section isn't part of your website template." };
   }
 
   const raw = formData.get("content");
@@ -96,8 +104,14 @@ export async function saveAbout(formData: FormData) {
 export async function saveServices(formData: FormData) {
   return saveSection("services", formData);
 }
+export async function saveBarbers(formData: FormData) {
+  return saveSection("barbers", formData);
+}
 export async function saveGallery(formData: FormData) {
   return saveSection("gallery", formData);
+}
+export async function saveProducts(formData: FormData) {
+  return saveSection("products", formData);
 }
 export async function saveContact(formData: FormData) {
   return saveSection("contact", formData);

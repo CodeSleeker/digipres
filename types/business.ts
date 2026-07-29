@@ -40,6 +40,18 @@ export interface CtaButton {
   arrow?: boolean;
 }
 
+/**
+ * Which source drives the scroll-scrubbed hero.
+ *
+ * Two interchangeable implementations exist, so a client can supply whichever
+ * asset they have:
+ *  - "frames" — a WebP frame sequence (templates/.../sections/hero.tsx)
+ *  - "video"  — an mp4 sampled to ImageBitmaps (.../sections/hero-video.tsx)
+ *
+ * Undefined means "frames", so existing tenants are unaffected.
+ */
+export type HeroMedia = "frames" | "video";
+
 export interface Hero {
   overline: string;
   titleLines: HeroTitleLine[];
@@ -47,7 +59,13 @@ export interface Hero {
   primaryCta: CtaButton;
   secondaryCta: CtaButton;
   stats: HeroStat[];
-  backgroundImage: string;
+  /** Defaults to "frames" when absent. */
+  heroMedia?: HeroMedia;
+  /**
+   * Scrub video: an uploaded Supabase Storage URL or one the owner pasted.
+   * Absent falls back to the template's own video.
+   */
+  heroVideoUrl?: string;
 }
 
 export interface Service {

@@ -1,22 +1,26 @@
 import type {
+  Barber,
   BusinessProfile,
   Contact,
   ContactDetail,
   SocialLink,
 } from "@/types/business";
 import type { Business, BusinessHours } from "@/types/business-entity";
+import type { BarberEntry } from "@/types/website-content";
 
 /**
  * Merge a database Business over the template's default profile to produce the
  * BusinessProfile the public template renders.
  *
  * Rules:
- *  - The six editable sections come from the stored content when present, else
- *    the default (so an un-customized site still renders).
+ *  - Editable sections come from the stored content when present, else the
+ *    default (so an un-customized site still renders). Which sections a tenant
+ *    may edit is declared by their template (templates/registry.ts); a section
+ *    the template doesn't render simply never gets written.
  *  - Contact details and footer socials are DERIVED from the scalar business
  *    columns (phone/address/hours/socials) rather than duplicated in JSON.
- *  - Non-editable sections (header/nav/marquee/craft/barbers/products/
- *    testimonials/ctaBanner) are left as the default.
+ *  - Non-editable sections (header/nav/marquee/craft/testimonials/ctaBanner)
+ *    are left as the default.
  */
 export function buildBusinessProfile(
   base: BusinessProfile,
@@ -34,7 +38,9 @@ export function buildBusinessProfile(
     hero: content.hero ?? base.hero,
     about: content.about ?? base.about,
     services: content.services ?? base.services,
+    barbers: buildBarbers(base, business),
     gallery: content.gallery ?? base.gallery,
+    products: content.products ?? base.products,
     contact: buildContact(base, business),
     footer: buildFooter(base, business),
   };
@@ -77,6 +83,70 @@ export function deriveBrand(name: string): BusinessProfile["brand"] | null {
     namePrimary: words.slice(0, -1).join(" ").toUpperCase(),
     nameAccent: words[words.length - 1]!.toUpperCase(),
     initial,
+  };
+}
+
+/**
+ * The team section. Stored entries carry bare profile URLs; the rendered
+ * `Barber` needs `SocialLink`s, so the label and accessible name are derived
+ * here — an owner should never be able to publish an `aria-label` that lies
+ * about where a link goes.
+ */
+function buildBarbers(
+  base: BusinessProfile,
+  business: Business,
+): BusinessProfile["barbers"] {
+  const stored = business.content.barbers;
+  if (!stored) return base.barbers;
+  return {
+    heading: stored.heading,
+    items: stored.items.map(toBarber),
+  };
+}
+
+export function toBarber(entry: BarberEntry): Barber {
+  const socials: SocialLink[] = [];
+  if (entry.instagramUrl) {
+    socials.push({
+      label: "IG",
+      href: entry.instagramUrl,
+      ariaLabel: `${entry.name} on Instagram`,
+    });
+  }
+  if (entry.facebookUrl) {
+    socials.push({
+      label: "FB",
+      href: entry.facebookUrl,
+      ariaLabel: `${entry.name} on Facebook`,
+    });
+  }
+  return {
+    name: entry.name,
+    role: entry.role,
+    bio: entry.bio,
+    image: entry.image,
+    socials,
+  };
+}
+
+/**
+ * The inverse of `toBarber`, used to prefill the CMS form from a template
+ * default. Placeholder hrefs in template data (`"#"`) are dropped rather than
+ * shown, since they aren't valid links an owner could save.
+ */
+export function toBarberEntry(barber: Barber): BarberEntry {
+  const href = (label: string) =>
+    barber.socials.find(
+      (s) => s.label.toUpperCase() === label && s.href.startsWith("https://"),
+    )?.href;
+
+  return {
+    name: barber.name,
+    role: barber.role,
+    bio: barber.bio,
+    image: barber.image,
+    instagramUrl: href("IG"),
+    facebookUrl: href("FB"),
   };
 }
 

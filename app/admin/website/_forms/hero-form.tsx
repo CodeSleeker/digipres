@@ -14,25 +14,32 @@ import {
   TextField,
   useCmsSubmit,
 } from "./form-kit";
+import { HeroVideoField } from "./hero-video-field";
 
-export function HeroForm({ defaultValues }: { defaultValues: HeroFormValues }) {
+export function HeroForm({
+  defaultValues,
+  businessId,
+}: {
+  defaultValues: HeroFormValues;
+  businessId: string | null;
+}) {
   const form = useForm<HeroFormValues>({
     resolver: zodResolver(heroSchema),
     defaultValues,
   });
   const { result, pending, submit } = useCmsSubmit(saveHero);
-  const titleLines = useFieldArray({ control: form.control, name: "titleLines" });
+  const titleLines = useFieldArray({
+    control: form.control,
+    name: "titleLines",
+  });
   const stats = useFieldArray({ control: form.control, name: "stats" });
 
   return (
     <form onSubmit={form.handleSubmit(submit)} className="grid max-w-2xl gap-6">
       <TextField form={form} name="overline" label="Overline" />
       <TextAreaField form={form} name="description" label="Description" />
-      <TextField
-        form={form}
-        name="backgroundImage"
-        label="Background image URL"
-      />
+
+      <HeroVideoField form={form} businessId={businessId} />
 
       <div className="grid gap-3">
         <SubHeading>Title lines</SubHeading>
@@ -50,7 +57,9 @@ export function HeroForm({ defaultValues }: { defaultValues: HeroFormValues }) {
             />
           </RepeatableRow>
         ))}
-        <AddButton onClick={() => titleLines.append({ text: "", stroke: false })}>
+        <AddButton
+          onClick={() => titleLines.append({ text: "", stroke: false })}
+        >
           Add line
         </AddButton>
       </div>
