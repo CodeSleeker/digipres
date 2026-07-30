@@ -10,6 +10,7 @@ import { getEntitlement } from "@/features/billing/queries";
 import { defaultFeatures } from "@/lib/features/catalogue";
 import { getPendingAppointmentCount } from "@/features/appointments/queries";
 import { LiveAppointments } from "./_components/live-appointments";
+import { DesktopAlertsToggle } from "./_components/desktop-alerts-toggle";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -166,14 +167,17 @@ export default async function AdminLayout({
             </Link>
           ))}
         </nav>
-        <a
-          href="/"
-          target="_blank"
-          rel="noreferrer"
-          className="mt-auto text-xs text-gray transition-colors hover:text-gold"
-        >
-          View live site ↗
-        </a>
+        <div className="mt-auto flex flex-col gap-2">
+          {features.appointments && <DesktopAlertsToggle />}
+          <a
+            href="/"
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs text-gray transition-colors hover:text-gold"
+          >
+            View live site ↗
+          </a>
+        </div>
       </aside>
 
       <div className="flex-1">

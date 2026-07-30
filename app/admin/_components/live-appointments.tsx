@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import {
+  bookingAlertBody,
+  type BookingAlertRow,
+} from "@/lib/notifications/booking-alert";
 
 /**
  * Live booking alerts for the whole admin area.
@@ -23,6 +27,41 @@ import { createClient } from "@/lib/supabase/client";
 /** Realtime unreachable? Re-fetch on a timer so the dashboard still catches up. */
 const FALLBACK_POLL_MS = 60_000;
 
+/**
+ * Raise a desktop notification, if the owner has allowed them and isn't
+ * already looking at the dashboard.
+ *
+ * The visibility check is the point of the feature. With the tab in view the
+ * toast below already says the same thing, and firing both is just noise; the
+ * case worth interrupting is the browser minimised or the owner on another
+ * tab. Note this still requires the browser to be RUNNING — real push with
+ * everything closed needs a service worker and VAPID, which is a bigger piece
+ * of work and, on iOS, only functions once the site is on the home screen.
+ */
+function notify(row: BookingAlertRow): void {
+  if (typeof window === "undefined" || !("Notification" in window)) return;
+  if (Notification.permission !== "granted") return;
+  if (document.visibilityState === "visible") return;
+
+  try {
+    const notification = new Notification("New booking", {
+      body: bookingAlertBody(row),
+      icon: "/brand/icon-192.png",
+      // A stable tag collapses a burst into one notification rather than
+      // stacking five; the dashboard behind it has the full list.
+      tag: "new-booking",
+    });
+    notification.onclick = () => {
+      window.focus();
+      notification.close();
+    };
+  } catch (error) {
+    // Some browsers refuse a page-constructed Notification and require a
+    // service worker. Not worth failing the refresh over.
+    console.warn("[notification]", error);
+  }
+}
+
 export function LiveAppointments({ businessId }: { businessId: string }) {
   const router = useRouter();
   const [count, setCount] = useState(0);
@@ -41,9 +80,10 @@ export function LiveAppointments({ businessId }: { businessId: string }) {
           table: "appointments",
           filter: `business_id=eq.${businessId}`,
         },
-        () => {
+        (payload) => {
           setCount((n) => n + 1);
           router.refresh();
+          notify(payload.new as BookingAlertRow);
         },
       )
       .subscribe((status, error) => {
