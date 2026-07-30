@@ -142,6 +142,8 @@ const FIELDS = [
   "description",
   "phone",
   "email",
+  "notifyEmail",
+  "notifyPhone",
   "address",
   "logoUrl",
   "faviconUrl",

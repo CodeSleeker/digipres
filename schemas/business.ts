@@ -21,17 +21,28 @@ const BUSINESS_CATEGORIES = [
   "other",
 ] as const;
 
-// Treat empty-string form fields as "not provided".
-const emptyToUndefined = (v: unknown) =>
-  typeof v === "string" && v.trim() === "" ? undefined : v;
-
-const optionalText = z.preprocess(
-  emptyToUndefined,
-  z.string().trim().max(2000).optional(),
-);
-// An empty URL field is an instruction, not an omission — see `optionalUrl`.
+/**
+ * A blank field is an instruction — "remove this" — not an omission.
+ *
+ * The distinction is load-bearing throughout this file. BusinessRepository.update
+ * writes only the fields that are not `undefined`, so a blank that parsed to
+ * `undefined` would be silently dropped: the form reports "saved" and the value
+ * is still there. `null` clears the column; leaving the field out of the request
+ * entirely is what leaves it untouched, which is what keeps partial updates
+ * partial.
+ */
 const emptyToNull = (v: unknown) =>
   typeof v === "string" && v.trim() === "" ? null : v;
+
+const optionalText = z.preprocess(
+  emptyToNull,
+  z.string().trim().max(2000).nullable().optional(),
+);
+
+const optionalPhone = z.preprocess(
+  emptyToNull,
+  z.string().trim().max(40).nullable().optional(),
+);
 
 /**
  * A web address.
@@ -42,11 +53,7 @@ const emptyToNull = (v: unknown) =>
  * card), so accepting any scheme would make the CMS a stored-XSS vector. Only
  * http(s) may be stored.
  *
- * Blank maps to `null`, not `undefined`, and the distinction is load-bearing:
- * the repository writes only non-undefined fields, so a blank that became
- * `undefined` would be silently dropped — clearing a logo or a social link
- * would appear to save and then change nothing. `null` clears the column;
- * omitting the field entirely still leaves it untouched.
+ * Blank clears the column — see `emptyToNull` above.
  */
 const optionalUrl = z.preprocess(
   emptyToNull,
@@ -73,8 +80,8 @@ export const businessBrandSchema = z.object({
   initial: z.string().trim().max(2).default(""),
 });
 const optionalEmail = z.preprocess(
-  emptyToUndefined,
-  z.string().email("Enter a valid email address.").optional(),
+  emptyToNull,
+  z.string().email("Enter a valid email address.").nullable().optional(),
 );
 
 const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/; // "HH:mm" 24h
@@ -101,11 +108,11 @@ export const createBusinessSchema = z.object({
     .max(63)
     .regex(SLUG_PATTERN, "Use lowercase letters, numbers and hyphens."),
   description: optionalText,
-  phone: z.preprocess(
-    emptyToUndefined,
-    z.string().trim().max(40).optional(),
-  ),
+  phone: optionalPhone,
   email: optionalEmail,
+  /** Alert destinations. Null means "use the public phone/email above". */
+  notifyEmail: optionalEmail,
+  notifyPhone: optionalPhone,
   address: optionalText,
   logoUrl: optionalUrl,
   faviconUrl: optionalUrl,
@@ -113,8 +120,8 @@ export const createBusinessSchema = z.object({
   brand: businessBrandSchema.nullable().optional(),
   category: z.enum(BUSINESS_CATEGORIES),
   ownerName: z.preprocess(
-    emptyToUndefined,
-    z.string().trim().max(120).optional(),
+    emptyToNull,
+    z.string().trim().max(120).nullable().optional(),
   ),
   hours: businessHoursSchema.optional().default([]),
   googleReviewUrl: optionalUrl,

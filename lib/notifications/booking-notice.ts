@@ -86,9 +86,9 @@ export function bookingEmailText(
  * error for the customer — they did nothing wrong and retrying would double-book
  * them. Failures are logged and reported in the return value instead.
  *
- * Destinations are the business's own contact details. That is right for a
- * one-person shop and wrong for a business whose public email is a shared inbox
- * nobody watches; a dedicated notification address is the natural next step.
+ * Destinations are the alert contacts the owner set (/admin/settings), falling
+ * back to the public website ones. Falling back rather than requiring the alert
+ * fields is what keeps every existing tenant working with nothing to fill in.
  */
 export async function notifyOwnerOfBooking(
   business: Business,
@@ -101,11 +101,23 @@ export async function notifyOwnerOfBooking(
   return { sms, email };
 }
 
+/** Alert contacts, each falling back to the public one. Exported for testing. */
+export function alertContacts(business: Business): {
+  phone: string | null;
+  email: string | null;
+} {
+  return {
+    phone: business.notifyPhone ?? business.phone,
+    email: business.notifyEmail ?? business.email,
+  };
+}
+
 async function sendSms(
   business: Business,
   notice: BookingNotice,
 ): Promise<NotifyResult["sms"]> {
-  const to = business.phone ? toE164(business.phone) : null;
+  const number = alertContacts(business).phone;
+  const to = number ? toE164(number) : null;
   if (!to) return "skipped";
 
   try {
@@ -124,11 +136,12 @@ async function sendEmail(
   business: Business,
   notice: BookingNotice,
 ): Promise<NotifyResult["email"]> {
-  if (!business.email) return "skipped";
+  const to = alertContacts(business).email;
+  if (!to) return "skipped";
 
   try {
     const result = await getEmailSender().send({
-      to: business.email,
+      to,
       subject: bookingEmailSubject(notice),
       text: bookingEmailText(business.name, notice),
     });

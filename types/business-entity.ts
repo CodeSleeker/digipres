@@ -42,6 +42,10 @@ export interface Business {
   description: string | null;
   phone: string | null;
   email: string | null;
+  /** Where booking alerts are emailed. Falls back to `email` when null. */
+  notifyEmail: string | null;
+  /** Where booking alerts are texted. Falls back to `phone` when null. */
+  notifyPhone: string | null;
   address: string | null;
   logoUrl: string | null;
   /** Square browser-tab icon; falls back to `logoUrl` (see lib/tenant/icons.ts). */

@@ -83,6 +83,12 @@ export default async function AdminLayout({
           >
             Google Profile
           </Link>
+          <Link
+            href="/admin/settings"
+            className="py-1 text-gray-light transition-colors hover:text-gold"
+          >
+            Contact details
+          </Link>
           {features.custom_domains && (
             <Link
               href="/admin/domains"
