@@ -36,12 +36,28 @@ export function useCraftScroll(sectionRef: RefObject<HTMLElement | null>) {
     const maxSpread = isMobile ? 90 : 160;
 
     let raf = 0;
+    /** Last progress actually painted; NaN so the first tick always runs. */
+    let painted = Number.NaN;
 
     const update = () => {
       const rect = section.getBoundingClientRect();
       const sectionHeight = section.offsetHeight - window.innerHeight;
       const scrolled = -rect.top;
       const progress = Math.max(0, Math.min(1, scrolled / sectionHeight));
+
+      // Nothing moved since the last frame — skip every write below.
+      //
+      // This is the difference between an idle page costing nothing and
+      // costing a full restyle 60 times a second. The writes underneath
+      // include `width` and `height`, which invalidate layout, so repeating
+      // them unchanged is not free: it is the most expensive kind of no-op.
+      // Rounded so sub-pixel scroll noise doesn't defeat the check.
+      const quantised = Math.round(progress * 1000);
+      if (quantised === painted) {
+        raf = requestAnimationFrame(update);
+        return;
+      }
+      painted = quantised;
 
       // Eased progress for smoother motion
       const ease =
@@ -149,7 +165,37 @@ export function useCraftScroll(sectionRef: RefObject<HTMLElement | null>) {
       raf = requestAnimationFrame(update);
     };
 
-    raf = requestAnimationFrame(update);
-    return () => cancelAnimationFrame(raf);
+    /**
+     * Only animate while the section is anywhere near the viewport.
+     *
+     * The loop used to start on mount and never stop, so scrolling the hero —
+     * or reading the footer — still paid for a full restyle of a section that
+     * was thousands of pixels off screen. On a mid-range phone that is the
+     * whole scroll budget spent on invisible work.
+     *
+     * `rootMargin` starts it a screen early so it is already in the right
+     * position by the time it scrolls into view.
+     */
+    const start = () => {
+      if (raf) return;
+      painted = Number.NaN; // force one paint at the current position
+      raf = requestAnimationFrame(update);
+    };
+    const stop = () => {
+      if (!raf) return;
+      cancelAnimationFrame(raf);
+      raf = 0;
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => (entry?.isIntersecting ? start() : stop()),
+      { rootMargin: "100% 0px" },
+    );
+    observer.observe(section);
+
+    return () => {
+      observer.disconnect();
+      stop();
+    };
   }, [sectionRef]);
 }

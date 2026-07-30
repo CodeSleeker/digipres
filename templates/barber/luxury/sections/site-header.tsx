@@ -28,10 +28,15 @@ export function SiteHeader({ business }: { business: BusinessProfile }) {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-[1000] border-b backdrop-blur-[16px] transition-all duration-[400ms]",
+        // No backdrop-blur under 768px. A blur behind a FIXED element forces
+        // the compositor to re-sample everything moving underneath it on every
+        // frame of a scroll — one of the most expensive things a phone GPU can
+        // be asked to do. The mobile bar is nearly opaque instead, which reads
+        // the same and costs nothing.
+        "fixed inset-x-0 top-0 z-[1000] border-b transition-all duration-[400ms] min-[769px]:backdrop-blur-[16px]",
         scrolled
-          ? "border-[rgba(201,169,110,0.08)] bg-[rgba(10,10,10,0.92)] py-3"
-          : "border-[rgba(201,169,110,0.08)] bg-[rgba(10,10,10,0.7)] py-5",
+          ? "border-[rgba(201,169,110,0.08)] bg-[rgba(10,10,10,0.97)] py-3 min-[769px]:bg-[rgba(10,10,10,0.92)]"
+          : "border-[rgba(201,169,110,0.08)] bg-[rgba(10,10,10,0.95)] py-5 min-[769px]:bg-[rgba(10,10,10,0.7)]",
       )}
     >
       <div className="site-container flex items-center justify-between">
@@ -93,7 +98,9 @@ export function SiteHeader({ business }: { business: BusinessProfile }) {
       <div
         id="mobile-nav"
         hidden={!menuOpen}
-        className="hidden border-t border-[rgba(201,169,110,0.12)] bg-[rgba(10,10,10,0.98)] backdrop-blur-[16px] max-[768px]:block"
+        // Blur dropped here too: this panel is mobile-only and already 98%
+        // opaque, so it was paying the compositor cost for nothing visible.
+        className="hidden border-t border-[rgba(201,169,110,0.12)] bg-[rgba(10,10,10,0.98)] max-[768px]:block"
       >
         <nav aria-label="Mobile">
           <ul className="site-container flex list-none flex-col gap-1 py-4">

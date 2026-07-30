@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, type RefObject } from "react";
+import { onScrollFrame } from "../lib/raf-scroll";
 
 /**
  * Hero background parallax (desktop / fine-pointer only). Disabled on touch
@@ -25,11 +26,8 @@ export function useParallax(ref: RefObject<HTMLElement | null>, speed = 0.3) {
     ).matches;
     if (isTouch) return;
 
-    const onScroll = () => {
+    return onScrollFrame(() => {
       el.style.translate = `0 ${window.scrollY * speed}px`;
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    });
   }, [ref, speed]);
 }

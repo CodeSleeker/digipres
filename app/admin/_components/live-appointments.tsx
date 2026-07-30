@@ -115,6 +115,18 @@ export function LiveAppointments({ businessId }: { businessId: string }) {
     return () => clearInterval(id);
   }, [degraded, router]);
 
+  // Visible, not just a console line: a live feature that has silently stopped
+  // is indistinguishable from a quiet day, and the owner is the one who needs
+  // to know the page will no longer update by itself.
+  if (degraded && count === 0) {
+    return (
+      <p className="fixed bottom-6 right-6 z-50 max-w-xs border border-dark-border bg-charcoal px-3 py-2 text-[0.65rem] leading-relaxed text-gray">
+        Live updates are offline — this page now refreshes every minute
+        instead.
+      </p>
+    );
+  }
+
   if (count === 0) return null;
 
   return (

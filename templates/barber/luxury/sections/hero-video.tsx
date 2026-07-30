@@ -15,6 +15,7 @@ import {
   sampleTimes,
   slotForTime,
 } from "../lib/hero-capture";
+import { onScrollFrame } from "../lib/raf-scroll";
 import styles from "./hero-video.module.css";
 
 export const HERO_VIDEO_SRC = "/templates/barber-luxury/hero-scrub.mp4";
@@ -134,13 +135,16 @@ export function HeroVideo({ business }: { business: BusinessProfile }) {
     };
 
     sizeCanvas();
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
+    // Coalesced to one per frame: this handler reads layout
+    // (`getBoundingClientRect`) and then writes a custom property and paints
+    // the canvas, so running it per raw scroll event forces a synchronous
+    // layout many times between paints — the main cause of touch-scroll jank.
+    const stopScroll = onScrollFrame(onScroll);
     window.addEventListener("resize", onResize, { passive: true });
 
     const cleanup = () => {
       cancelled = true;
-      window.removeEventListener("scroll", onScroll);
+      stopScroll();
       window.removeEventListener("resize", onResize);
       if (watchdog) clearTimeout(watchdog);
       if (video) {
