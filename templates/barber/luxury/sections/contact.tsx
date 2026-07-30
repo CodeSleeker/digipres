@@ -23,8 +23,8 @@ export function Contact({ business }: { business: BusinessProfile }) {
   );
   const [loading, setLoading] = useState(false);
 
-  // Booking behavior ported 1:1 from the mockup script (client validation +
-  // POST to /api/bookings). The API route is intentionally out of scope here.
+  // Client-side validation is a courtesy, not a control — /api/bookings parses
+  // and re-validates everything it receives.
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
@@ -35,12 +35,13 @@ export function Contact({ business }: { business: BusinessProfile }) {
     const phone = value("phone");
     const service = value("service");
     const date = value("date");
+    const time = value("time");
     const barber = value("barber");
     const notes = value("notes");
 
-    if (!name || !phone || !service || !date) {
+    if (!name || !phone || !service || !date || !time) {
       setFeedback({
-        text: "Please complete your name, phone, service and preferred date.",
+        text: "Please complete your name, phone, service, date and time.",
         ok: false,
       });
       return;
@@ -59,7 +60,19 @@ export function Contact({ business }: { business: BusinessProfile }) {
       const res = await fetch(`${window.location.origin}/api/bookings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, service, date, barber, notes }),
+        // `slug` is only consulted when the request host doesn't identify a
+        // tenant — local dev and the apex, where sites are served from
+        // /s/<slug>. On a real tenant domain the host wins and this is ignored.
+        body: JSON.stringify({
+          name,
+          phone,
+          service,
+          date,
+          time,
+          barber,
+          notes,
+          slug: business.slug,
+        }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -190,23 +203,36 @@ export function Contact({ business }: { business: BusinessProfile }) {
                   />
                 </div>
                 <div className="mb-5">
-                  <Label htmlFor="barber" className={labelClass}>
-                    Preferred Barber
+                  <Label htmlFor="time" className={labelClass}>
+                    Preferred Time
                   </Label>
-                  <select
-                    id="barber"
-                    name="barber"
-                    defaultValue=""
+                  <Input
+                    id="time"
+                    name="time"
+                    type="time"
+                    required
                     className={fieldClass}
-                  >
-                    <option value="">Any available</option>
-                    {contact.barberOptions.map((opt) => (
-                      <option key={opt.label} value={opt.value ?? opt.label}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
+              </div>
+
+              <div className="mb-5">
+                <Label htmlFor="barber" className={labelClass}>
+                  Preferred Barber
+                </Label>
+                <select
+                  id="barber"
+                  name="barber"
+                  defaultValue=""
+                  className={fieldClass}
+                >
+                  <option value="">Any available</option>
+                  {contact.barberOptions.map((opt) => (
+                    <option key={opt.label} value={opt.value ?? opt.label}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="mb-5">

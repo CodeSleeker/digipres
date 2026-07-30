@@ -10,6 +10,7 @@ import {
 import { AppointmentTabs } from "./_components/appointment-tabs";
 import { AppointmentStatusBadge } from "./_components/appointment-status-badge";
 import { DeleteAppointmentButton } from "./_components/delete-appointment-button";
+import { LiveBookings } from "./_components/live-bookings";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -47,6 +48,9 @@ export default async function AppointmentsListPage({
       </div>
 
       <AppointmentTabs active="list" />
+
+      {/* businessId is non-null here: requireFeature above throws without one. */}
+      {businessId && <LiveBookings businessId={businessId} />}
 
       <form
         method="get"
