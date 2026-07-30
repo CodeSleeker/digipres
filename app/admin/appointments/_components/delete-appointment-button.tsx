@@ -47,7 +47,7 @@ export function DeleteAppointmentButton({ id }: { id: string }) {
       }}
       className="text-xs text-gray transition-colors hover:text-destructive disabled:opacity-50"
     >
-      {pending ? "…" : "Delete"}
+      {pending ? "Deleting…" : "Delete"}
     </button>
   );
 }

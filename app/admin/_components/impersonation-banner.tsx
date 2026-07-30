@@ -1,4 +1,5 @@
 import { stopImpersonation } from "@/features/platform/impersonation";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 /**
  * Always-visible reminder that this is a staff session acting on a client's
@@ -13,12 +14,12 @@ export function ImpersonationBanner({ businessName }: { businessName: string }) 
         you make are recorded against your account.
       </p>
       <form action={stopImpersonation}>
-        <button
-          type="submit"
+        <SubmitButton
+          pendingLabel="Exiting…"
           className="text-xs uppercase tracking-[1.5px] text-gold underline-offset-4 transition-colors hover:underline"
         >
           Exit
-        </button>
+        </SubmitButton>
       </form>
     </div>
   );

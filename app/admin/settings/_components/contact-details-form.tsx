@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { fieldClass } from "../../website/_forms/form-kit";
+import { SavedNotice } from "@/components/ui/saved-notice";
+import { Spinner } from "@/components/ui/submit-button";
 
 /**
  * The business's contact details, in two groups the owner has to be able to
@@ -133,15 +135,21 @@ export function ContactDetailsForm({ defaults }: { defaults: Defaults }) {
         <Button
           type="submit"
           disabled={pending}
+          aria-busy={pending}
           className="rounded-none bg-gold font-heading tracking-[2px] text-black hover:bg-gold-light"
         >
-          {pending ? "SAVING…" : "SAVE DETAILS"}
+          {pending ? (
+            <span className="inline-flex items-center gap-2">
+              <Spinner />
+              SAVING…
+            </span>
+          ) : (
+            "SAVE DETAILS"
+          )}
         </Button>
-        {state.success && (
-          <span className="text-sm text-[#5bbf7b]">
-            Saved — changes are live.
-          </span>
-        )}
+        <SavedNotice token={state.success ? state : null}>
+          Saved — changes are live.
+        </SavedNotice>
         {state.error && (
           <span className="text-sm text-destructive">{state.error}</span>
         )}

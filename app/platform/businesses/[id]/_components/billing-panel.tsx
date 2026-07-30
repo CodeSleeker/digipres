@@ -4,6 +4,7 @@ import {
 } from "@/features/platform/billing";
 import { FEATURE_KEYS, FEATURES } from "@/lib/features/catalogue";
 import type { Entitlement, Plan } from "@/types/billing";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 /**
  * Plan assignment + per-feature overrides for one tenant.
@@ -61,12 +62,12 @@ export function BillingPanel({
             ))}
           </select>
         </label>
-        <button
-          type="submit"
+        <SubmitButton
+          pendingLabel="Saving…"
           className="border border-gold px-4 py-2 text-xs uppercase tracking-[2px] text-gold transition-colors hover:bg-gold hover:text-black"
         >
           Set plan
-        </button>
+        </SubmitButton>
       </form>
 
       <ul className="grid gap-2">
@@ -114,12 +115,12 @@ export function BillingPanel({
                   <option value="on">Force on</option>
                   <option value="off">Force off</option>
                 </select>
-                <button
-                  type="submit"
+                <SubmitButton
+                  pendingLabel="Applying…"
                   className="text-xs uppercase tracking-[1px] text-gray transition-colors hover:text-gold"
                 >
                   Apply
-                </button>
+                </SubmitButton>
               </form>
             </li>
           );

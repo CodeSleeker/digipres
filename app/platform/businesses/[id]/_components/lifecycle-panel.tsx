@@ -5,6 +5,7 @@ import {
 } from "@/features/platform/lifecycle";
 import type { Business } from "@/types/business-entity";
 import type { PlatformRole } from "@/types/platform";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 const STATUS_COPY: Record<Business["status"], string> = {
   active: "Live — the website is serving and the owner has full access.",
@@ -53,22 +54,22 @@ export function LifecyclePanel({
           {business.status === "active" ? (
             <form action={suspendBusiness}>
               <input type="hidden" name="businessId" value={business.id} />
-              <button
-                type="submit"
+              <SubmitButton
+                pendingLabel="Suspending…"
                 className="border border-dark-border px-4 py-2 text-xs uppercase tracking-[2px] text-white transition-colors hover:border-gold hover:text-gold"
               >
                 Suspend service
-              </button>
+              </SubmitButton>
             </form>
           ) : (
             <form action={reactivateBusiness}>
               <input type="hidden" name="businessId" value={business.id} />
-              <button
-                type="submit"
+              <SubmitButton
+                pendingLabel="Reactivating…"
                 className="border border-gold px-4 py-2 text-xs uppercase tracking-[2px] text-gold transition-colors hover:bg-gold hover:text-black"
               >
                 Reactivate
-              </button>
+              </SubmitButton>
             </form>
           )}
         </div>
@@ -95,12 +96,12 @@ export function LifecyclePanel({
               placeholder={`Type "${business.slug}" to confirm`}
               className="min-w-[16rem] border border-dark-border bg-black px-3 py-2 text-sm text-white placeholder:text-gray focus-visible:border-gold focus-visible:outline-none"
             />
-            <button
-              type="submit"
+            <SubmitButton
+              pendingLabel="Removing…"
               className="border border-destructive px-4 py-2 text-xs uppercase tracking-[2px] text-destructive transition-colors hover:bg-destructive hover:text-white"
             >
               Remove
-            </button>
+            </SubmitButton>
           </form>
         </div>
       )}

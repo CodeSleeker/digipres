@@ -9,6 +9,8 @@ import {
   type OnboardingStepId,
 } from "@/types/onboarding";
 import type { BusinessCategory, DayHours } from "@/types/business-entity";
+import { SavedNotice } from "@/components/ui/saved-notice";
+import { Spinner } from "@/components/ui/submit-button";
 import { stepSchemas } from "@/schemas/onboarding";
 import {
   saveOnboardingStep,
@@ -256,20 +258,24 @@ export function OnboardingWizard({ view }: { view: OnboardingView }) {
           <Button
             type="button"
             disabled={saving}
+            aria-busy={saving}
             onClick={handleSave}
             className="rounded-none bg-gold font-heading tracking-[2px] text-black hover:bg-gold-light"
           >
-            {saving
-              ? "SAVING…"
-              : alreadyDone
-                ? "SAVE CHANGES"
-                : step.id === "verification"
-                  ? "MARK AS DONE"
-                  : "SAVE & CONTINUE"}
+            {saving ? (
+              <span className="inline-flex items-center gap-2">
+                <Spinner />
+                SAVING…
+              </span>
+            ) : alreadyDone ? (
+              "SAVE CHANGES"
+            ) : step.id === "verification" ? (
+              "MARK AS DONE"
+            ) : (
+              "SAVE & CONTINUE"
+            )}
           </Button>
-          {result?.success && (
-            <span className="text-sm text-[#5bbf7b]">Saved.</span>
-          )}
+          <SavedNotice token={result?.success ? result : null}>Saved.</SavedNotice>
           {result?.error && (
             <span className="text-sm text-destructive">{result.error}</span>
           )}

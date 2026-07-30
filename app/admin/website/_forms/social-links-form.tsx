@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { fieldClass } from "./form-kit";
+import { SavedNotice } from "@/components/ui/saved-notice";
+import { Spinner } from "@/components/ui/submit-button";
 
 const PLATFORMS = [
   { name: "facebookUrl", label: "Facebook", placeholder: "https://facebook.com/…" },
@@ -76,15 +78,21 @@ export function SocialLinksForm({
         <Button
           type="submit"
           disabled={pending}
+          aria-busy={pending}
           className="rounded-none bg-gold font-heading tracking-[2px] text-black hover:bg-gold-light"
         >
-          {pending ? "SAVING…" : "SAVE LINKS"}
+          {pending ? (
+            <span className="inline-flex items-center gap-2">
+              <Spinner />
+              SAVING…
+            </span>
+          ) : (
+            "SAVE LINKS"
+          )}
         </Button>
-        {state.success && (
-          <span className="text-sm text-[#5bbf7b]">
-            Saved — changes are live.
-          </span>
-        )}
+        <SavedNotice token={state.success ? state : null}>
+          Saved — changes are live.
+        </SavedNotice>
         {state.error && (
           <span className="text-sm text-destructive">{state.error}</span>
         )}

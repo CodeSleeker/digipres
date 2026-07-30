@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import type { BusinessProfile } from "@/types/business";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,17 @@ export function Contact({ business }: { business: BusinessProfile }) {
     null,
   );
   const [loading, setLoading] = useState(false);
+
+  /**
+   * Clear the confirmation after a few seconds — but ONLY the confirmation.
+   * A failure has to stay on screen: it tells the customer their booking did
+   * not go through, and taking that away would leave them believing it did.
+   */
+  useEffect(() => {
+    if (!feedback?.ok) return;
+    const timer = setTimeout(() => setFeedback(null), 3000);
+    return () => clearTimeout(timer);
+  }, [feedback]);
 
   // Client-side validation is a courtesy, not a control — /api/bookings parses
   // and re-validates everything it receives.
@@ -249,12 +260,12 @@ export function Contact({ business }: { business: BusinessProfile }) {
 
               <ButtonAction
                 type="submit"
-                arrow
+                arrow={!loading}
                 disabled={loading}
                 aria-busy={loading}
                 className="mt-2 w-full justify-center max-[768px]:min-h-[52px]"
               >
-                CONFIRM BOOKING
+                {loading ? "SENDING BOOKING…" : "CONFIRM BOOKING"}
               </ButtonAction>
 
               <div

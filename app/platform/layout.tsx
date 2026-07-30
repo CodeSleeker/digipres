@@ -3,7 +3,7 @@ import Link from "next/link";
 import { requirePlatformAdmin } from "@/lib/auth/require-platform-admin";
 import { logout } from "@/lib/auth/actions";
 import { PLATFORM_ROLE_LABEL } from "@/types/platform";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -80,13 +80,12 @@ export default async function PlatformLayout({
             <span className="text-[0.7rem] text-gray">{user.email}</span>
           </div>
           <form action={logout}>
-            <Button
-              type="submit"
-              variant="outline"
-              className="h-8 rounded-none border-dark-border text-xs tracking-[2px] text-white hover:border-gold hover:text-gold"
+            <SubmitButton
+              pendingLabel="SIGNING OUT…"
+              className="inline-flex h-8 items-center rounded-none border border-dark-border px-4 text-xs tracking-[2px] text-white transition-colors hover:border-gold hover:text-gold"
             >
               LOG OUT
-            </Button>
+            </SubmitButton>
           </form>
         </header>
         <main className="p-8">{children}</main>

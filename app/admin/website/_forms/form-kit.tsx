@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { CmsFormState } from "@/features/website-cms/actions";
+import { SavedNotice } from "@/components/ui/saved-notice";
+import { Spinner } from "@/components/ui/submit-button";
 
 /**
  * Small building blocks shared by every CMS section form. They wrap the shadcn
@@ -233,13 +235,23 @@ export function SubmitBar({
       <Button
         type="submit"
         disabled={pending}
+        aria-busy={pending}
         className="rounded-none bg-gold font-heading tracking-[2px] text-black hover:bg-gold-light"
       >
-        {pending ? "SAVING…" : "SAVE CHANGES"}
+        {pending ? (
+          <span className="inline-flex items-center gap-2">
+            <Spinner />
+            SAVING…
+          </span>
+        ) : (
+          "SAVE CHANGES"
+        )}
       </Button>
-      {result?.success && (
-        <span className="text-sm text-[#5bbf7b]">Saved — changes are live.</span>
-      )}
+      {/* `result` is a fresh object per save, so it doubles as the token that
+          re-shows the message on a repeat save. */}
+      <SavedNotice token={result?.success ? result : null}>
+        Saved — changes are live.
+      </SavedNotice>
       {result?.error && (
         <span className="text-sm text-destructive">{result.error}</span>
       )}

@@ -11,6 +11,8 @@ import { generatedIconHref } from "@/lib/tenant/icons";
 import { ImageField } from "../../website/_forms/image-field";
 import { SubHeading, TextField } from "../../website/_forms/form-kit";
 import { Button } from "@/components/ui/button";
+import { SavedNotice } from "@/components/ui/saved-notice";
+import { Spinner } from "@/components/ui/submit-button";
 
 /**
  * Blank is allowed everywhere here — each empty field means "fall back", not
@@ -167,15 +169,21 @@ export function BrandingForm({
         <Button
           type="submit"
           disabled={pending}
+          aria-busy={pending}
           className="rounded-none bg-gold font-heading tracking-[2px] text-black hover:bg-gold-light"
         >
-          {pending ? "SAVING…" : "SAVE BRANDING"}
+          {pending ? (
+            <span className="inline-flex items-center gap-2">
+              <Spinner />
+              SAVING…
+            </span>
+          ) : (
+            "SAVE BRANDING"
+          )}
         </Button>
-        {result?.success && (
-          <span className="text-sm text-[#5bbf7b]">
-            Saved — changes are live.
-          </span>
-        )}
+        <SavedNotice token={result?.success ? result : null}>
+          Saved — changes are live.
+        </SavedNotice>
         {result?.error && (
           <span className="text-sm text-destructive">{result.error}</span>
         )}

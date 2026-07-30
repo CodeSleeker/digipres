@@ -4,14 +4,15 @@ import { getOwnerContext } from "@/lib/tenant/business-context";
 import { SuspendedNotice } from "./_components/suspended-notice";
 import { logout } from "@/lib/auth/actions";
 import { templateSections } from "@/templates/registry";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { ImpersonationBanner } from "./_components/impersonation-banner";
 import { getEntitlement } from "@/features/billing/queries";
 import { defaultFeatures } from "@/lib/features/catalogue";
 import { getPendingAppointmentCount } from "@/features/appointments/queries";
 import { LiveAppointments } from "./_components/live-appointments";
 import { DesktopAlertsToggle } from "./_components/desktop-alerts-toggle";
-import { BookingSoundToggle } from "./_components/booking-sound-toggle";
+import { BookingSoundSettings } from "./_components/booking-sound-settings";
+import { PendingAppointmentsBadge } from "./_components/pending-appointments-badge";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -118,16 +119,7 @@ export default async function AdminLayout({
               className="flex items-center justify-between gap-2 py-1 text-gray-light transition-colors hover:text-gold"
             >
               Appointments
-              {pendingAppointments > 0 && (
-                <span
-                  className="min-w-5 rounded-full bg-gold px-1.5 py-0.5 text-center text-[0.65rem] font-semibold leading-none text-black"
-                  // The number alone is ambiguous out of context — a screen
-                  // reader would just say "Appointments 3".
-                  aria-label={`${pendingAppointments} awaiting confirmation`}
-                >
-                  {pendingAppointments > 99 ? "99+" : pendingAppointments}
-                </span>
-              )}
+              <PendingAppointmentsBadge serverCount={pendingAppointments} />
             </Link>
           )}
           {features.reviews && (
@@ -169,7 +161,13 @@ export default async function AdminLayout({
           ))}
         </nav>
         <div className="mt-auto flex flex-col gap-2">
-          {features.appointments && <BookingSoundToggle />}
+          {/* In the sidebar so its status line is visible; the toast it also
+              renders is position-fixed, so where it sits in the DOM is
+              irrelevant. */}
+          {businessId && features.appointments && !blocked && (
+            <LiveAppointments businessId={businessId} />
+          )}
+          {features.appointments && <BookingSoundSettings />}
           {features.appointments && <DesktopAlertsToggle />}
           <a
             href="/"
@@ -199,13 +197,12 @@ export default async function AdminLayout({
             <span className="text-[0.7rem] text-gray">{user.email}</span>
           </div>
           <form action={logout}>
-            <Button
-              type="submit"
-              variant="outline"
-              className="h-8 rounded-none border-dark-border text-xs tracking-[2px] text-white hover:border-gold hover:text-gold"
+            <SubmitButton
+              pendingLabel="SIGNING OUT…"
+              className="inline-flex h-8 items-center rounded-none border border-dark-border px-4 text-xs tracking-[2px] text-white transition-colors hover:border-gold hover:text-gold"
             >
               LOG OUT
-            </Button>
+            </SubmitButton>
           </form>
         </header>
         <main className="p-8">
@@ -216,12 +213,6 @@ export default async function AdminLayout({
           )}
         </main>
       </div>
-
-      {/* Outside <main> so the toast isn't replaced when the route changes.
-          Skipped for a blocked tenant — they can't act on a booking anyway. */}
-      {businessId && features.appointments && !blocked && (
-        <LiveAppointments businessId={businessId} />
-      )}
     </div>
   );
 }
