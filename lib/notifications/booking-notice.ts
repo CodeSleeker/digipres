@@ -144,6 +144,10 @@ async function sendEmail(
       to,
       subject: bookingEmailSubject(notice),
       text: bookingEmailText(business.name, notice),
+      // The owner should see their OWN business in the sender column, not the
+      // platform's name and certainly not another client's. Only the display
+      // name varies; the address stays on the one verified domain.
+      fromName: business.name,
     });
     return result.success ? "sent" : "failed";
   } catch (error) {

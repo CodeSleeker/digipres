@@ -15,6 +15,18 @@ export interface EmailMessage {
   text: string;
   /** Optional HTML alternative. */
   html?: string;
+  /**
+   * Who the mail should appear to be FROM, e.g. the tenant's business name.
+   *
+   * A display name only — deliberately NOT a full address. This platform sends
+   * for many businesses from one verified domain, so the owner of Ronie's must
+   * see "Ronie's Barber" and never the platform's name or, worse, another
+   * client's. But letting a caller supply the whole From header would let
+   * tenant-controlled data choose the ADDRESS too, and the business name is
+   * edited by the client. Splitting it this way makes that impossible: the
+   * address always comes from EMAIL_FROM, the name is sanitised and quoted.
+   */
+  fromName?: string;
 }
 
 export interface EmailSendResult {
@@ -42,6 +54,55 @@ export function resendConfigFromEnv(
 }
 
 /**
+ * The bare `user@host` out of an address that may carry a display name, so a
+ * new name can be put on it. `EMAIL_FROM` is written either way in practice.
+ */
+export function bareAddress(from: string): string {
+  const angled = /<([^<>]+)>\s*$/.exec(from.trim());
+  return (angled ? angled[1]! : from).trim();
+}
+
+/** Unicode control characters: C0 and C1, so CR and LF included. */
+const CONTROL_CHARS = /\p{Cc}/gu;
+
+/**
+ * A display name that cannot break out of the From header.
+ *
+ * The input is the business name, which the client edits — so it is hostile
+ * input, and the two things it must not be able to do are inject a second
+ * address and split the header.
+ *
+ * Both are closed by ALWAYS emitting a quoted-string. Inside quotes, `<`, `>`,
+ * `@`, `,` and `;` are literal text rather than delimiters, so a business
+ * called `Evil <ceo@bank.example>, Real` becomes one harmless display name
+ * instead of a second From address. `\` and `"` are escaped, and control
+ * characters are stripped before any of that.
+ *
+ * Returns null when nothing usable survives, so the caller can fall back to the
+ * configured From rather than send `"" <addr>`.
+ */
+export function quoteDisplayName(raw: string): string | null {
+  const cleaned = raw
+    .replace(CONTROL_CHARS, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    // Long display names get folded or truncated by relays; do it predictably.
+    .slice(0, 78);
+
+  if (!cleaned) return null;
+  return `"${cleaned.replace(/([\\"])/g, "\\$1")}"`;
+}
+
+/** `EMAIL_FROM`'s address, presented under `displayName`. */
+export function applyDisplayName(
+  configuredFrom: string,
+  displayName: string | undefined,
+): string {
+  const quoted = displayName ? quoteDisplayName(displayName) : null;
+  return quoted ? `${quoted} <${bareAddress(configuredFrom)}>` : configuredFrom;
+}
+
+/**
  * Resend over plain `fetch` rather than their SDK — one HTTP call does not
  * justify a dependency, and this keeps the module usable in any runtime.
  */
@@ -57,7 +118,7 @@ export class ResendEmailSender implements EmailSender {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: this.config.from,
+          from: applyDisplayName(this.config.from, message.fromName),
           to: [message.to],
           subject: message.subject,
           text: message.text,
@@ -85,7 +146,13 @@ export class ResendEmailSender implements EmailSender {
 class LogEmailSender implements EmailSender {
   async send(message: EmailMessage): Promise<EmailSendResult> {
     console.info(
-      "[email:stub] to=%s subject=%o body=%o",
+      "[email:stub] from=%o to=%s subject=%o body=%o",
+      // Mirrors what the real sender would build, so the stub is a useful
+      // preview of the From header rather than just of the body.
+      applyDisplayName(
+        process.env.EMAIL_FROM ?? "(EMAIL_FROM unset)",
+        message.fromName,
+      ),
       message.to,
       message.subject,
       message.text,
