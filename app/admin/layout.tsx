@@ -11,6 +11,7 @@ import { defaultFeatures } from "@/lib/features/catalogue";
 import { getPendingAppointmentCount } from "@/features/appointments/queries";
 import { LiveAppointments } from "./_components/live-appointments";
 import { DesktopAlertsToggle } from "./_components/desktop-alerts-toggle";
+import { BookingSoundToggle } from "./_components/booking-sound-toggle";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -168,6 +169,7 @@ export default async function AdminLayout({
           ))}
         </nav>
         <div className="mt-auto flex flex-col gap-2">
+          {features.appointments && <BookingSoundToggle />}
           {features.appointments && <DesktopAlertsToggle />}
           <a
             href="/"

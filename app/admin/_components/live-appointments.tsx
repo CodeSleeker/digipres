@@ -8,6 +8,7 @@ import {
   bookingAlertBody,
   type BookingAlertRow,
 } from "@/lib/notifications/booking-alert";
+import { playBookingChime } from "@/lib/notifications/chime";
 
 /**
  * Live booking alerts for the whole admin area.
@@ -83,6 +84,10 @@ export function LiveAppointments({ businessId }: { businessId: string }) {
         (payload) => {
           setCount((n) => n + 1);
           router.refresh();
+          // Sound plays whether or not the tab is in view — the owner may be
+          // across the room. The desktop notification below is the one that
+          // would be redundant while they're looking at the screen.
+          playBookingChime();
           notify(payload.new as BookingAlertRow);
         },
       )
