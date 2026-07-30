@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { updateBusiness } from "@/features/business/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,10 +31,21 @@ interface Defaults {
   address: string;
   notifyPhone: string;
   notifyEmail: string;
+  notifyCustomerSms: boolean;
 }
 
 export function ContactDetailsForm({ defaults }: { defaults: Defaults }) {
   const [state, action, pending] = useActionState(updateBusiness, {});
+
+  /**
+   * The one controlled field on this form.
+   *
+   * An unchecked checkbox submits NOTHING, which `readForm` would read as
+   * "field omitted, leave it alone" — making the box impossible to untick. So
+   * the checkbox carries no `name` and a hidden input submits an explicit
+   * "true"/"false" alongside it.
+   */
+  const [textCustomers, setTextCustomers] = useState(defaults.notifyCustomerSms);
 
   return (
     <form action={action} className="grid max-w-2xl gap-10">
@@ -129,6 +140,37 @@ export function ContactDetailsForm({ defaults }: { defaults: Defaults }) {
                 : "No email on file — no booking emails will be sent."
           }
         />
+      </section>
+
+      <section className="grid gap-4">
+        <div>
+          <h2 className="font-heading text-lg tracking-[2px] text-white">
+            Text your customers
+          </h2>
+          <p className="mt-1 text-xs leading-relaxed text-gray">
+            Two messages: one when they submit a booking (“we have your
+            request”) and one when you confirm it. Each is charged per text, and
+            the number sent depends on how busy your website is — switch this
+            off to keep only your own alerts. Anyone who has replied STOP is
+            never texted either way.
+          </p>
+        </div>
+
+        {/* Always submits, so unticking actually saves — see the note above. */}
+        <input
+          type="hidden"
+          name="notifyCustomerSms"
+          value={textCustomers ? "true" : "false"}
+        />
+        <label className="flex items-start gap-2 text-sm text-gray-light">
+          <input
+            type="checkbox"
+            checked={textCustomers}
+            onChange={(event) => setTextCustomers(event.target.checked)}
+            className="mt-0.5 accent-gold"
+          />
+          Text customers about their bookings
+        </label>
       </section>
 
       <div className="flex flex-wrap items-center gap-4 border-t border-dark-border pt-5">

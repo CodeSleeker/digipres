@@ -119,6 +119,7 @@ export class BusinessRepository {
       email: input.email ?? null,
       notify_email: input.notifyEmail ?? null,
       notify_phone: input.notifyPhone ?? null,
+      notify_customer_sms: input.notifyCustomerSms ?? true,
       address: input.address ?? null,
       logo_url: input.logoUrl ?? null,
       favicon_url: input.faviconUrl ?? null,
@@ -152,6 +153,8 @@ export class BusinessRepository {
     if (input.email !== undefined) patch.email = input.email;
     if (input.notifyEmail !== undefined) patch.notify_email = input.notifyEmail;
     if (input.notifyPhone !== undefined) patch.notify_phone = input.notifyPhone;
+    if (input.notifyCustomerSms !== undefined)
+      patch.notify_customer_sms = input.notifyCustomerSms;
     if (input.address !== undefined) patch.address = input.address;
     if (input.logoUrl !== undefined) patch.logo_url = input.logoUrl;
     if (input.faviconUrl !== undefined) patch.favicon_url = input.faviconUrl;
@@ -255,6 +258,7 @@ function toDomain(row: BusinessRow): Business {
     email: row.email,
     notifyEmail: row.notify_email,
     notifyPhone: row.notify_phone,
+    notifyCustomerSms: row.notify_customer_sms ?? true,
     address: row.address,
     logoUrl: row.logo_url,
     faviconUrl: row.favicon_url,

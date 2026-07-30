@@ -37,6 +37,7 @@ export default async function SettingsPage() {
             address: business.address ?? "",
             notifyPhone: business.notifyPhone ?? "",
             notifyEmail: business.notifyEmail ?? "",
+            notifyCustomerSms: business.notifyCustomerSms,
           }}
         />
       ) : (

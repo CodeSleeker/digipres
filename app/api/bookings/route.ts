@@ -9,6 +9,7 @@ import {
   isPastDate,
 } from "@/schemas/booking";
 import { notifyOwnerOfBooking } from "@/lib/notifications/booking-notice";
+import { notifyCustomerBookingReceived } from "@/lib/notifications/customer-notice";
 import { toE164 } from "@/lib/sms/phone";
 import { revalidateTenantSite } from "@/lib/tenant/revalidate";
 
@@ -98,19 +99,19 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const customerId = await upsertCustomer(supabase, business.id, booking);
+    const customer = await upsertCustomer(supabase, business.id, booking);
 
     const { data: appointment, error } = await supabase
       .from("appointments")
       .insert({
         business_id: business.id,
-        customer_id: customerId,
+        customer_id: customer.id,
         service: booking.service,
         staff: booking.barber ?? null,
         // Never from the caller — see the note at the top of this file.
         status: "scheduled",
         starts_at: bookingStartsAt(booking.date, booking.time),
-        notes: appointmentNotes(booking, customerId),
+        notes: appointmentNotes(booking, customer.id),
       })
       .select("id")
       .single();
@@ -129,12 +130,28 @@ export async function POST(request: NextRequest) {
       time: booking.time,
       notes: booking.notes ?? null,
     });
+    // The customer's own acknowledgement. Separate from the owner's alert
+    // because it can be skipped independently — an opted-out number still
+    // produces a booking the owner must be told about.
+    const acknowledged = await notifyCustomerBookingReceived(
+      business,
+      { mobile: customer.mobile, smsStatus: customer.smsStatus },
+      {
+        businessName: business.name,
+        customerName: booking.name,
+        service: booking.service,
+        date: booking.date,
+        time: booking.time,
+      },
+    );
+
     console.info(
-      "[booking] business=%s appointment=%s sms=%s email=%s",
+      "[booking] business=%s appointment=%s owner-sms=%s owner-email=%s customer-sms=%s",
       business.slug,
       appointment.id,
       notified.sms,
       notified.email,
+      acknowledged,
     );
 
     // The public page is ISR-cached; nothing on it shows bookings today, but
@@ -181,29 +198,33 @@ async function upsertCustomer(
   supabase: ReturnType<typeof createServiceClient>,
   businessId: string,
   booking: { name: string; phone: string },
-): Promise<string | null> {
+): Promise<{ id: string | null; mobile: string; smsStatus: string | null }> {
   const mobile = toE164(booking.phone) ?? booking.phone.trim();
 
+  // `sms_status` comes back too: a returning customer may have replied STOP,
+  // and that has to be honoured before texting them a confirmation.
   const { data: existing } = await supabase
     .from("customers")
-    .select("id")
+    .select("id,sms_status")
     .eq("business_id", businessId)
     .eq("mobile", mobile)
     .is("deleted_at", null)
     .limit(1)
     .maybeSingle();
-  if (existing) return existing.id;
+  if (existing) {
+    return { id: existing.id, mobile, smsStatus: existing.sms_status };
+  }
 
   const { data, error } = await supabase
     .from("customers")
     .insert({ business_id: businessId, name: booking.name, mobile })
-    .select("id")
+    .select("id,sms_status")
     .single();
   if (error) {
     // A customer row is a convenience, not the booking. Losing it must not
     // lose the appointment, which can stand on its own with the notes.
     console.error("[booking:customer]", error);
-    return null;
+    return { id: null, mobile, smsStatus: null };
   }
-  return data.id;
+  return { id: data.id, mobile, smsStatus: data.sms_status };
 }

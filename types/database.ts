@@ -68,6 +68,7 @@ export interface Database {
           favicon_url: string | null;
           notify_email: string | null;
           notify_phone: string | null;
+          notify_customer_sms: boolean;
           cover_image_url: string | null;
           category: BusinessCategoryEnum;
           owner_name: string | null;
@@ -108,6 +109,7 @@ export interface Database {
           favicon_url?: string | null;
           notify_email?: string | null;
           notify_phone?: string | null;
+          notify_customer_sms?: boolean;
           cover_image_url?: string | null;
           category?: BusinessCategoryEnum;
           owner_name?: string | null;
@@ -148,6 +150,7 @@ export interface Database {
           favicon_url?: string | null;
           notify_email?: string | null;
           notify_phone?: string | null;
+          notify_customer_sms?: boolean;
           cover_image_url?: string | null;
           category?: BusinessCategoryEnum;
           owner_name?: string | null;

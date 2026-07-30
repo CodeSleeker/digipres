@@ -45,6 +45,23 @@ const optionalPhone = z.preprocess(
 );
 
 /**
+ * A boolean arriving from a form.
+ *
+ * FormData carries strings, and an UNCHECKED checkbox submits nothing at all —
+ * which would parse as "field omitted, leave it alone" and make the box
+ * impossible to untick. Forms therefore submit this as an explicit hidden
+ * "true"/"false" (see the contact details form) and this accepts either that or
+ * a real boolean. Anything unrecognised is left `undefined` so the column is
+ * untouched, rather than being coerced to false and silently disabling texts.
+ */
+const checkboxBoolean = z.preprocess((value) => {
+  if (typeof value === "boolean") return value;
+  if (value === "true" || value === "on") return true;
+  if (value === "false" || value === "off") return false;
+  return undefined;
+}, z.boolean().optional());
+
+/**
  * A web address.
  *
  * The scheme check is NOT decoration. Zod's `.url()` only asks whether the
@@ -113,6 +130,7 @@ export const createBusinessSchema = z.object({
   /** Alert destinations. Null means "use the public phone/email above". */
   notifyEmail: optionalEmail,
   notifyPhone: optionalPhone,
+  notifyCustomerSms: checkboxBoolean,
   address: optionalText,
   logoUrl: optionalUrl,
   faviconUrl: optionalUrl,

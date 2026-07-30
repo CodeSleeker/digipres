@@ -276,6 +276,7 @@ function baselineChecks(): VisibilityCheck[] {
     email: null,
     notifyEmail: null,
     notifyPhone: null,
+    notifyCustomerSms: true,
     address: null,
     logoUrl: null,
     faviconUrl: null,

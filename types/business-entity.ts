@@ -46,6 +46,11 @@ export interface Business {
   notifyEmail: string | null;
   /** Where booking alerts are texted. Falls back to `phone` when null. */
   notifyPhone: string | null;
+  /**
+   * Send booking acknowledgement/confirmation texts to CUSTOMERS. The owner's
+   * own alerts are separate and unaffected. Never overrides an opt-out.
+   */
+  notifyCustomerSms: boolean;
   address: string | null;
   logoUrl: string | null;
   /** Square browser-tab icon; falls back to `logoUrl` (see lib/tenant/icons.ts). */
