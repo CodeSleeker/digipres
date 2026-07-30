@@ -124,6 +124,14 @@ export default async function AdminLayout({
           <div className="mb-1 mt-4 text-[0.65rem] uppercase tracking-[2px] text-gray">
             Website
           </div>
+          {/* Branding sits above the sections because it isn't one: it's on the
+              business record and applies to every template. */}
+          <Link
+            href="/admin/branding"
+            className="py-1 text-gray-light transition-colors hover:text-gold"
+          >
+            Branding
+          </Link>
           {/* Only the sections this tenant's template actually renders. */}
           {templateSections(business?.templateCode).map((section) => (
             <Link

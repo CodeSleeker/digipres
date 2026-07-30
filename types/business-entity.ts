@@ -44,6 +44,8 @@ export interface Business {
   email: string | null;
   address: string | null;
   logoUrl: string | null;
+  /** Square browser-tab icon; falls back to `logoUrl` (see lib/tenant/icons.ts). */
+  faviconUrl: string | null;
   coverImageUrl: string | null;
   category: BusinessCategory;
   ownerName: string | null;

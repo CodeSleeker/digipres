@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Monogram } from "./monogram";
 
 /**
  * Aliamz Digital — the platform's own marketing page, served at the production
@@ -77,8 +78,11 @@ export function LandingPage() {
           a sticky header, inheriting the page colour is no longer enough. */}
       <header className="sticky top-0 z-40 border-b border-[#e8e4dc] bg-[#faf9f7]">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
-          <span className="text-sm font-semibold uppercase tracking-[0.35em]">
-            Aliamz<span className="text-[#6f5b2d]"> Digital</span>
+          <span className="flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.35em]">
+            <Monogram size={28} />
+            <span>
+              Aliamz<span className="text-[#6f5b2d]"> Digital</span>
+            </span>
           </span>
           <nav aria-label="Primary">
             <Link

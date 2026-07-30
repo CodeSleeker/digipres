@@ -9,11 +9,21 @@ import type { BusinessProfile } from "@/types/business";
 import type { Business } from "@/types/business-entity";
 
 const base = {
-  brand: { namePrimary: "RONIE'S", nameAccent: "BARBER", initial: "R" },
+  brand: {
+    namePrimary: "RONIE'S",
+    nameAccent: "BARBER",
+    initial: "R",
+    logoUrl: null,
+  },
 } as unknown as BusinessProfile;
 
 const business = (over: Partial<Business> = {}): Business =>
-  ({ name: "Acme Construction", brand: null, ...over }) as unknown as Business;
+  ({
+    name: "Acme Construction",
+    brand: null,
+    logoUrl: null,
+    ...over,
+  }) as unknown as Business;
 
 describe("deriveBrand", () => {
   it("splits a multi-word name into primary + accent", () => {
@@ -57,12 +67,13 @@ describe("resolveBrand", () => {
       namePrimary: "THE",
       nameAccent: "SHOP",
       initial: "T",
+      logoUrl: null,
     });
   });
 
   it("derives from the business name — so a second tenant is NOT branded as the first", () => {
     const result = resolveBrand(base, business({ name: "Acme Construction" }));
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       namePrimary: "ACME",
       nameAccent: "CONSTRUCTION",
       initial: "A",
@@ -82,6 +93,29 @@ describe("resolveBrand", () => {
       }),
     );
     expect(result.initial).toBe("Z");
+  });
+
+  it("carries the uploaded logo through, whatever the wordmark resolved to", () => {
+    const logoUrl = "https://cdn.test/ronies.png";
+    expect(resolveBrand(base, business({ logoUrl })).logoUrl).toBe(logoUrl);
+    expect(
+      resolveBrand(
+        base,
+        business({
+          logoUrl,
+          brand: { namePrimary: "THE", nameAccent: "SHOP", initial: "T" },
+        }),
+      ).logoUrl,
+    ).toBe(logoUrl);
+  });
+
+  it("does not inherit the template default's logo slot", () => {
+    // The demo profile ships logoUrl: null; a tenant with no upload must get
+    // null too — never a stale image from whatever the base happened to hold.
+    const withDemoLogo = {
+      brand: { ...base.brand, logoUrl: "https://cdn.test/demo.png" },
+    } as unknown as BusinessProfile;
+    expect(resolveBrand(withDemoLogo, business({ name: "" })).logoUrl).toBeNull();
   });
 });
 

@@ -6,7 +6,11 @@ import type {
   ContactDetail,
   SocialLink,
 } from "@/types/business";
-import type { Business, BusinessHours } from "@/types/business-entity";
+import type {
+  Business,
+  BusinessBrand,
+  BusinessHours,
+} from "@/types/business-entity";
 import type { BarberEntry, TestimonialEntry } from "@/types/website-content";
 
 /**
@@ -49,6 +53,21 @@ export function buildBusinessProfile(
 }
 
 /**
+ * The tenant's identity in the header and footer: the wordmark plus, when the
+ * owner has uploaded one, the logo image that replaces the initial mark.
+ *
+ * The image is kept on the same object as the words rather than passed
+ * separately, because a template rendering one always needs the other — the
+ * words are the image's accessible name and its fallback.
+ */
+export function resolveBrand(
+  base: BusinessProfile,
+  business: Business,
+): BusinessProfile["brand"] {
+  return { ...resolveWordmark(base, business), logoUrl: business.logoUrl };
+}
+
+/**
  * The wordmark, in order of preference:
  *   1. an explicit `brand` override on the business,
  *   2. derived from the business name — "Ronies Barber" → RONIES / BARBER / R,
@@ -57,10 +76,10 @@ export function buildBusinessProfile(
  * Step 2 matters: without it every tenant on a template inherits the demo
  * content's branding, so a second barber would be labelled as the first.
  */
-export function resolveBrand(
+export function resolveWordmark(
   base: BusinessProfile,
   business: Business,
-): BusinessProfile["brand"] {
+): BusinessBrand {
   const override = business.brand;
   if (override?.namePrimary) {
     return {
@@ -69,11 +88,11 @@ export function resolveBrand(
       initial: override.initial || override.namePrimary[0]!.toUpperCase(),
     };
   }
-  return deriveBrand(business.name) ?? base.brand;
+  return deriveBrand(business.name) ?? stripLogo(base.brand);
 }
 
 /** Split a business name into the two-tone wordmark, or null if unusable. */
-export function deriveBrand(name: string): BusinessProfile["brand"] | null {
+export function deriveBrand(name: string): BusinessBrand | null {
   const words = name.trim().split(/\s+/).filter(Boolean);
   if (words.length === 0) return null;
 
@@ -85,6 +104,15 @@ export function deriveBrand(name: string): BusinessProfile["brand"] | null {
     namePrimary: words.slice(0, -1).join(" ").toUpperCase(),
     nameAccent: words[words.length - 1]!.toUpperCase(),
     initial,
+  };
+}
+
+/** The template default carries a (null) logo slot; the words alone are wanted. */
+function stripLogo(brand: BusinessProfile["brand"]): BusinessBrand {
+  return {
+    namePrimary: brand.namePrimary,
+    nameAccent: brand.nameAccent,
+    initial: brand.initial,
   };
 }
 

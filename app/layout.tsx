@@ -32,6 +32,23 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Digital Presence Platform",
   description: "Websites for local businesses.",
+  /**
+   * The Aliamz Digital mark, for the platform's own surfaces (marketing, auth,
+   * /admin, /platform).
+   *
+   * Declared as CONFIG, deliberately, rather than as `app/icon.svg`. A metadata
+   * FILE in the app root applies to every route and outranks anything a deeper
+   * segment declares — which would stamp the agency's icon on every client's
+   * public site with no way to override it. As config it is merely the default,
+   * and app/s/[slug] replaces it with the tenant's own (lib/tenant/icons.ts).
+   */
+  icons: {
+    icon: [
+      { url: "/brand/icon.svg", type: "image/svg+xml" },
+      { url: "/brand/icon-192.png", type: "image/png", sizes: "192x192" },
+    ],
+    apple: [{ url: "/brand/apple-icon.png", sizes: "180x180" }],
+  },
 };
 
 export default function RootLayout({

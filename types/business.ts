@@ -183,6 +183,12 @@ export interface BusinessProfile {
     nameAccent: string;
     /** Single-letter logo mark, e.g. "R". */
     initial: string;
+    /**
+     * The owner's uploaded logo image. When set the template shows it INSTEAD
+     * of the initial mark; the wordmark words stay as the accessible name, so
+     * the header still reads correctly if the image fails to load.
+     */
+    logoUrl: string | null;
   };
   seo: {
     title: string;

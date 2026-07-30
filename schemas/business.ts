@@ -29,6 +29,10 @@ const optionalText = z.preprocess(
   emptyToUndefined,
   z.string().trim().max(2000).optional(),
 );
+// An empty URL field is an instruction, not an omission — see `optionalUrl`.
+const emptyToNull = (v: unknown) =>
+  typeof v === "string" && v.trim() === "" ? null : v;
+
 /**
  * A web address.
  *
@@ -37,9 +41,15 @@ const optionalText = z.preprocess(
  * these values are rendered as `<a href>` (the footer social icons, the contact
  * card), so accepting any scheme would make the CMS a stored-XSS vector. Only
  * http(s) may be stored.
+ *
+ * Blank maps to `null`, not `undefined`, and the distinction is load-bearing:
+ * the repository writes only non-undefined fields, so a blank that became
+ * `undefined` would be silently dropped — clearing a logo or a social link
+ * would appear to save and then change nothing. `null` clears the column;
+ * omitting the field entirely still leaves it untouched.
  */
 const optionalUrl = z.preprocess(
-  emptyToUndefined,
+  emptyToNull,
   z
     .string()
     .url("Enter a valid URL.")
@@ -48,8 +58,20 @@ const optionalUrl = z.preprocess(
       (value) => /^https?:\/\//i.test(value),
       "Links must start with http:// or https://.",
     )
+    .nullable()
     .optional(),
 );
+
+/**
+ * Wordmark override. `null` removes it, so the wordmark reverts to being
+ * derived from the business name (lib/website/build-profile.ts).
+ */
+export const businessBrandSchema = z.object({
+  namePrimary: z.string().trim().min(1, "Primary word is required.").max(40),
+  nameAccent: z.string().trim().max(40).default(""),
+  // Blank is allowed: `resolveBrand` backfills it from the primary word.
+  initial: z.string().trim().max(2).default(""),
+});
 const optionalEmail = z.preprocess(
   emptyToUndefined,
   z.string().email("Enter a valid email address.").optional(),
@@ -86,7 +108,9 @@ export const createBusinessSchema = z.object({
   email: optionalEmail,
   address: optionalText,
   logoUrl: optionalUrl,
+  faviconUrl: optionalUrl,
   coverImageUrl: optionalUrl,
+  brand: businessBrandSchema.nullable().optional(),
   category: z.enum(BUSINESS_CATEGORIES),
   ownerName: z.preprocess(
     emptyToUndefined,

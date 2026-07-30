@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { apexMode } from "@/lib/marketing/mode";
 import { LandingPage } from "@/components/marketing/landing";
 import { loadBusinessProfile } from "@/lib/website/load-profile";
+import { tenantIcons } from "@/lib/tenant/icons";
 import { loadTemplate } from "@/templates/registry";
 
 /**
@@ -31,6 +32,14 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
+    // Dev preview of a real tenant — show that tenant's icon, not the
+    // platform's, so this route looks like what /s/<slug> will serve. Only the
+    // profile is loaded here, so the dedicated faviconUrl isn't in reach; the
+    // logo and the generated tile are.
+    icons: tenantIcons(
+      { faviconUrl: null, logoUrl: business.brand.logoUrl },
+      business.brand.initial,
+    ),
     openGraph: { title, description, type: "website" },
     twitter: { card: "summary_large_image", title, description },
   };

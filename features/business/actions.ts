@@ -144,6 +144,7 @@ const FIELDS = [
   "email",
   "address",
   "logoUrl",
+  "faviconUrl",
   "coverImageUrl",
   "category",
   "ownerName",
@@ -157,7 +158,7 @@ const FIELDS = [
 /**
  * Build a raw input object from FormData. Only keys actually present are
  * included, so update stays a genuine partial (omitted fields are untouched).
- * `hours` arrives as a JSON string field.
+ * `hours` and `brand` arrive as JSON string fields.
  */
 function readForm(formData: FormData): Record<string, unknown> {
   const raw: Record<string, unknown> = {};
@@ -174,6 +175,20 @@ function readForm(formData: FormData): Record<string, unknown> {
         raw.hours = JSON.parse(value);
       } catch {
         raw.hours = value; // let Zod reject invalid JSON
+      }
+    }
+  }
+  // Unlike `hours`, an empty `brand` is meaningful: it drops the override so
+  // the wordmark reverts to being derived from the business name.
+  if (formData.has("brand")) {
+    const value = formData.get("brand");
+    if (typeof value !== "string" || value.trim() === "") {
+      raw.brand = null;
+    } else {
+      try {
+        raw.brand = JSON.parse(value);
+      } catch {
+        raw.brand = value; // let Zod reject invalid JSON
       }
     }
   }

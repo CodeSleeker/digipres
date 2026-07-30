@@ -160,6 +160,15 @@ describe("social URL validation — these become live hrefs", () => {
 
   it("treats a cleared field as 'remove this icon', not an error", () => {
     const parsed = updateBusinessSchema.parse({ facebookUrl: "" });
-    expect(parsed.facebookUrl).toBeUndefined();
+    // `null`, NOT `undefined`. BusinessRepository.update writes only the fields
+    // that are not undefined, so a blank that parsed to undefined would be
+    // dropped on the floor — the form would report "saved" and the icon would
+    // still be there. null is what actually clears the column.
+    expect(parsed.facebookUrl).toBeNull();
+  });
+
+  it("leaves an omitted field alone rather than clearing it", () => {
+    const parsed = updateBusinessSchema.parse({ facebookUrl: "" });
+    expect("instagramUrl" in parsed).toBe(false);
   });
 });

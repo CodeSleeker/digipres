@@ -65,6 +65,7 @@ export interface Database {
           email: string | null;
           address: string | null;
           logo_url: string | null;
+          favicon_url: string | null;
           cover_image_url: string | null;
           category: BusinessCategoryEnum;
           owner_name: string | null;
@@ -102,6 +103,7 @@ export interface Database {
           email?: string | null;
           address?: string | null;
           logo_url?: string | null;
+          favicon_url?: string | null;
           cover_image_url?: string | null;
           category?: BusinessCategoryEnum;
           owner_name?: string | null;
@@ -139,6 +141,7 @@ export interface Database {
           email?: string | null;
           address?: string | null;
           logo_url?: string | null;
+          favicon_url?: string | null;
           cover_image_url?: string | null;
           category?: BusinessCategoryEnum;
           owner_name?: string | null;

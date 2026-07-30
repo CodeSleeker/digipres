@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Aliamz Digital — primary avatar. Ink tile, monoline A. -->
+  <rect width="512" height="512" rx="120" fill="#111113"/>
+  <g stroke="#FAFAF8" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M 168 364 L 256 148 L 344 364"/>
+    <path d="M 196 296 L 316 296"/>
+  </g>
+</svg>

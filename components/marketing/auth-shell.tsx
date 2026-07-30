@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BRAND } from "./theme";
+import { Monogram } from "./monogram";
 
 /**
  * Shared frame for the platform's auth screens.
@@ -24,9 +25,12 @@ export function AuthShell({
     >
       <Link
         href="/"
-        className={`text-sm font-semibold uppercase tracking-[0.35em] ${BRAND.quietLink}`}
+        className={`flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.35em] ${BRAND.quietLink}`}
       >
-        Aliamz<span className={BRAND.accent}> Digital</span>
+        <Monogram size={32} />
+        <span>
+          Aliamz<span className={BRAND.accent}> Digital</span>
+        </span>
       </Link>
 
       <div className={`mt-8 w-full max-w-sm p-8 ${BRAND.card}`}>

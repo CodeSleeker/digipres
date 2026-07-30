@@ -119,6 +119,7 @@ export class BusinessRepository {
       email: input.email ?? null,
       address: input.address ?? null,
       logo_url: input.logoUrl ?? null,
+      favicon_url: input.faviconUrl ?? null,
       cover_image_url: input.coverImageUrl ?? null,
       category: input.category,
       owner_name: input.ownerName ?? null,
@@ -149,8 +150,12 @@ export class BusinessRepository {
     if (input.email !== undefined) patch.email = input.email;
     if (input.address !== undefined) patch.address = input.address;
     if (input.logoUrl !== undefined) patch.logo_url = input.logoUrl;
+    if (input.faviconUrl !== undefined) patch.favicon_url = input.faviconUrl;
     if (input.coverImageUrl !== undefined)
       patch.cover_image_url = input.coverImageUrl;
+    // `null` is meaningful here: it clears the override so the wordmark goes
+    // back to being derived from the business name.
+    if (input.brand !== undefined) patch.brand = input.brand as unknown as Json;
     if (input.category !== undefined) patch.category = input.category;
     if (input.ownerName !== undefined) patch.owner_name = input.ownerName;
     if (input.hours !== undefined) patch.hours = input.hours as unknown as Json;
@@ -246,6 +251,7 @@ function toDomain(row: BusinessRow): Business {
     email: row.email,
     address: row.address,
     logoUrl: row.logo_url,
+    faviconUrl: row.favicon_url,
     coverImageUrl: row.cover_image_url,
     category: row.category,
     ownerName: row.owner_name,

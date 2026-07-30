@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { loadTenantBySlug } from "@/lib/tenant/profile";
 import { canonicalUrlFor } from "@/lib/tenant/urls";
+import { tenantIcons } from "@/lib/tenant/icons";
 import { buildLocalBusinessJsonLd } from "@/lib/seo/json-ld";
 import { JsonLd } from "@/components/json-ld";
 import { loadTemplate } from "@/templates/registry";
@@ -35,6 +36,9 @@ export async function generateMetadata({
     metadataBase: new URL(canonical),
     title,
     description,
+    // Replaces the platform icons from the root layout — this is the client's
+    // site, so it gets the client's mark.
+    icons: tenantIcons(tenant.business, tenant.profile.brand.initial),
     alternates: { canonical },
     openGraph: { title, description, type: "website", url: canonical },
     twitter: { card: "summary_large_image", title, description },
