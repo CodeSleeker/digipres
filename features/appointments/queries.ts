@@ -47,6 +47,31 @@ export async function getAppointmentsForMonth(
   return makeAppointmentService(supabase).listBetween(businessId, start, end);
 }
 
+/**
+ * The "needs your attention" number on the Appointments nav item.
+ *
+ * Counts appointments still in `scheduled`, which is where a website booking
+ * lands (app/api/bookings) and where a manually created one starts. Confirming,
+ * completing or cancelling moves it out of the count — so the badge is a to-do
+ * list the owner can actually clear, not a running total that only grows.
+ *
+ * Returns 0 rather than throwing: a badge is decoration, and a transient count
+ * failure must never take down every page in the admin shell that renders it.
+ */
+export async function getPendingAppointmentCount(): Promise<number> {
+  const { supabase, businessId } = await getOwnerContext();
+  if (!businessId) return 0;
+  try {
+    return await new AppointmentRepository(supabase).countByStatus(
+      businessId,
+      "scheduled",
+    );
+  } catch (error) {
+    console.error("[appointments:count]", error);
+    return 0;
+  }
+}
+
 export async function getAppointment(id: string): Promise<Appointment | null> {
   const { supabase, businessId } = await getOwnerContext();
   if (!businessId) return null;

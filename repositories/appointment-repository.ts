@@ -89,6 +89,27 @@ export class AppointmentRepository {
     return row;
   }
 
+  /**
+   * How many active appointments sit in one status.
+   *
+   * `head: true` asks PostgREST for the count alone — no rows over the wire.
+   * The admin layout runs this on every page load, so it must stay a cheap
+   * index-only count, not a list that gets thrown away.
+   */
+  async countByStatus(
+    businessId: string,
+    status: AppointmentRow["status"],
+  ): Promise<number> {
+    const { count, error } = await this.supabase
+      .from("appointments")
+      .select("id", { count: "exact", head: true })
+      .eq("business_id", businessId)
+      .eq("status", status)
+      .is("deleted_at", null);
+    if (error) throw error;
+    return count ?? 0;
+  }
+
   async insert(
     businessId: string,
     input: CreateAppointmentInput,

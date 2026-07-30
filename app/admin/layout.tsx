@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { ImpersonationBanner } from "./_components/impersonation-banner";
 import { getEntitlement } from "@/features/billing/queries";
 import { defaultFeatures } from "@/lib/features/catalogue";
+import { getPendingAppointmentCount } from "@/features/appointments/queries";
+import { LiveAppointments } from "./_components/live-appointments";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -33,6 +35,11 @@ export default async function AdminLayout({
   const features = businessId
     ? (await getEntitlement(supabase, businessId)).features
     : defaultFeatures();
+
+  // The nav badge. Only worth a query when the nav item is actually rendered.
+  const pendingAppointments = features.appointments
+    ? await getPendingAppointmentCount()
+    : 0;
 
   // A business that isn't `active` gets a notice instead of the dashboard —
   // rendered in place rather than redirected, so there's no loop and the owner
@@ -106,9 +113,19 @@ export default async function AdminLayout({
           {features.appointments && (
             <Link
               href="/admin/appointments"
-              className="py-1 text-gray-light transition-colors hover:text-gold"
+              className="flex items-center justify-between gap-2 py-1 text-gray-light transition-colors hover:text-gold"
             >
               Appointments
+              {pendingAppointments > 0 && (
+                <span
+                  className="min-w-5 rounded-full bg-gold px-1.5 py-0.5 text-center text-[0.65rem] font-semibold leading-none text-black"
+                  // The number alone is ambiguous out of context — a screen
+                  // reader would just say "Appointments 3".
+                  aria-label={`${pendingAppointments} awaiting confirmation`}
+                >
+                  {pendingAppointments > 99 ? "99+" : pendingAppointments}
+                </span>
+              )}
             </Link>
           )}
           {features.reviews && (
@@ -193,6 +210,12 @@ export default async function AdminLayout({
           )}
         </main>
       </div>
+
+      {/* Outside <main> so the toast isn't replaced when the route changes.
+          Skipped for a blocked tenant — they can't act on a booking anyway. */}
+      {businessId && features.appointments && !blocked && (
+        <LiveAppointments businessId={businessId} />
+      )}
     </div>
   );
 }
