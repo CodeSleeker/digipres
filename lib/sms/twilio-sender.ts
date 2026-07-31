@@ -19,6 +19,13 @@ export interface TwilioConfig {
 export class TwilioSmsSender implements SmsSender {
   constructor(private readonly config: TwilioConfig) {}
 
+  /**
+   * The port's `options.senderId` is deliberately not declared here. Twilio
+   * originates from a number or messaging service you own, so there is no
+   * per-tenant label to set — the business name reaches the recipient in the
+   * message body instead. Dropping the parameter still satisfies SmsSender, and
+   * says "ignored" more clearly than an unused argument would.
+   */
   async send(to: string, body: string): Promise<SmsSendResult> {
     const { accountSid, authToken } = this.config;
     const endpoint = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
@@ -73,11 +80,13 @@ export class TwilioSmsSender implements SmsSender {
 }
 
 /** Build a TwilioConfig from env, or null when Twilio isn't fully configured. */
-export function twilioConfigFromEnv(): TwilioConfig | null {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID;
-  const authToken = process.env.TWILIO_AUTH_TOKEN;
-  const messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
-  const fromNumber = process.env.TWILIO_FROM_NUMBER;
+export function twilioConfigFromEnv(
+  env: Record<string, string | undefined> = process.env,
+): TwilioConfig | null {
+  const accountSid = env.TWILIO_ACCOUNT_SID;
+  const authToken = env.TWILIO_AUTH_TOKEN;
+  const messagingServiceSid = env.TWILIO_MESSAGING_SERVICE_SID;
+  const fromNumber = env.TWILIO_FROM_NUMBER;
 
   // Need credentials AND a way to originate (a messaging service or a number).
   if (!accountSid || !authToken || (!messagingServiceSid && !fromNumber)) {
@@ -89,6 +98,6 @@ export function twilioConfigFromEnv(): TwilioConfig | null {
     authToken,
     messagingServiceSid,
     fromNumber,
-    statusCallbackUrl: process.env.TWILIO_STATUS_CALLBACK_URL,
+    statusCallbackUrl: env.TWILIO_STATUS_CALLBACK_URL,
   };
 }

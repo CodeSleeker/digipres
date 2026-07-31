@@ -124,6 +124,10 @@ async function sendSms(
     const result = await getSmsSender().send(
       to,
       bookingSmsBody(business.name, notice),
+      // Same reasoning as the email's fromName below: on a carrier that supports
+      // alphanumeric senders the owner should see their own business, not the
+      // platform. Ignored by Twilio, which has no such field.
+      { senderId: business.name },
     );
     return result.success ? "sent" : "failed";
   } catch (error) {

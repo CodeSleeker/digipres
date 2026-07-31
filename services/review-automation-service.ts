@@ -37,6 +37,28 @@ export class ReviewAutomationService {
     private readonly sender: SmsSender,
   ) {}
 
+  /**
+   * The business name to send a queued message under, memoized in `cache`.
+   *
+   * Best-effort: a failed lookup yields undefined, and the message still goes
+   * out under whatever the provider's configured default is. A review reminder
+   * is not worth losing over a name.
+   */
+  private async senderIdFor(
+    businessId: string,
+    cache: Map<string, string | undefined>,
+  ): Promise<string | undefined> {
+    if (cache.has(businessId)) return cache.get(businessId);
+    let name: string | undefined;
+    try {
+      name = (await this.businesses.findById(businessId))?.name;
+    } catch {
+      name = undefined;
+    }
+    cache.set(businessId, name);
+    return name;
+  }
+
   /** Called when an appointment transitions into 'completed'. */
   async startForAppointment(
     businessId: string,
@@ -112,6 +134,11 @@ export class ReviewAutomationService {
     let sent = 0;
     let failed = 0;
 
+    // Sender IDs, resolved once per tenant per run. The scheduler processes
+    // every business in one pass, so without the cache a full queue would issue
+    // one business lookup per message to say the same thing each time.
+    const senderIds = new Map<string, string | undefined>();
+
     for (const message of due) {
       // Idempotency: if a prior run already obtained a provider message id for
       // this row but didn't finish marking it sent, do NOT send again — just
@@ -129,7 +156,9 @@ export class ReviewAutomationService {
       const attempts = message.attempts + 1;
       let result;
       try {
-        result = await this.sender.send(message.toMobile, message.body);
+        result = await this.sender.send(message.toMobile, message.body, {
+          senderId: await this.senderIdFor(message.businessId, senderIds),
+        });
       } catch (error) {
         result = { success: false, error: errorText(error) };
       }

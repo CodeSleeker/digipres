@@ -49,6 +49,18 @@ const BOOTSTRAP = `
     grant select, insert, update, delete on tables to authenticated;
   alter default privileges in schema public
     grant select on tables to anon;
+
+  -- Supabase provisions this publication on every hosted project; plain Postgres
+  -- does not, so 0024's ALTER PUBLICATION ... ADD TABLE has nothing to alter.
+  -- Created empty, exactly as Supabase does — the migration adds its own tables.
+  -- Guarded rather than dropped: publications are database-scoped and survive the
+  -- DROP SCHEMA public CASCADE above, so a re-run against the same cluster would
+  -- otherwise fail on "already exists" (there is no CREATE ... IF NOT EXISTS).
+  do $$ begin
+    if not exists (select from pg_publication where pubname = 'supabase_realtime') then
+      create publication supabase_realtime;
+    end if;
+  end $$;
 `;
 
 function migrationFiles(): string[] {

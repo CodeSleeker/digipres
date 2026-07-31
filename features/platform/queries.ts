@@ -100,8 +100,11 @@ export async function getPlatformHealth(): Promise<PlatformHealth> {
     failedMessages,
     retentionLastRun,
     minutesSinceRetention: minutesSince(retentionLastRun?.startedAt),
+    // Any supported carrier counts — the panel answers "will a text actually
+    // leave the server", not "is Twilio set up".
     smsConfigured: Boolean(
-      process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN,
+      (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) ||
+        process.env.PHILSMS_API_TOKEN,
     ),
     edgeConfigConfigured: Boolean(edgeConfigConnection()),
     cronSecretConfigured: Boolean(process.env.CRON_SECRET),

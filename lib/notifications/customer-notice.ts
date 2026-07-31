@@ -83,6 +83,7 @@ export interface CustomerSmsSettings {
 async function send(
   settings: CustomerSmsSettings,
   customer: TextableCustomer,
+  notice: CustomerBookingNotice,
   body: string,
   label: string,
 ): Promise<CustomerNotifyResult> {
@@ -91,7 +92,14 @@ async function send(
   if (!settings.notifyCustomerSms) return "disabled";
   if (!canTextCustomer(customer)) return "skipped";
   try {
-    const result = await getSmsSender().send(customer.mobile as string, body);
+    const result = await getSmsSender().send(
+      customer.mobile as string,
+      body,
+      // This one matters most: it's the text a CUSTOMER receives, and a booking
+      // confirmation from "RoniesBarber" is recognised where one from a random
+      // shortcode is ignored or reported as spam.
+      { senderId: notice.businessName },
+    );
     return result.success ? "sent" : "failed";
   } catch (error) {
     console.error(`[customer:${label}]`, error);
@@ -107,6 +115,7 @@ export function notifyCustomerBookingReceived(
   return send(
     settings,
     customer,
+    notice,
     bookingReceivedSms(notice),
     "booking-received",
   );
@@ -120,6 +129,7 @@ export function notifyCustomerBookingConfirmed(
   return send(
     settings,
     customer,
+    notice,
     bookingConfirmedSms(notice),
     "booking-confirmed",
   );
