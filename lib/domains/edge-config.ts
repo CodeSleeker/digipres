@@ -1,15 +1,18 @@
 import type { DomainRoute } from "@/types/domain";
 import {
   TENANT_ROUTING_KEY,
+  edgeConfigStoreId,
   type TenantRouting,
 } from "@/lib/tenant/edge-routing";
 
 /**
- * Publishes the hostname → tenant routing table to Vercel Edge Config, which is
- * what the edge middleware reads (lib/tenant/edge-routing.ts).
+ * Publishes the hostname → tenant routing table to Vercel Global Config (named
+ * Edge Config before July 2026), which the edge middleware reads
+ * (lib/tenant/edge-routing.ts).
  *
- * Reads use the EDGE_CONFIG connection string; WRITES go through the Vercel API
- * and need EDGE_CONFIG_ID + VERCEL_API_TOKEN.
+ * Reads use the GLOBAL_CONFIG connection string; WRITES go through the Vercel
+ * API and additionally need VERCEL_API_TOKEN. The store id is derived from the
+ * connection string, so only the token has to be supplied separately.
  */
 
 /** Pure: fold verified routes into the two lookup maps the edge needs. */
@@ -34,7 +37,7 @@ export async function publishTenantRouting(
   routes: DomainRoute[],
 ): Promise<boolean> {
   const token = process.env.VERCEL_API_TOKEN?.trim();
-  const configId = process.env.EDGE_CONFIG_ID?.trim();
+  const configId = edgeConfigStoreId();
   if (!token || !configId) return false;
 
   const team = process.env.VERCEL_TEAM_ID?.trim();

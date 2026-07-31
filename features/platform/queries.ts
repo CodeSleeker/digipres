@@ -14,6 +14,7 @@ import { getEntitlement } from "@/features/billing/queries";
 import type { Entitlement, Plan } from "@/types/billing";
 import type { Business } from "@/types/business-entity";
 import type { BusinessDomain } from "@/types/domain";
+import { edgeConfigConnection } from "@/lib/tenant/edge-routing";
 import type {
   AuditListQuery,
   AuditListResult,
@@ -97,7 +98,7 @@ export async function getPlatformHealth(): Promise<PlatformHealth> {
     smsConfigured: Boolean(
       process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN,
     ),
-    edgeConfigConfigured: Boolean(process.env.EDGE_CONFIG),
+    edgeConfigConfigured: Boolean(edgeConfigConnection()),
     cronSecretConfigured: Boolean(process.env.CRON_SECRET),
     domainProvisioningConfigured: Boolean(
       process.env.VERCEL_API_TOKEN && process.env.VERCEL_PROJECT_ID,

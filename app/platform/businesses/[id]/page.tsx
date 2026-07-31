@@ -8,6 +8,7 @@ import { BillingPanel } from "./_components/billing-panel";
 import { startImpersonation } from "@/features/platform/impersonation";
 import { getPlatformRole } from "@/lib/auth/require-platform-admin";
 import { LifecyclePanel } from "./_components/lifecycle-panel";
+import { DetailsPanel } from "./_components/details-panel";
 import { onboardingPercentage } from "@/types/onboarding";
 import { StatTile } from "../../_components/stat-tile";
 
@@ -17,10 +18,14 @@ export default async function PlatformBusinessDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ billingError?: string; lifecycleError?: string }>;
+  searchParams: Promise<{
+    billingError?: string;
+    lifecycleError?: string;
+    detailsError?: string;
+  }>;
 }) {
   const { id } = await params;
-  const { billingError, lifecycleError } = await searchParams;
+  const { billingError, lifecycleError, detailsError } = await searchParams;
   const { business, counts, domains } = await getPlatformBusiness(id);
   if (!business) notFound();
 
@@ -127,6 +132,18 @@ export default async function PlatformBusinessDetailPage({
         entitlement={billing.entitlement}
         overrides={billing.overrides}
       />
+
+      {detailsError && (
+        <p
+          role="alert"
+          className="border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+        >
+          {detailsError}
+        </p>
+      )}
+
+      {/* Read-only for read_only staff, same rule the other write panels use. */}
+      {role && role !== "read_only" && <DetailsPanel business={business} />}
 
       <section className="border-t border-dark-border pt-6">
         <h2 className="font-heading text-lg tracking-[2px]">Support</h2>

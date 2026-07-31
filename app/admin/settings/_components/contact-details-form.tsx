@@ -26,6 +26,7 @@ import { Spinner } from "@/components/ui/submit-button";
  */
 
 interface Defaults {
+  name: string;
   phone: string;
   email: string;
   address: string;
@@ -60,6 +61,15 @@ export function ContactDetailsForm({ defaults }: { defaults: Defaults }) {
           </p>
         </div>
 
+        <TextRow
+          name="name"
+          label="Business name"
+          type="text"
+          placeholder="Ronie's Barber"
+          defaultValue={defaults.name}
+          error={state.fieldErrors?.name?.[0]}
+          hint="Shown in your site header, page title and search results."
+        />
         <TextRow
           name="phone"
           label="Phone"
