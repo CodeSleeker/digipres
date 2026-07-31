@@ -1,4 +1,5 @@
 import type { SmsSender, SmsSendOptions, SmsSendResult } from "./sender";
+import { smsSegments, toGsm7 } from "./gsm7";
 
 /**
  * PhilSMS-backed SmsSender. Speaks their REST API over plain fetch, same as the
@@ -94,6 +95,28 @@ export class PhilSmsSender implements SmsSender {
       };
     }
 
+    // Downgrade to GSM-7 HERE, at the boundary, not in each template.
+    //
+    // The templates are careful, but the values interpolated into them are
+    // typed by clients and their customers — a shop named with a curly
+    // apostrophe would force UCS-2 and cost triple no matter how the sentence
+    // is written. This also covers review messages, whose bodies were rendered
+    // and stored in the database possibly months before this code ran.
+    const message = toGsm7(body);
+    const cost = smsSegments(message);
+
+    // Only the expensive case is logged. A one-credit send is the norm and
+    // saying so on every booking would bury the case worth looking at.
+    if (cost.segments > 1) {
+      console.warn(
+        "[sms:philsms] %d credits (%s, %d units) to=%s",
+        cost.segments,
+        cost.encoding,
+        cost.units,
+        philSmsRecipient(to),
+      );
+    }
+
     try {
       const res = await fetch(ENDPOINT, {
         method: "POST",
@@ -106,7 +129,7 @@ export class PhilSmsSender implements SmsSender {
           recipient: philSmsRecipient(to),
           sender_id: senderId,
           type: "plain",
-          message: body,
+          message,
         }),
       });
 

@@ -1,5 +1,6 @@
 import { getSmsSender } from "@/lib/sms/sender";
 import { isE164 } from "@/lib/sms/phone";
+import { clipForSms } from "@/lib/sms/gsm7";
 
 /**
  * Texts to the CUSTOMER about their own booking — distinct from
@@ -49,23 +50,29 @@ function firstName(name: string): string {
 }
 
 /**
- * Kept to roughly one SMS segment (160 GSM-7 characters) where the business
- * name allows. Every extra segment is charged on every booking, and these go to
- * customers rather than the owner, so the volume is whatever the site attracts.
+ * One 160-character GSM-7 segment — one credit — and these go to customers, so
+ * the volume is whatever the site attracts rather than something the owner
+ * controls. The names are clipped because a long shop or service name would
+ * otherwise push the message into a second segment on every single booking.
+ *
+ * Plain ASCII punctuation only. One curly apostrophe here would halve the
+ * segment size for every text the platform sends.
  */
 export function bookingReceivedSms(notice: CustomerBookingNotice): string {
-  const service = notice.service ? ` for ${notice.service}` : "";
+  const service = notice.service ? ` for ${clipForSms(notice.service, 24)}` : "";
   return (
-    `Hi ${firstName(notice.customerName)}, thanks! ${notice.businessName} has your booking request` +
-    `${service} on ${notice.date} at ${notice.time}. We'll text you once it's confirmed.`
+    // "request" is load-bearing: it is what stops the customer reading this as
+    // "you're booked" before the owner has actually accepted it.
+    `Hi ${firstName(notice.customerName)}, ${clipForSms(notice.businessName, 24)} got your booking request` +
+    `${service} on ${notice.date} ${notice.time}. We'll confirm shortly.`
   );
 }
 
 export function bookingConfirmedSms(notice: CustomerBookingNotice): string {
-  const service = notice.service ? ` (${notice.service})` : "";
+  const service = notice.service ? ` (${clipForSms(notice.service, 24)})` : "";
   return (
-    `Hi ${firstName(notice.customerName)}, your booking at ${notice.businessName}` +
-    `${service} is CONFIRMED for ${notice.date} at ${notice.time}. See you then!`
+    `Hi ${firstName(notice.customerName)}, your booking at ${clipForSms(notice.businessName, 24)}` +
+    `${service} on ${notice.date} ${notice.time} is CONFIRMED. See you!`
   );
 }
 

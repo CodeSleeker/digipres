@@ -3,6 +3,7 @@ import type { CustomerRepository } from "@/repositories/customer-repository";
 import type { BusinessRepository } from "@/repositories/business-repository";
 import type { SmsSender } from "@/lib/sms/sender";
 import { isE164 } from "@/lib/sms/phone";
+import { clipForSms } from "@/lib/sms/gsm7";
 import type { Appointment } from "@/types/appointment";
 import type { Business } from "@/types/business-entity";
 import type { Customer } from "@/types/customer";
@@ -215,12 +216,16 @@ function renderBody(
   appointment: Appointment,
 ): string {
   const name = firstName(customer.name);
-  const shop = business.name;
+  const shop = clipForSms(business.name, 24);
   const link = business.googleReviewUrl;
   const service = appointment.service
-    ? ` after your ${appointment.service}`
+    ? ` after your ${clipForSms(appointment.service, 24)}`
     : "";
 
+  // ASCII punctuation only, and names clipped: three of these go out per
+  // completed appointment, so a second segment here is charged three times.
+  // (The review link is kept — unlike the owner alert, acting on it IS the
+  // point of the message, and there is no other channel carrying it.)
   switch (step) {
     case "thank_you":
       return `Hi ${name}, thank you for choosing ${shop}${service}! We hope to see you again soon.`;
@@ -229,7 +234,7 @@ function renderBody(
         link ? ` Leave a quick review: ${link}` : ""
       }`;
     case "reminder":
-      return `Hi ${name}, just a gentle reminder — a quick review of ${shop} would mean a lot!${
+      return `Hi ${name}, just a gentle reminder - a quick review of ${shop} would mean a lot!${
         link ? ` ${link}` : ""
       }`;
   }

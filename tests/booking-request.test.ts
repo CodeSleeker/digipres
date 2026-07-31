@@ -11,6 +11,7 @@ import {
   type BookingNotice,
 } from "@/lib/notifications/booking-notice";
 import { resendConfigFromEnv } from "@/lib/email/sender";
+import { smsSegments } from "@/lib/sms/gsm7";
 
 const valid = {
   name: "Juan Dela Cruz",
@@ -171,14 +172,23 @@ describe("booking notifications", () => {
     expect(body).toContain("Skin Fade");
     expect(body).toContain("2099-01-15");
     expect(body).toContain("14:30");
-    expect(body).toContain("/admin/appointments/abc-123/edit");
   });
 
-  it("keeps the SMS inside two segments", () => {
-    // Every extra segment is charged on every single booking, so length is a
-    // cost decision, not a style one.
+  it("leaves the dashboard link OUT of the SMS", () => {
+    // The URL was 79 characters — around half the cost of every booking alert.
+    // The owner reaches the booking through the email and the live dashboard;
+    // the text only has to say one arrived.
+    const body = bookingSmsBody("Ronie's Barber", notice);
+    expect(body).not.toMatch(/https?:\/\//);
+    expect(body).not.toContain("/admin/appointments/");
+  });
+
+  it("costs exactly one credit", () => {
+    // Measured in SEGMENTS, not characters. The previous version of this test
+    // asserted length <= 320 and passed while the message billed 3 credits: an
+    // em dash had forced UCS-2, where a segment is 67 characters, not 153.
     const body = bookingSmsBody("Ronie's Barber Shop", notice);
-    expect(body.length).toBeLessThanOrEqual(320);
+    expect(smsSegments(body)).toMatchObject({ encoding: "GSM-7", segments: 1 });
   });
 
   it("names the customer and the service in the email subject", () => {

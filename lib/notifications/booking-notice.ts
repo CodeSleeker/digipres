@@ -2,6 +2,7 @@ import type { Business } from "@/types/business-entity";
 import { getSmsSender } from "@/lib/sms/sender";
 import { toE164 } from "@/lib/sms/phone";
 import { getEmailSender } from "@/lib/email/sender";
+import { clipForSms } from "@/lib/sms/gsm7";
 import { platformBaseUrl } from "@/lib/tenant/urls";
 
 /**
@@ -37,21 +38,28 @@ export function appointmentUrl(appointmentId: string): string {
 }
 
 /**
- * Kept short on purpose: an SMS segment is 160 GSM-7 characters and every extra
- * segment is another charge on every booking. Name, service and day are what
- * the owner needs to decide whether to act now; the link carries the rest.
+ * ONE 160-character GSM-7 segment, which is one credit. Built to stay there.
+ *
+ * Three things keep it under the limit, and all three are load-bearing:
+ *
+ *  - No em dash. A single non-GSM-7 character forces UCS-2 and cuts the segment
+ *    to 70 characters, which is what made this message cost three credits.
+ *  - No dashboard link. The URL was 79 of ~200 characters — half the cost of
+ *    every booking — and the owner already gets it in the email and as a live
+ *    dashboard alert. An SMS's job here is only to say "go look".
+ *  - Interpolated names are clipped, because they are typed by the client and a
+ *    long shop or service name would otherwise silently add a segment.
  */
 export function bookingSmsBody(
   businessName: string,
   notice: BookingNotice,
 ): string {
-  const staff = notice.staff ? ` with ${notice.staff}` : "";
+  const staff = notice.staff ? ` w/ ${clipForSms(notice.staff, 16)}` : "";
   return [
-    `New booking — ${businessName}`,
-    `${notice.customerName} (${notice.customerPhone})`,
-    `${notice.service}${staff}`,
-    `${notice.date} at ${notice.time}`,
-    appointmentUrl(notice.appointmentId),
+    `New booking - ${clipForSms(businessName, 24)}`,
+    `${clipForSms(notice.customerName, 24)} ${notice.customerPhone}`,
+    `${clipForSms(notice.service, 24)}${staff}`,
+    `${notice.date} ${notice.time}`,
   ].join("\n");
 }
 
