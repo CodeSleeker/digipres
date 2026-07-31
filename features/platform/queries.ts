@@ -1,4 +1,9 @@
-import { requirePlatformAdmin } from "@/lib/auth/require-platform-admin";
+import {
+  requirePlatformAdmin,
+  requireSuperAdmin,
+} from "@/lib/auth/require-platform-admin";
+import { createServiceClient } from "@/lib/supabase/service";
+import { logError } from "@/lib/observability/logger";
 import { AuditRepository } from "@/repositories/audit-repository";
 import { PlatformRepository } from "@/repositories/platform-repository";
 import { BusinessRepository } from "@/repositories/business-repository";
@@ -122,6 +127,27 @@ export async function getBusinessBilling(businessId: string): Promise<{
   ]);
 
   return { plans, entitlement, overrides };
+}
+
+/**
+ * The address a tenant's owner signs in with, read from the auth user.
+ *
+ * Super admin only, and gated here rather than by the caller: an auth email is
+ * account-identifying, and the guard belongs with the read so a future caller
+ * can't expose it by forgetting to check. Returns null rather than throwing —
+ * the panel is decoration if the lookup fails, not the page.
+ */
+export async function getOwnerLoginEmail(
+  ownerId: string,
+): Promise<string | null> {
+  await requireSuperAdmin();
+  try {
+    const { data } = await createServiceClient().auth.admin.getUserById(ownerId);
+    return data?.user?.email ?? null;
+  } catch (error) {
+    logError(error, { scope: "platform:getOwnerLoginEmail" });
+    return null;
+  }
 }
 
 export async function getPlatformBusiness(id: string): Promise<{

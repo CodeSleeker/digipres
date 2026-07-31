@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import {
   getBusinessBilling,
   getPlatformBusiness,
+  getOwnerLoginEmail,
 } from "@/features/platform/queries";
 import { BillingPanel } from "./_components/billing-panel";
 import { startImpersonation } from "@/features/platform/impersonation";
@@ -10,6 +11,7 @@ import { getPlatformRole } from "@/lib/auth/require-platform-admin";
 import { LifecyclePanel } from "./_components/lifecycle-panel";
 import { DetailsPanel } from "./_components/details-panel";
 import { formatAddress } from "@/lib/businesses/address";
+import { OwnerLoginPanel } from "./_components/owner-login-panel";
 import { onboardingPercentage } from "@/types/onboarding";
 import { StatTile } from "../../_components/stat-tile";
 
@@ -145,6 +147,16 @@ export default async function PlatformBusinessDetailPage({
 
       {/* Read-only for read_only staff, same rule the other write panels use. */}
       {role && role !== "read_only" && <DetailsPanel business={business} />}
+
+      {/* Super admin only — repointing a login is account-takeover territory. */}
+      {role === "super_admin" && (
+        <OwnerLoginPanel
+          businessId={business.id}
+          slug={business.slug}
+          currentEmail={await getOwnerLoginEmail(business.ownerId)}
+          publicEmail={business.email}
+        />
+      )}
 
       <section className="border-t border-dark-border pt-6">
         <h2 className="font-heading text-lg tracking-[2px]">Support</h2>
