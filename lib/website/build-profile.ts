@@ -12,6 +12,7 @@ import type {
   BusinessHours,
 } from "@/types/business-entity";
 import type { BarberEntry, TestimonialEntry } from "@/types/website-content";
+import { formatAddress } from "@/lib/businesses/address";
 
 /**
  * Merge a database Business over the template's default profile to produce the
@@ -241,11 +242,14 @@ function buildContactDetails(
 ): ContactDetail[] {
   const details: ContactDetail[] = [];
 
-  if (business.address) {
+  // Composed from the split components (migration 0027) so the card and the
+  // JSON-LD can't disagree about where the business is.
+  const address = formatAddress(business);
+  if (address) {
     details.push({
       icon: "📍",
       title: "LOCATION",
-      lines: [business.name, business.address].filter(Boolean) as string[],
+      lines: [business.name, address].filter(Boolean) as string[],
     });
   }
 

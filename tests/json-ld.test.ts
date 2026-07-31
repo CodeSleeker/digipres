@@ -44,12 +44,63 @@ describe("buildLocalBusinessJsonLd", () => {
     });
   });
 
+  it("emits the full PostalAddress when the components are filled in", () => {
+    // `addressLocality` is the point of the exercise: without it nothing on the
+    // page says which town this is, and a parser answering "barber in Cagayan
+    // de Oro" has to guess it out of prose.
+    const ld = buildLocalBusinessJsonLd(
+      business({
+        address: "12 Corrales Ave",
+        addressLocality: "Cagayan de Oro",
+        addressRegion: "Misamis Oriental",
+        addressPostalCode: "9000",
+        addressCountry: "PH",
+      }),
+      URL,
+    );
+    expect(ld.address).toEqual({
+      "@type": "PostalAddress",
+      streetAddress: "12 Corrales Ave",
+      addressLocality: "Cagayan de Oro",
+      addressRegion: "Misamis Oriental",
+      postalCode: "9000",
+      addressCountry: "PH",
+    });
+  });
+
   it("includes only present social links in sameAs", () => {
     const ld = buildLocalBusinessJsonLd(business(), URL);
     expect(ld.sameAs).toEqual([
       "https://facebook.com/ronies",
       "https://ronies.test",
     ]);
+  });
+
+  it("publishes the Google link FIRST in sameAs when there is one", () => {
+    // This is the link that ties the website to the Business Profile — the
+    // entity that actually answers "near me" searches. It was being collected
+    // in onboarding and then never emitted.
+    const ld = buildLocalBusinessJsonLd(
+      business({ googleReviewUrl: "https://g.page/r/ronies/review" }),
+      URL,
+    );
+    expect(ld.sameAs).toEqual([
+      "https://g.page/r/ronies/review",
+      "https://facebook.com/ronies",
+      "https://ronies.test",
+    ]);
+  });
+
+  it("omits sameAs entirely when the tenant has no links at all", () => {
+    const ld = buildLocalBusinessJsonLd(
+      business({
+        googleReviewUrl: null,
+        facebookUrl: null,
+        websiteUrl: null,
+      }),
+      URL,
+    );
+    expect(ld.sameAs).toBeUndefined();
   });
 
   it("emits opening hours only for open days", () => {

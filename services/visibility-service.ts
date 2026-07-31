@@ -72,6 +72,10 @@ function buildChecks(b: Business): VisibilityCheck[] {
   const localMissing: string[] = [];
   (has(b.name) ? localReady : localMissing).push("name");
   (has(b.address) ? localReady : localMissing).push("address");
+  // Tracked separately from the street line, because it is the component that
+  // actually places the business: without a locality nothing on the page says
+  // which town this is, and a street line alone can't be resolved to one.
+  (has(b.addressLocality) ? localReady : localMissing).push("city");
   (has(b.phone) ? localReady : localMissing).push("phone");
   (openDays > 0 ? localReady : localMissing).push("hours");
   (has(b.logoUrl) ? localReady : localMissing).push("logo");
@@ -278,6 +282,10 @@ function baselineChecks(): VisibilityCheck[] {
     notifyPhone: null,
     notifyCustomerSms: true,
     address: null,
+    addressLocality: null,
+    addressRegion: null,
+    addressPostalCode: null,
+    addressCountry: null,
     logoUrl: null,
     faviconUrl: null,
     coverImageUrl: null,

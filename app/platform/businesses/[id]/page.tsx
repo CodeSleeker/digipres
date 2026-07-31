@@ -9,6 +9,7 @@ import { startImpersonation } from "@/features/platform/impersonation";
 import { getPlatformRole } from "@/lib/auth/require-platform-admin";
 import { LifecyclePanel } from "./_components/lifecycle-panel";
 import { DetailsPanel } from "./_components/details-panel";
+import { formatAddress } from "@/lib/businesses/address";
 import { onboardingPercentage } from "@/types/onboarding";
 import { StatTile } from "../../_components/stat-tile";
 
@@ -38,7 +39,7 @@ export default async function PlatformBusinessDetailPage({
     ["Owner name", business.ownerName ?? "—"],
     ["Phone", business.phone ?? "—"],
     ["Email", business.email ?? "—"],
-    ["Address", business.address ?? "—"],
+    ["Address", formatAddress(business) ?? "—"],
     ["Created", new Date(business.createdAt).toLocaleString()],
   ];
 

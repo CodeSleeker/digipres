@@ -44,6 +44,12 @@ const optionalPhone = z.preprocess(
   z.string().trim().max(40).nullable().optional(),
 );
 
+/** A single-line value — a city, a province, a postcode. */
+const optionalShortText = z.preprocess(
+  emptyToNull,
+  z.string().trim().max(120).nullable().optional(),
+);
+
 /**
  * A boolean arriving from a form.
  *
@@ -131,7 +137,30 @@ export const createBusinessSchema = z.object({
   notifyEmail: optionalEmail,
   notifyPhone: optionalPhone,
   notifyCustomerSms: checkboxBoolean,
+  /** Street line only; the components below carry the rest. */
   address: optionalText,
+  addressLocality: optionalShortText,
+  addressRegion: optionalShortText,
+  addressPostalCode: optionalShortText,
+  /**
+   * ISO 3166-1 alpha-2. Constrained and upper-cased because schema.org
+   * consumers read this as a code — "Philippines" in an `addressCountry` is
+   * accepted by the spec but is weaker than "PH", and free text here would
+   * mostly produce the weaker form.
+   */
+  addressCountry: z.preprocess(
+    (value) =>
+      typeof value === "string"
+        ? value.trim() === ""
+          ? null
+          : value.trim().toUpperCase()
+        : value,
+    z
+      .string()
+      .regex(/^[A-Z]{2}$/, "Use a 2-letter country code, e.g. PH.")
+      .nullable()
+      .optional(),
+  ),
   logoUrl: optionalUrl,
   faviconUrl: optionalUrl,
   coverImageUrl: optionalUrl,

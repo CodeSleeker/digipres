@@ -54,6 +54,10 @@ interface WizardValues {
   phone: string;
   email: string;
   address: string;
+  addressLocality: string;
+  addressRegion: string;
+  addressPostalCode: string;
+  addressCountry: string;
   category: BusinessCategory;
   description: string;
   logoUrl: string;
@@ -85,7 +89,13 @@ function buildStepData(
     case "info":
       return { name: v.name, phone: v.phone, email: v.email };
     case "address":
-      return { address: v.address };
+      return {
+        address: v.address,
+        addressLocality: v.addressLocality,
+        addressRegion: v.addressRegion,
+        addressPostalCode: v.addressPostalCode,
+        addressCountry: v.addressCountry,
+      };
     case "category":
       return { category: v.category };
     case "hours":
@@ -115,6 +125,10 @@ export function OnboardingWizard({ view }: { view: OnboardingView }) {
       phone: view.fields.phone,
       email: view.fields.email,
       address: view.fields.address,
+      addressLocality: view.fields.addressLocality,
+      addressRegion: view.fields.addressRegion,
+      addressPostalCode: view.fields.addressPostalCode,
+      addressCountry: view.fields.addressCountry,
       category: view.fields.category,
       description: view.fields.description,
       logoUrl: view.fields.logoUrl,
@@ -299,13 +313,42 @@ function renderStep(
         </>
       );
     case "address":
+      // Split rather than one box: the city is what lets a search engine or an
+      // AI assistant place this business, and neither can pull it reliably out
+      // of a free-text line.
       return (
-        <TextAreaField
-          form={form}
-          name="address"
-          label="Full address"
-          placeholder="Street, city, region"
-        />
+        <>
+          <TextAreaField
+            form={form}
+            name="address"
+            label="Street address"
+            placeholder="Unit / building / street"
+          />
+          <TextField
+            form={form}
+            name="addressLocality"
+            label="City / town"
+            placeholder="Cagayan de Oro"
+          />
+          <TextField
+            form={form}
+            name="addressRegion"
+            label="Province / region"
+            placeholder="Misamis Oriental"
+          />
+          <TextField
+            form={form}
+            name="addressPostalCode"
+            label="Postal code"
+            placeholder="9000"
+          />
+          <TextField
+            form={form}
+            name="addressCountry"
+            label="Country code"
+            placeholder="PH"
+          />
+        </>
       );
     case "category":
       return (

@@ -121,6 +121,10 @@ export class BusinessRepository {
       notify_phone: input.notifyPhone ?? null,
       notify_customer_sms: input.notifyCustomerSms ?? true,
       address: input.address ?? null,
+      address_locality: input.addressLocality ?? null,
+      address_region: input.addressRegion ?? null,
+      address_postal_code: input.addressPostalCode ?? null,
+      address_country: input.addressCountry ?? null,
       logo_url: input.logoUrl ?? null,
       favicon_url: input.faviconUrl ?? null,
       cover_image_url: input.coverImageUrl ?? null,
@@ -156,6 +160,14 @@ export class BusinessRepository {
     if (input.notifyCustomerSms !== undefined)
       patch.notify_customer_sms = input.notifyCustomerSms;
     if (input.address !== undefined) patch.address = input.address;
+    if (input.addressLocality !== undefined)
+      patch.address_locality = input.addressLocality;
+    if (input.addressRegion !== undefined)
+      patch.address_region = input.addressRegion;
+    if (input.addressPostalCode !== undefined)
+      patch.address_postal_code = input.addressPostalCode;
+    if (input.addressCountry !== undefined)
+      patch.address_country = input.addressCountry;
     if (input.logoUrl !== undefined) patch.logo_url = input.logoUrl;
     if (input.faviconUrl !== undefined) patch.favicon_url = input.faviconUrl;
     if (input.coverImageUrl !== undefined)
@@ -260,6 +272,10 @@ function toDomain(row: BusinessRow): Business {
     notifyPhone: row.notify_phone,
     notifyCustomerSms: row.notify_customer_sms ?? true,
     address: row.address,
+    addressLocality: row.address_locality,
+    addressRegion: row.address_region,
+    addressPostalCode: row.address_postal_code,
+    addressCountry: row.address_country,
     logoUrl: row.logo_url,
     faviconUrl: row.favicon_url,
     coverImageUrl: row.cover_image_url,

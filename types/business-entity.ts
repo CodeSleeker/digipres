@@ -51,7 +51,20 @@ export interface Business {
    * own alerts are separate and unaffected. Never overrides an opt-out.
    */
   notifyCustomerSms: boolean;
+  /**
+   * Street line ONLY. The remaining components are the fields below.
+   *
+   * Rows created before migration 0027 hold a whole address here; that still
+   * renders and still emits as `streetAddress`, it just isn't split.
+   */
   address: string | null;
+  /** City or town — schema.org `addressLocality`. */
+  addressLocality: string | null;
+  /** Province or state — `addressRegion`. */
+  addressRegion: string | null;
+  addressPostalCode: string | null;
+  /** ISO 3166-1 alpha-2, e.g. "PH" — `addressCountry`. */
+  addressCountry: string | null;
   logoUrl: string | null;
   /** Square browser-tab icon; falls back to `logoUrl` (see lib/tenant/icons.ts). */
   faviconUrl: string | null;

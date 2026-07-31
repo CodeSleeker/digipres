@@ -64,6 +64,10 @@ export interface Database {
           phone: string | null;
           email: string | null;
           address: string | null;
+          address_locality: string | null;
+          address_region: string | null;
+          address_postal_code: string | null;
+          address_country: string | null;
           logo_url: string | null;
           favicon_url: string | null;
           notify_email: string | null;
@@ -105,6 +109,10 @@ export interface Database {
           phone?: string | null;
           email?: string | null;
           address?: string | null;
+          address_locality?: string | null;
+          address_region?: string | null;
+          address_postal_code?: string | null;
+          address_country?: string | null;
           logo_url?: string | null;
           favicon_url?: string | null;
           notify_email?: string | null;
@@ -146,6 +154,10 @@ export interface Database {
           phone?: string | null;
           email?: string | null;
           address?: string | null;
+          address_locality?: string | null;
+          address_region?: string | null;
+          address_postal_code?: string | null;
+          address_country?: string | null;
           logo_url?: string | null;
           favicon_url?: string | null;
           notify_email?: string | null;

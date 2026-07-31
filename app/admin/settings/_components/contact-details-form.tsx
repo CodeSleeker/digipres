@@ -30,6 +30,10 @@ interface Defaults {
   phone: string;
   email: string;
   address: string;
+  addressLocality: string;
+  addressRegion: string;
+  addressPostalCode: string;
+  addressCountry: string;
   notifyPhone: string;
   notifyEmail: string;
   notifyCustomerSms: boolean;
@@ -89,20 +93,62 @@ export function ContactDetailsForm({ defaults }: { defaults: Defaults }) {
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="address" className={labelClass}>
-            Address
+            Street address
           </Label>
           <Textarea
             id="address"
             name="address"
             defaultValue={defaults.address}
-            placeholder="Street, city, province"
+            placeholder="Unit / building / street"
             className={`${fieldClass} min-h-20 resize-y`}
           />
+          <span className="text-[0.65rem] text-gray">
+            Just the street part — the city and province go below.
+          </span>
           {state.fieldErrors?.address?.[0] && (
             <p role="alert" className="text-xs text-destructive">
               {state.fieldErrors.address[0]}
             </p>
           )}
+        </div>
+
+        {/* Split out because search engines and AI assistants can't reliably
+            pull a city out of a free-text address — and the city is what makes
+            the page resolvable to a place. */}
+        <div className="grid grid-cols-2 gap-4 max-[640px]:grid-cols-1">
+          <TextRow
+            name="addressLocality"
+            label="City / town"
+            type="text"
+            placeholder="Cagayan de Oro"
+            defaultValue={defaults.addressLocality}
+            error={state.fieldErrors?.addressLocality?.[0]}
+          />
+          <TextRow
+            name="addressRegion"
+            label="Province / region"
+            type="text"
+            placeholder="Misamis Oriental"
+            defaultValue={defaults.addressRegion}
+            error={state.fieldErrors?.addressRegion?.[0]}
+          />
+          <TextRow
+            name="addressPostalCode"
+            label="Postal code"
+            type="text"
+            placeholder="9000"
+            defaultValue={defaults.addressPostalCode}
+            error={state.fieldErrors?.addressPostalCode?.[0]}
+          />
+          <TextRow
+            name="addressCountry"
+            label="Country code"
+            type="text"
+            placeholder="PH"
+            defaultValue={defaults.addressCountry}
+            error={state.fieldErrors?.addressCountry?.[0]}
+            hint="Two letters, e.g. PH. Not shown on your site."
+          />
         </div>
       </section>
 

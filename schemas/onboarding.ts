@@ -9,7 +9,13 @@ import type { OnboardingStepId } from "@/types/onboarding";
  */
 export const stepSchemas = {
   info: createBusinessSchema.pick({ name: true, phone: true, email: true }),
-  address: createBusinessSchema.pick({ address: true }),
+  address: createBusinessSchema.pick({
+    address: true,
+    addressLocality: true,
+    addressRegion: true,
+    addressPostalCode: true,
+    addressCountry: true,
+  }),
   category: createBusinessSchema.pick({ category: true }),
   hours: createBusinessSchema.pick({ hours: true }),
   photos: createBusinessSchema.pick({ logoUrl: true, coverImageUrl: true }),

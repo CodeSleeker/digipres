@@ -21,6 +21,10 @@ export interface OnboardingView {
     phone: string;
     email: string;
     address: string;
+    addressLocality: string;
+    addressRegion: string;
+    addressPostalCode: string;
+    addressCountry: string;
     category: BusinessCategory;
     hours: BusinessHours;
     logoUrl: string;
@@ -58,6 +62,10 @@ export async function getOnboardingView(): Promise<OnboardingView> {
       phone: business?.phone ?? "",
       email: business?.email ?? "",
       address: business?.address ?? "",
+      addressLocality: business?.addressLocality ?? "",
+      addressRegion: business?.addressRegion ?? "",
+      addressPostalCode: business?.addressPostalCode ?? "",
+      addressCountry: business?.addressCountry ?? "",
       category: business?.category ?? "other",
       hours: business?.hours ?? [],
       logoUrl: business?.logoUrl ?? "",
