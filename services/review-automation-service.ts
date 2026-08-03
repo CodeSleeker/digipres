@@ -102,16 +102,53 @@ export class ReviewAutomationService {
 
     await this.messages.insertMany(queued);
 
-    // Reflect that a review has been solicited.
-    if (customer.reviewStatus === "pending") {
-      await this.customers.update(businessId, customer.id, {
-        reviewStatus: "requested",
-      });
-    }
+    /*
+     * The customer's reviewStatus is NOT touched here.
+     *
+     * It used to flip to "requested" at this point, which was wrong: at this
+     * moment the only thing that has gone out is the thank-you, and that asks
+     * for nothing. The review request itself is three days away and might
+     * never send at all — the customer can reply STOP, the queue can exhaust
+     * MAX_ATTEMPTS, or the campaign can be cancelled by a review arriving.
+     *
+     * Marking it here meant the dashboard reported "Requested, awaiting a
+     * response" for someone nobody had asked, and `aggregateReviewRate`
+     * divided by people who were merely queued — permanently understating the
+     * real conversion rate. `markRequested` now does it when the review
+     * request is actually sent.
+     */
 
     // Fire the immediately-due thank-you now (rest handled by the processor),
     // scoped to this tenant — this runs inside an owner request, not the cron.
     await this.processDue(new Date().toISOString(), 100, businessId);
+  }
+
+  /**
+   * Mark the customer as having been asked — only once the REVIEW REQUEST has
+   * actually left, and only from `pending`.
+   *
+   * Never from "received": a customer who reviewed after the thank-you but
+   * before the request would otherwise be walked backwards into "requested" by
+   * a message that is about to be cancelled anyway.
+   *
+   * Best-effort. The message is already marked sent by the time this runs, so
+   * throwing here would fail a batch over a status label and risk re-sending
+   * on the next pass.
+   */
+  private async markRequested(message: ReviewMessage): Promise<void> {
+    if (message.step !== "review_request") return;
+    try {
+      const customer = await this.customers.findById(
+        message.businessId,
+        message.customerId,
+      );
+      if (customer?.reviewStatus !== "pending") return;
+      await this.customers.update(message.businessId, message.customerId, {
+        reviewStatus: "requested",
+      });
+    } catch (error) {
+      console.error("[review:markRequested]", errorText(error));
+    }
   }
 
   /**
@@ -151,6 +188,7 @@ export class ReviewAutomationService {
           message.attempts,
           message.providerMessageId,
         );
+        await this.markRequested(message);
         sent += 1;
         continue;
       }
@@ -171,6 +209,7 @@ export class ReviewAutomationService {
           attempts,
           result.providerMessageId ?? null,
         );
+        await this.markRequested(message);
         sent += 1;
       } else if (attempts < MAX_ATTEMPTS) {
         // Retry later with linear backoff.

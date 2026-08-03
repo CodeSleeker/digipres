@@ -57,7 +57,9 @@ export default async function AdminHome() {
         <StatCard
           label="Pending Reviews"
           value={stats.pendingReviews}
-          hint="Requested, awaiting a response"
+          // Now true: the customer only reaches "requested" once the review
+          // request itself has been sent, not when the campaign was queued.
+          hint="Asked for a review, awaiting a response"
           icon={<ReviewIcon />}
           href="/admin/reviews"
         />
@@ -71,7 +73,10 @@ export default async function AdminHome() {
         <StatCard
           label="Messages Sent"
           value={stats.messagesSent}
-          hint="Review-automation SMS delivered"
+          // "Sent", not "delivered": the count is `status in (sent, delivered)`,
+          // and delivered only arrives via the carrier's status webhook. A text
+          // that left and then bounced would have read as delivered here.
+          hint="Review-automation texts sent"
           icon={<ChatIcon />}
           href="/admin/reviews"
         />
