@@ -1,17 +1,22 @@
 import { submitLead } from "@/features/marketing/leads";
 import { PROJECT_TYPES } from "@/schemas/lead";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 /**
  * The marketing site's two forms.
  *
- * Server components with a plain `action={submitLead}` — no `useActionState`,
- * no client bundle. The landing page is otherwise a pure server render, and a
- * form asking a stranger for their contact details is the last thing that
- * should depend on JavaScript having loaded.
+ * Server components with a plain `action={submitLead}`: no `useActionState`,
+ * and the form itself still posts as ordinary HTML. A form asking a stranger
+ * for their contact details should not stop working because a script failed.
  *
- * The trade is that feedback arrives as a redirect rather than in place, which
- * is why every field sets `defaultValue` from nothing: on a failed submit the
- * browser's own back/restore behaviour is what preserves typing.
+ * THE ONE CLIENT COMPONENT is the submit button. `SubmitButton` reads
+ * `useFormStatus`, which is the only way a server-rendered form can know it is
+ * mid-flight. Without it the page looks completely inert after the click — and
+ * a form that gives no feedback gets submitted twice, which here means two
+ * database rows, two emails and two SMS credits for one enquiry.
+ *
+ * Progressive enhancement holds: with JavaScript off the button is a plain
+ * submit and the form still posts, it just doesn't animate.
  */
 
 const field =
@@ -156,9 +161,12 @@ export function BookingForm() {
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <button type="submit" className={button}>
+        <SubmitButton
+          pendingLabel="Sending…"
+          className={`${button} inline-flex items-center justify-center`}
+        >
           Request consultation
-        </button>
+        </SubmitButton>
         {/* Set expectations here rather than after the fact: the preferred slot
             is a request against a calendar that does not exist yet. */}
         <span className="text-xs leading-relaxed text-[#555c6b]">
@@ -219,9 +227,12 @@ export function ContactForm() {
         />
       </div>
 
-      <button type="submit" className={button}>
+      <SubmitButton
+        pendingLabel="Sending…"
+        className={`${button} inline-flex items-center justify-center`}
+      >
         Send message
-      </button>
+      </SubmitButton>
     </form>
   );
 }

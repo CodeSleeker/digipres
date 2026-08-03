@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { getOwnerContext } from "@/lib/tenant/business-context";
 import { requireFeature } from "@/lib/features/guard";
 import { getAppointments } from "@/features/appointments/queries";
@@ -67,12 +68,12 @@ export default async function AppointmentsListPage({
             ))}
           </select>
         </label>
-        <button
-          type="submit"
-          className="h-9 rounded-none border border-dark-border px-4 text-sm text-white transition-colors hover:border-gold hover:text-gold"
+        <SubmitButton
+          pendingLabel="Applying…"
+          className="inline-flex h-9 items-center rounded-none border border-dark-border px-4 text-sm text-white transition-colors hover:border-gold hover:text-gold"
         >
           Apply
-        </button>
+        </SubmitButton>
         <Link
           href="/admin/appointments"
           className="h-9 px-3 text-sm leading-9 text-gray transition-colors hover:text-gold"

@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { requestPasswordReset, type ForgotState } from "@/lib/auth/actions";
 import { BRAND } from "@/components/marketing/theme";
+import { Spinner } from "@/components/ui/submit-button";
 
 const initialState: ForgotState = {};
 
@@ -56,7 +57,14 @@ export function ForgotForm() {
         aria-busy={isPending}
         className={`mt-1 ${BRAND.button}`}
       >
-        {isPending ? "Sending…" : "Send reset link"}
+        {isPending ? (
+          <span className="inline-flex items-center gap-2">
+            <Spinner />
+            Sending…
+          </span>
+        ) : (
+          "Send reset link"
+        )}
       </button>
 
       <Link href="/login" className={`text-center text-sm ${BRAND.quietLink}`}>

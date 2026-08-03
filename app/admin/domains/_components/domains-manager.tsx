@@ -11,9 +11,46 @@ import {
 import type { BusinessDomain } from "@/types/domain";
 import type { DnsInstruction } from "@/lib/domains/provider";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/submit-button";
 
 const fieldClass =
   "h-auto w-full rounded-none border border-dark-border bg-charcoal px-3 py-2 text-sm text-white outline-none transition-colors focus:border-gold";
+
+/**
+ * A per-row action link that shows its own progress.
+ *
+ * `disabled` locks every row action while ANY of them runs (they mutate the
+ * same list), but only the clicked one gets the spinner — otherwise three
+ * buttons animate at once and none of them means anything.
+ */
+function RowAction({
+  children,
+  pendingLabel,
+  active,
+  disabled,
+  onClick,
+  className,
+}: {
+  children: React.ReactNode;
+  pendingLabel: string;
+  active: boolean;
+  disabled: boolean;
+  onClick: () => void;
+  className: string;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      aria-busy={active}
+      onClick={onClick}
+      className={`inline-flex items-center gap-2 transition-colors disabled:opacity-50 ${className}`}
+    >
+      {active && <Spinner />}
+      {active ? pendingLabel : children}
+    </button>
+  );
+}
 
 export function DomainsManager({
   domains,
@@ -28,16 +65,27 @@ export function DomainsManager({
   );
   const [pending, start] = useTransition();
   const [rowState, setRowState] = useState<Record<string, DomainState>>({});
+  /**
+   * WHICH row action is running, not just whether one is.
+   *
+   * `useTransition`'s flag is a single boolean, so with it alone all three
+   * buttons on every row dim together and nothing says which one was clicked.
+   * Verifying DNS can take seconds — long enough to wonder if the click landed.
+   */
+  const [running, setRunning] = useState<string | null>(null);
 
   function run(
     action: (formData: FormData) => Promise<DomainState>,
     id: string,
+    label: string,
   ) {
     const formData = new FormData();
     formData.set("id", id);
+    setRunning(`${id}:${label}`);
     start(async () => {
       const result = await action(formData);
       setRowState((s) => ({ ...s, [id]: result }));
+      setRunning(null);
     });
   }
 
@@ -65,7 +113,14 @@ export function DomainsManager({
             disabled={adding}
             className="rounded-none bg-gold font-heading tracking-[2px] text-black hover:bg-gold-light"
           >
-            {adding ? "ADDING…" : "ADD DOMAIN"}
+            {adding ? (
+              <span className="inline-flex items-center gap-2">
+                <Spinner />
+                ADDING…
+              </span>
+            ) : (
+              "ADD DOMAIN"
+            )}
           </Button>
         </form>
 
@@ -121,33 +176,40 @@ export function DomainsManager({
 
                     <div className="flex flex-wrap items-center gap-3 text-xs">
                       {!domain.verified && (
-                        <button
-                          type="button"
+                        <RowAction
+                          active={running === `${domain.id}:verify`}
                           disabled={pending}
-                          onClick={() => run(verifyDomain, domain.id)}
-                          className="text-gold transition-colors hover:text-gold-light disabled:opacity-50"
+                          onClick={() =>
+                            run(verifyDomain, domain.id, "verify")
+                          }
+                          pendingLabel="Verifying…"
+                          className="text-gold hover:text-gold-light"
                         >
                           Verify
-                        </button>
+                        </RowAction>
                       )}
                       {domain.verified && !domain.isPrimary && (
-                        <button
-                          type="button"
+                        <RowAction
+                          active={running === `${domain.id}:primary`}
                           disabled={pending}
-                          onClick={() => run(setPrimaryDomain, domain.id)}
-                          className="text-gray transition-colors hover:text-gold disabled:opacity-50"
+                          onClick={() =>
+                            run(setPrimaryDomain, domain.id, "primary")
+                          }
+                          pendingLabel="Updating…"
+                          className="text-gray hover:text-gold"
                         >
                           Make primary
-                        </button>
+                        </RowAction>
                       )}
-                      <button
-                        type="button"
+                      <RowAction
+                        active={running === `${domain.id}:remove`}
                         disabled={pending}
-                        onClick={() => run(removeDomain, domain.id)}
-                        className="text-gray transition-colors hover:text-destructive disabled:opacity-50"
+                        onClick={() => run(removeDomain, domain.id, "remove")}
+                        pendingLabel="Removing…"
+                        className="text-gray hover:text-destructive"
                       >
                         Remove
-                      </button>
+                      </RowAction>
                     </div>
                   </div>
 

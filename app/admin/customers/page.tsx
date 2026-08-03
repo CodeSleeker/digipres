@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { getCustomers } from "@/features/customers/queries";
 import { customerListQuerySchema } from "@/schemas/customer";
 import {
@@ -91,12 +92,12 @@ export default async function CustomersPage({
             ))}
           </select>
         </label>
-        <button
-          type="submit"
-          className="h-9 rounded-none border border-dark-border px-4 text-sm text-white transition-colors hover:border-gold hover:text-gold"
+        <SubmitButton
+          pendingLabel="Applying…"
+          className="inline-flex h-9 items-center rounded-none border border-dark-border px-4 text-sm text-white transition-colors hover:border-gold hover:text-gold"
         >
           Apply
-        </button>
+        </SubmitButton>
         <Link
           href="/admin/customers"
           className="h-9 rounded-none px-3 text-sm leading-9 text-gray transition-colors hover:text-gold"

@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { login, type LoginState } from "@/lib/auth/actions";
 import { BRAND } from "@/components/marketing/theme";
+import { Spinner } from "@/components/ui/submit-button";
 
 const initialState: LoginState = {};
 
@@ -70,7 +71,14 @@ export function LoginForm() {
         aria-busy={isPending}
         className={`mt-1 ${BRAND.button}`}
       >
-        {isPending ? "Signing in…" : "Sign in"}
+        {isPending ? (
+          <span className="inline-flex items-center gap-2">
+            <Spinner />
+            Signing in…
+          </span>
+        ) : (
+          "Sign in"
+        )}
       </button>
     </form>
   );

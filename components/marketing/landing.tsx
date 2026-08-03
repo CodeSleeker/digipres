@@ -10,9 +10,14 @@ import {
  * Aliamz Digital — the platform's own marketing page, served at the production
  * apex (see lib/marketing/mode.ts for when it renders instead of a tenant).
  *
- * Design: light minimalist, typography-led, zero images and zero client JS —
- * deliberately scoped palette (this file only) so the dark admin/portal/tenant
- * surfaces are untouched.
+ * Design: light minimalist and typography-led, with a deliberately scoped
+ * palette (this file only) so the dark admin/portal/tenant surfaces are
+ * untouched.
+ *
+ * Almost no client JavaScript: the brand mark is an <Image>, and the two form
+ * submit buttons are client components so they can show progress. Everything
+ * else renders on the server, and both forms still post as plain HTML with
+ * scripting disabled.
  *
  * TWO OFFERINGS, kept visually distinct so they don't blur into each other:
  *

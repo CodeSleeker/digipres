@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { notFound } from "next/navigation";
 import {
   getBusinessBilling,
@@ -175,12 +176,12 @@ export default async function PlatformBusinessDetailPage({
         <div className="mt-4 flex items-center gap-4">
           <form action={startImpersonation}>
             <input type="hidden" name="businessId" value={business.id} />
-            <button
-              type="submit"
-              className="border border-gold px-4 py-2 text-xs uppercase tracking-[2px] text-gold transition-colors hover:bg-gold hover:text-black"
+            <SubmitButton
+              pendingLabel="Starting session…"
+              className="inline-flex items-center border border-gold px-4 py-2 text-xs uppercase tracking-[2px] text-gold transition-colors hover:bg-gold hover:text-black"
             >
               Act as this business
-            </button>
+            </SubmitButton>
           </form>
           <Link
             href={`/platform/audit?business=${business.id}`}

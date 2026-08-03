@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { getPlatformBusinesses } from "@/features/platform/queries";
 
 const PAGE_SIZE = 20;
@@ -40,12 +41,12 @@ export default async function PlatformBusinessesPage({
           placeholder="Search name or slug…"
           className="h-auto w-full max-w-xs rounded-none border border-dark-border bg-charcoal px-3 py-2 text-sm text-white outline-none transition-colors focus:border-gold"
         />
-        <button
-          type="submit"
-          className="border border-dark-border px-4 text-xs uppercase tracking-[2px] text-gray-light transition-colors hover:border-gold hover:text-gold"
+        <SubmitButton
+          pendingLabel="Searching…"
+          className="inline-flex items-center border border-dark-border px-4 text-xs uppercase tracking-[2px] text-gray-light transition-colors hover:border-gold hover:text-gold"
         >
           Search
-        </button>
+        </SubmitButton>
       </form>
 
       {result.rows.length === 0 ? (

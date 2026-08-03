@@ -1,4 +1,5 @@
 import { guardPage } from "@/lib/features/guard";
+import { SubmitButton } from "@/components/ui/submit-button";
 import Link from "next/link";
 import { getReviewMessages } from "@/features/reviews/queries";
 import { reviewMessageListQuerySchema } from "@/schemas/review-message";
@@ -72,12 +73,12 @@ export default async function ReviewsPage({
             ))}
           </select>
         </label>
-        <button
-          type="submit"
-          className="h-9 rounded-none border border-dark-border px-4 text-sm text-white transition-colors hover:border-gold hover:text-gold"
+        <SubmitButton
+          pendingLabel="Applying…"
+          className="inline-flex h-9 items-center rounded-none border border-dark-border px-4 text-sm text-white transition-colors hover:border-gold hover:text-gold"
         >
           Apply
-        </button>
+        </SubmitButton>
         <Link
           href="/admin/reviews"
           className="h-9 px-3 text-sm leading-9 text-gray transition-colors hover:text-gold"

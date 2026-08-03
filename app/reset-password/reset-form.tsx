@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { updatePassword, type ResetState } from "@/lib/auth/actions";
+import { Spinner } from "@/components/ui/submit-button";
 import { BRAND } from "@/components/marketing/theme";
 
 const initialState: ResetState = {};
@@ -84,11 +85,16 @@ export function ResetForm({
         aria-busy={isPending}
         className={`mt-1 ${BRAND.button}`}
       >
-        {isPending
-          ? "Saving…"
-          : requireCurrentPassword
-            ? "Change password"
-            : "Set new password"}
+        {isPending ? (
+          <span className="inline-flex items-center gap-2">
+            <Spinner />
+            Saving…
+          </span>
+        ) : requireCurrentPassword ? (
+          "Change password"
+        ) : (
+          "Set new password"
+        )}
       </button>
     </form>
   );
