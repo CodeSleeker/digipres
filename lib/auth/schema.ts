@@ -19,9 +19,17 @@ export const forgotPasswordSchema = z.object({
 
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 
-/** Set a new password (from a recovery session). */
+/**
+ * Set a new password.
+ *
+ * `currentPassword` is optional HERE because the recovery flow legitimately has
+ * none. Whether it is actually required is decided in the action, from the
+ * recovery marker — a schema cannot see that, and making it the schema's job
+ * would put the security decision in the wrong place.
+ */
 export const resetPasswordSchema = z
   .object({
+    currentPassword: z.string().optional(),
     password: z.string().min(8, "Use at least 8 characters."),
     confirm: z.string(),
   })

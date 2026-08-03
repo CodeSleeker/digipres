@@ -6,7 +6,16 @@ import { BRAND } from "@/components/marketing/theme";
 
 const initialState: ResetState = {};
 
-export function ResetForm() {
+export function ResetForm({
+  /**
+   * False only for a session created by a reset email — that person has no
+   * current password to give. The server decides this independently from the
+   * recovery cookie; this prop just picks the fields to show.
+   */
+  requireCurrentPassword = true,
+}: {
+  requireCurrentPassword?: boolean;
+}) {
   const [state, formAction, isPending] = useActionState(
     updatePassword,
     initialState,
@@ -14,6 +23,23 @@ export function ResetForm() {
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
+      {requireCurrentPassword && (
+        <div className="flex flex-col gap-2">
+          <label htmlFor="currentPassword" className={BRAND.label}>
+            Current password
+          </label>
+          <input
+            id="currentPassword"
+            name="currentPassword"
+            type="password"
+            required
+            autoComplete="current-password"
+            placeholder="••••••••"
+            className={BRAND.field}
+          />
+        </div>
+      )}
+
       <div className="flex flex-col gap-2">
         <label htmlFor="password" className={BRAND.label}>
           New password
@@ -58,7 +84,11 @@ export function ResetForm() {
         aria-busy={isPending}
         className={`mt-1 ${BRAND.button}`}
       >
-        {isPending ? "Saving…" : "Set new password"}
+        {isPending
+          ? "Saving…"
+          : requireCurrentPassword
+            ? "Change password"
+            : "Set new password"}
       </button>
     </form>
   );

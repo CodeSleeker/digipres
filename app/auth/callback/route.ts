@@ -1,8 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logError } from "@/lib/observability/logger";
+import {
+  RECOVERY_COOKIE,
+  recoveryCookieOptions,
+} from "@/lib/auth/recovery-session";
 
 export const dynamic = "force-dynamic";
+
+const RESET_PATH = "/reset-password";
 
 /**
  * OAuth/recovery callback. Exchanges the `code` from an email link for a session
@@ -25,7 +31,21 @@ export async function GET(request: NextRequest) {
     try {
       const supabase = await createClient();
       const { error } = await supabase.auth.exchangeCodeForSession(code);
-      if (!error) return NextResponse.redirect(`${origin}${next}`);
+      if (!error) {
+        const response = NextResponse.redirect(`${origin}${next}`);
+        // Record that this session came from a valid emailed code, so
+        // /reset-password knows not to demand a current password the person
+        // plainly does not have. Set only after the exchange succeeds, and only
+        // for the reset destination — see lib/auth/recovery-session.ts.
+        if (next === RESET_PATH) {
+          response.cookies.set(
+            RECOVERY_COOKIE,
+            "1",
+            recoveryCookieOptions(),
+          );
+        }
+        return response;
+      }
     } catch (error) {
       logError(error, { scope: "auth:callback" });
     }
