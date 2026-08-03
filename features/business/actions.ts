@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { FIELDS } from "./form-fields";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 import type { Business } from "@/types/business-entity";
@@ -136,31 +137,6 @@ export async function deleteBusiness(): Promise<BusinessFormState> {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-const FIELDS = [
-  "name",
-  "slug",
-  "description",
-  "phone",
-  "email",
-  "notifyEmail",
-  "notifyPhone",
-  "notifyCustomerSms",
-  "address",
-  "addressLocality",
-  "addressRegion",
-  "addressPostalCode",
-  "addressCountry",
-  "logoUrl",
-  "faviconUrl",
-  "coverImageUrl",
-  "category",
-  "ownerName",
-  "googleReviewUrl",
-  "facebookUrl",
-  "instagramUrl",
-  "tiktokUrl",
-  "websiteUrl",
-] as const;
 
 /**
  * Build a raw input object from FormData. Only keys actually present are
