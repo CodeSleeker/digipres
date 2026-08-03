@@ -31,6 +31,13 @@ export async function revalidateOwnerSite(
  * staff member's own page and leave the client's stale.
  */
 export function revalidateTenantSite(slug: string | null): void {
-  if (slug) revalidatePath(`/s/${slug}`);
+  if (slug) {
+    revalidatePath(`/s/${slug}`);
+    // The Open Graph card is a SEPARATE route, so the line above does not touch
+    // it. Miss this and a renamed business keeps sharing its old name — for as
+    // long as the cache lives, with nothing anywhere to indicate it, because
+    // nobody looks at their own link preview.
+    revalidatePath(`/s/${slug}/opengraph-image`);
+  }
   revalidatePath("/"); // apex / dev-slug view
 }

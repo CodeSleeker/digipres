@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { formatAddress, postalAddress } from "@/lib/businesses/address";
+import {
+  formatAddress,
+  formatLocality,
+  postalAddress,
+} from "@/lib/businesses/address";
 import { updateBusinessSchema } from "@/schemas/business";
 
 const full = {
@@ -113,5 +117,45 @@ describe("address validation", () => {
     const parsed = updateBusinessSchema.parse({ addressLocality: "Cebu" });
     expect("address" in parsed).toBe(false);
     expect("addressRegion" in parsed).toBe(false);
+  });
+});
+
+describe("formatLocality", () => {
+  it("gives the place without the street line", () => {
+    // The share card asks "where is this business", not "how do I reach the
+    // door" — and a home-based tenant should not have their street address
+    // pasted into every group chat their link lands in.
+    expect(formatLocality(full)).toBe("Cagayan de Oro, Misamis Oriental");
+  });
+
+  it("drops whichever half is missing", () => {
+    expect(formatLocality({ ...empty, addressLocality: "Iligan" })).toBe(
+      "Iligan",
+    );
+    expect(formatLocality({ ...empty, addressRegion: "Lanao del Norte" })).toBe(
+      "Lanao del Norte",
+    );
+  });
+
+  it("is null when there is no place, rather than guessing", () => {
+    expect(formatLocality(empty)).toBeNull();
+    expect(
+      formatLocality({ ...empty, addressLocality: "   ", addressRegion: "" }),
+    ).toBeNull();
+  });
+
+  it("does NOT fall back to the pre-0027 free-text address", () => {
+    // Legacy rows keep a whole address in `address`. Falling back would put the
+    // street line straight back into the card this helper exists to keep it out
+    // of, and nothing downstream would flag it.
+    expect(
+      formatLocality({ ...empty, address: "12 Corrales Ave, Cagayan de Oro" }),
+    ).toBeNull();
+  });
+
+  it("ignores postcode and country, which formatAddress includes", () => {
+    const line = formatLocality(full)!;
+    expect(line).not.toContain("9000");
+    expect(line).not.toContain("PH");
   });
 });

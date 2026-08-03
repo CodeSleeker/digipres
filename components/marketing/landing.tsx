@@ -38,7 +38,6 @@ import { Monogram } from "./monogram";
    would fight the gold on a page this minimal, so it stays in the neutrals. */
 
 const CONTACT = {
-  // TODO(aliamz): replace placeholders with the real contact details.
   email: "hello@aliamz.com",
   phone: "+639977436111",
 };

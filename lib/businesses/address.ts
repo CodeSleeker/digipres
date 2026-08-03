@@ -40,6 +40,29 @@ export function formatAddress(parts: AddressParts): string | null {
 }
 
 /**
+ * Just the PLACE — locality and region — or null when neither is set.
+ *
+ * For surfaces where the street line is noise rather than information: a share
+ * card at thumbnail size, a directory row, anywhere the question is "where is
+ * this business" and not "how do I walk to the door". It also keeps a
+ * home-based tenant's street address out of a preview that gets pasted into
+ * group chats.
+ *
+ * Deliberately does NOT fall back to the pre-0027 free-text `address`: that
+ * field holds a whole address on legacy rows, so falling back would reintroduce
+ * exactly the street line this exists to omit. A tenant with no locality gets
+ * nothing, which is the honest answer and a reason to fill the field in.
+ */
+export function formatLocality(parts: AddressParts): string | null {
+  const line = [parts.addressLocality, parts.addressRegion]
+    .map((part) => part?.trim())
+    .filter((part): part is string => Boolean(part))
+    .join(", ");
+
+  return line || null;
+}
+
+/**
  * The schema.org PostalAddress, or null when there is nothing to say.
  *
  * Only non-empty components are included: an empty string in `addressLocality`
