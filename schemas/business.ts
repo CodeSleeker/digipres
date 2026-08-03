@@ -188,6 +188,7 @@ export const createBusinessSchema = z.object({
       .optional(),
   ),
   logoUrl: optionalUrl,
+  wordmarkUrl: optionalUrl,
   faviconUrl: optionalUrl,
   coverImageUrl: optionalUrl,
   brand: businessBrandSchema.nullable().optional(),

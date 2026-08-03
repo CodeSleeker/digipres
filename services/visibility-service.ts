@@ -24,8 +24,11 @@ import type {
  */
 const PLATFORM = {
   emitsMetaTags: true, // app/page.tsx generateMetadata sets title + description
-  emitsOgImage: false, // no openGraph.images / metadataBase yet
-  emitsTwitterImage: false,
+  // app/s/[slug]/opengraph-image.tsx generates a 1200×630 card per tenant.
+  // Next's file convention emits BOTH og:image and twitter:image from it —
+  // verified against the rendered page, not assumed from the docs.
+  emitsOgImage: true,
+  emitsTwitterImage: true,
   hasCanonical: true, // tenant pages set metadataBase + alternates.canonical
   hasRobots: true, // app/robots.ts
   hasSitemap: true, // app/sitemap.ts (lists active tenant slugs)
@@ -153,15 +156,19 @@ function buildChecks(b: Business): VisibilityCheck[] {
       category: "metadata",
       weight: 6,
       status: PLATFORM.emitsOgImage ? "pass" : "warn",
-      finding: PLATFORM.emitsOgImage
-        ? "Open Graph tags including og:image are emitted."
-        : `Open Graph title/description are emitted, but no og:image. ${
-            has(b.coverImageUrl)
-              ? "A cover image exists and can be wired in."
-              : "No cover image is set to use."
-          }`,
-      recommendation:
-        "Set metadataBase and openGraph.images to the cover image (1200×630) so shared links render a rich preview.",
+      /*
+       * The card is generated per tenant, so it always exists. What varies is
+       * what goes ON it — which is the part the owner controls, and therefore
+       * the only part worth reporting to them.
+       */
+      finding: !PLATFORM.emitsOgImage
+        ? "Open Graph title/description are emitted, but no og:image."
+        : has(b.logoUrl)
+          ? "A 1200×630 share card is generated from your logo and business name, and og:image points at it."
+          : "A 1200×630 share card is generated and og:image points at it, but with no logo uploaded it falls back to a tile showing your initial.",
+      recommendation: has(b.logoUrl)
+        ? "Nothing to do — links to your site render a branded preview. Adding your city under Contact details puts your location on the card too."
+        : "Upload a logo under Branding. It replaces the initial tile on the share card people see when your link is posted to Messenger, Facebook or Viber.",
     },
     {
       id: "twitter-cards",
@@ -170,10 +177,13 @@ function buildChecks(b: Business): VisibilityCheck[] {
       weight: 4,
       status: PLATFORM.emitsTwitterImage ? "pass" : "warn",
       finding: PLATFORM.emitsTwitterImage
-        ? "summary_large_image card with an image is emitted."
+        ? "A summary_large_image card is emitted, using the same generated share image as Open Graph."
         : "A summary_large_image card is declared but has no image, so it falls back to a plain card.",
-      recommendation:
-        "Add twitter.images (the cover image) alongside the existing card so X/Twitter previews show the visual.",
+      // Same image as Open Graph, so the same advice applies; saying it twice
+      // in a checklist reads as two separate jobs.
+      recommendation: has(b.logoUrl)
+        ? "Nothing to do — this uses the same share card as Open Graph above."
+        : "Covered by the Open Graph item above: upload a logo and both previews improve together.",
     },
     {
       id: "canonical",
@@ -288,6 +298,7 @@ function baselineChecks(): VisibilityCheck[] {
     addressPostalCode: null,
     addressCountry: null,
     logoUrl: null,
+    wordmarkUrl: null,
     faviconUrl: null,
     coverImageUrl: null,
     category: "other",

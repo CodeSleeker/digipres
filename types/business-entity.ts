@@ -75,6 +75,12 @@ export interface Business {
   /** ISO 3166-1 alpha-2, e.g. "PH" — `addressCountry`. */
   addressCountry: string | null;
   logoUrl: string | null;
+  /**
+   * Optional image of the business NAME for the header (migration 0030).
+   * When set it replaces the text wordmark; a tenant whose logo is a single
+   * lockup puts it here and leaves logoUrl empty.
+   */
+  wordmarkUrl: string | null;
   /** Square browser-tab icon; falls back to `logoUrl` (see lib/tenant/icons.ts). */
   faviconUrl: string | null;
   coverImageUrl: string | null;

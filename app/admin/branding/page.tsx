@@ -33,6 +33,7 @@ export default async function BrandingPage() {
           businessName={business.name}
           defaultValues={{
             logoUrl: business.logoUrl ?? "",
+            wordmarkUrl: business.wordmarkUrl ?? "",
             faviconUrl: business.faviconUrl ?? "",
             namePrimary: business.brand?.namePrimary ?? "",
             nameAccent: business.brand?.nameAccent ?? "",

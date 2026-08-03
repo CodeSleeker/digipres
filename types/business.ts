@@ -189,6 +189,13 @@ export interface BusinessProfile {
      * the header still reads correctly if the image fails to load.
      */
     logoUrl: string | null;
+    /**
+     * Optional image of the NAME. When set the template shows it instead of
+     * the wordmark words — and gives it a real `alt`, because the name is no
+     * longer text in the DOM. A tenant whose logo is one lockup puts it here
+     * and leaves `logoUrl` null.
+     */
+    wordmarkUrl: string | null;
   };
   seo: {
     title: string;

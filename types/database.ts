@@ -73,6 +73,7 @@ export interface Database {
           address_postal_code: string | null;
           address_country: string | null;
           logo_url: string | null;
+          wordmark_url: string | null;
           favicon_url: string | null;
           notify_email: string | null;
           notify_phone: string | null;
@@ -119,6 +120,7 @@ export interface Database {
           address_postal_code?: string | null;
           address_country?: string | null;
           logo_url?: string | null;
+          wordmark_url?: string | null;
           favicon_url?: string | null;
           notify_email?: string | null;
           notify_phone?: string | null;
@@ -165,6 +167,7 @@ export interface Database {
           address_postal_code?: string | null;
           address_country?: string | null;
           logo_url?: string | null;
+          wordmark_url?: string | null;
           favicon_url?: string | null;
           notify_email?: string | null;
           notify_phone?: string | null;

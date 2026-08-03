@@ -21,6 +21,7 @@ import { Spinner } from "@/components/ui/submit-button";
  */
 const schema = z.object({
   logoUrl: z.string().trim(),
+  wordmarkUrl: z.string().trim(),
   faviconUrl: z.string().trim(),
   namePrimary: z.string().trim().max(40),
   nameAccent: z.string().trim().max(40),
@@ -50,6 +51,7 @@ export function BrandingForm({
     start(async () => {
       const fd = new FormData();
       fd.set("logoUrl", values.logoUrl);
+      fd.set("wordmarkUrl", values.wordmarkUrl);
       fd.set("faviconUrl", values.faviconUrl);
       // An empty primary word clears the override entirely, which is what puts
       // the wordmark back on the derived-from-name path. Sending the object
@@ -83,16 +85,39 @@ export function BrandingForm({
     <form onSubmit={form.handleSubmit(submit)} className="grid max-w-2xl gap-10">
       <section className="grid gap-4">
         <div>
-          <SubHeading>Logo</SubHeading>
+          <SubHeading>Logo mark</SubHeading>
           <p className="mt-1 text-xs leading-relaxed text-gray">
-            Shown in your site header and footer. Leave it empty to use the gold
-            initial mark instead. A transparent PNG or an SVG looks best.
+            The symbol shown in your site header, beside your name. Leave it
+            empty to use the gold initial mark instead. A transparent PNG works
+            best — your header is dark, so a logo saved on a white background
+            shows as a white box. Around 176&nbsp;&times;&nbsp;176 pixels is
+            plenty.
           </p>
         </div>
         <ImageField
           form={form}
           name="logoUrl"
           label="Logo image"
+          businessId={businessId}
+        />
+      </section>
+
+      <section className="grid gap-4">
+        <div>
+          <SubHeading>Name image</SubHeading>
+          <p className="mt-1 text-xs leading-relaxed text-gray">
+            Optional. Upload your business name as an image when it&apos;s set
+            in a specific typeface — we&apos;ll show it instead of the text
+            version. If your logo is a single piece with the name already in it,
+            put that here and leave the logo mark empty, so the name
+            doesn&apos;t appear twice. Transparent PNG, around
+            448&nbsp;&times;&nbsp;64 pixels.
+          </p>
+        </div>
+        <ImageField
+          form={form}
+          name="wordmarkUrl"
+          label="Name image"
           businessId={businessId}
         />
       </section>
@@ -129,10 +154,11 @@ export function BrandingForm({
 
       <section className="grid gap-4">
         <div>
-          <SubHeading>Wordmark</SubHeading>
+          <SubHeading>Wordmark text</SubHeading>
           <p className="mt-1 text-xs leading-relaxed text-gray">
-            The two-tone business name beside your logo. Leave the first field
-            empty to build it from your business name automatically
+            The two-tone business name beside your logo, used when no name image
+            is uploaded above. Leave the first field empty to build it from your
+            business name automatically
             {derived && (
               <>
                 {" "}

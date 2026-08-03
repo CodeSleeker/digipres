@@ -65,7 +65,15 @@ export function resolveBrand(
   base: BusinessProfile,
   business: Business,
 ): BusinessProfile["brand"] {
-  return { ...resolveWordmark(base, business), logoUrl: business.logoUrl };
+  return {
+    ...resolveWordmark(base, business),
+    // `?? null` so the profile matches its own type at RUNTIME, not just to
+    // TypeScript. The repository always produces null for an unset column, but
+    // this is the boundary that builds the rendering contract, and a field the
+    // template branches on should never arrive as undefined from anywhere.
+    logoUrl: business.logoUrl ?? null,
+    wordmarkUrl: business.wordmarkUrl ?? null,
+  };
 }
 
 /**

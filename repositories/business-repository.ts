@@ -126,6 +126,7 @@ export class BusinessRepository {
       address_postal_code: input.addressPostalCode ?? null,
       address_country: input.addressCountry ?? null,
       logo_url: input.logoUrl ?? null,
+      wordmark_url: input.wordmarkUrl ?? null,
       favicon_url: input.faviconUrl ?? null,
       cover_image_url: input.coverImageUrl ?? null,
       category: input.category,
@@ -171,6 +172,8 @@ export class BusinessRepository {
     if (input.addressCountry !== undefined)
       patch.address_country = input.addressCountry;
     if (input.logoUrl !== undefined) patch.logo_url = input.logoUrl;
+    if (input.wordmarkUrl !== undefined)
+      patch.wordmark_url = input.wordmarkUrl;
     if (input.faviconUrl !== undefined) patch.favicon_url = input.faviconUrl;
     if (input.coverImageUrl !== undefined)
       patch.cover_image_url = input.coverImageUrl;
@@ -280,6 +283,7 @@ function toDomain(row: BusinessRow): Business {
     addressPostalCode: row.address_postal_code,
     addressCountry: row.address_country,
     logoUrl: row.logo_url,
+    wordmarkUrl: row.wordmark_url ?? null,
     faviconUrl: row.favicon_url,
     coverImageUrl: row.cover_image_url,
     category: row.category,

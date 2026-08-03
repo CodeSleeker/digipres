@@ -15,6 +15,7 @@ export const ronies: BusinessProfile = {
     initial: "R",
     // Demo content ships no image — a real tenant's upload fills this in.
     logoUrl: null,
+    wordmarkUrl: null,
   },
   seo: {
     title: "Ronie's Barber Shop — Premium Men's Grooming | Cagayan de Oro",
