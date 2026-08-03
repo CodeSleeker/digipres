@@ -52,6 +52,15 @@ export interface Business {
    */
   notifyCustomerSms: boolean;
   /**
+   * Alphanumeric label the recipient sees instead of a number, registered with
+   * the carrier for THIS business (max 11 chars). Super admin only — it is an
+   * arrangement with the carrier, not a tenant preference.
+   *
+   * null means "no explicit sender": Semaphore falls back to the account's
+   * registered default, PhilSMS refuses to send, Twilio never uses it at all.
+   */
+  smsSenderId: string | null;
+  /**
    * Street line ONLY. The remaining components are the fields below.
    *
    * Rows created before migration 0027 hold a whole address here; that still

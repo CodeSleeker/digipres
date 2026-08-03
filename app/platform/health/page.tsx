@@ -5,11 +5,32 @@ import {
   formatAge,
 } from "@/lib/platform/health";
 import { StatTile } from "../_components/stat-tile";
+import type { PlatformHealth } from "@/types/platform";
 
 /**
  * System health: is the scheduler alive, is the queue draining, and which
  * capabilities this environment actually has configured.
  */
+/**
+ * Says which of the two variable names was found and what the store did with
+ * it, rather than naming one variable and leaving the rest to guesswork.
+ *
+ * Vercel renamed Edge Config to Global Config in July 2026: a store connected
+ * today injects GLOBAL_CONFIG, older ones still supply EDGE_CONFIG. Both are
+ * read, so seeing WHICH one was picked up is the fastest way to tell a naming
+ * problem apart from a deployment that simply predates the variable.
+ */
+function edgeConfigHint(probe: PlatformHealth["edgeConfig"]): string {
+  if (!probe.source) {
+    return "Neither GLOBAL_CONFIG nor EDGE_CONFIG is set on this deployment — custom domains fall back to a database lookup. Note that adding the variable in Vercel only takes effect on the NEXT deployment.";
+  }
+  if (probe.reachable === false) {
+    return `${probe.source} is set but the store did not answer: ${probe.error ?? "unknown error"}`;
+  }
+  const store = probe.storeId ?? "id could not be derived — set GLOBAL_CONFIG_ID";
+  return `via ${probe.source} · store ${store} · ${probe.domainCount ?? 0} hostname${probe.domainCount === 1 ? "" : "s"} published`;
+}
+
 export default async function PlatformHealthPage() {
   const health = await getPlatformHealth();
 
@@ -22,7 +43,7 @@ export default async function PlatformHealthPage() {
     [
       "SMS carrier",
       health.smsConfigured,
-      "TWILIO_* — without it messages are marked sent but never leave",
+      "SMS_PROVIDER + TWILIO_* or PHILSMS_API_TOKEN — without one, messages are marked sent but never leave",
     ],
     [
       "Custom domains",
@@ -31,8 +52,10 @@ export default async function PlatformHealthPage() {
     ],
     [
       "Edge routing table",
-      health.edgeConfigConfigured,
-      "EDGE_CONFIG — custom domains resolve via the database fallback without it",
+      // Green only when the store ANSWERS. A set-but-broken connection used to
+      // read as configured, which is the failure this row exists to catch.
+      health.edgeConfig.reachable === true,
+      edgeConfigHint(health.edgeConfig),
     ],
   ];
 

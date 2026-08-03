@@ -159,6 +159,8 @@ export class BusinessRepository {
     if (input.notifyPhone !== undefined) patch.notify_phone = input.notifyPhone;
     if (input.notifyCustomerSms !== undefined)
       patch.notify_customer_sms = input.notifyCustomerSms;
+    if (input.smsSenderId !== undefined)
+      patch.sms_sender_id = input.smsSenderId;
     if (input.address !== undefined) patch.address = input.address;
     if (input.addressLocality !== undefined)
       patch.address_locality = input.addressLocality;
@@ -271,6 +273,7 @@ function toDomain(row: BusinessRow): Business {
     notifyEmail: row.notify_email,
     notifyPhone: row.notify_phone,
     notifyCustomerSms: row.notify_customer_sms ?? true,
+    smsSenderId: row.sms_sender_id ?? null,
     address: row.address,
     addressLocality: row.address_locality,
     addressRegion: row.address_region,

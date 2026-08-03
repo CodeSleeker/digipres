@@ -4,6 +4,10 @@ import { requirePlatformAdmin } from "@/lib/auth/require-platform-admin";
 import { logout } from "@/lib/auth/actions";
 import { PLATFORM_ROLE_LABEL } from "@/types/platform";
 import { SubmitButton } from "@/components/ui/submit-button";
+import {
+  DashboardShell,
+  NavLink,
+} from "@/components/admin/dashboard-shell";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -21,75 +25,46 @@ export default async function PlatformLayout({
   const { user, role } = await requirePlatformAdmin();
 
   return (
-    <div className="flex min-h-screen bg-black text-white">
-      {/* Pinned nav — see the note in app/admin/layout.tsx for why `self-start`
-          is required for `sticky` to do anything inside a flex row. */}
-      <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col gap-6 self-start overflow-y-auto border-r border-dark-border p-6">
-        <Link
-          href="/platform"
-          className="font-heading text-lg tracking-[2px] text-gold"
-        >
-          PLATFORM
-        </Link>
+    <DashboardShell
+      brandLabel="PLATFORM"
+      brandHref="/platform"
+      nav={
         <nav className="flex flex-col gap-1 text-sm">
-          <Link
-            href="/platform"
-            className="py-1 text-gray-light transition-colors hover:text-gold"
-          >
-            Overview
-          </Link>
-          <Link
-            href="/platform/businesses"
-            className="py-1 text-gray-light transition-colors hover:text-gold"
-          >
-            Businesses
-          </Link>
-          <Link
-            href="/platform/analytics"
-            className="py-1 text-gray-light transition-colors hover:text-gold"
-          >
-            Analytics
-          </Link>
-          <Link
-            href="/platform/audit"
-            className="py-1 text-gray-light transition-colors hover:text-gold"
-          >
-            Audit Trail
-          </Link>
-          <Link
-            href="/platform/health"
-            className="py-1 text-gray-light transition-colors hover:text-gold"
-          >
-            System Health
-          </Link>
+          <NavLink href="/platform">Overview</NavLink>
+          <NavLink href="/platform/businesses">Businesses</NavLink>
+          <NavLink href="/platform/analytics">Analytics</NavLink>
+          <NavLink href="/platform/audit">Audit Trail</NavLink>
+          <NavLink href="/platform/health">System Health</NavLink>
         </nav>
+      }
+      navFooter={
         <Link
           href="/admin"
-          className="mt-auto text-xs text-gray transition-colors hover:text-gold"
+          className="text-xs text-gray transition-colors hover:text-gold"
         >
           ← My business back office
         </Link>
-      </aside>
-
-      <div className="flex-1">
-        <header className="flex items-center justify-between border-b border-dark-border px-8 py-4">
-          <div className="flex flex-col">
-            <span className="text-sm text-white">
-              {PLATFORM_ROLE_LABEL[role]}
-            </span>
-            <span className="text-[0.7rem] text-gray">{user.email}</span>
-          </div>
-          <form action={logout}>
-            <SubmitButton
-              pendingLabel="SIGNING OUT…"
-              className="inline-flex h-8 items-center rounded-none border border-dark-border px-4 text-xs tracking-[2px] text-white transition-colors hover:border-gold hover:text-gold"
-            >
-              LOG OUT
-            </SubmitButton>
-          </form>
-        </header>
-        <main className="p-8">{children}</main>
-      </div>
-    </div>
+      }
+      headerLeft={
+        <>
+          <span className="truncate text-sm text-white">
+            {PLATFORM_ROLE_LABEL[role]}
+          </span>
+          <span className="truncate text-[0.7rem] text-gray">{user.email}</span>
+        </>
+      }
+      headerRight={
+        <form action={logout}>
+          <SubmitButton
+            pendingLabel="SIGNING OUT…"
+            className="inline-flex h-8 items-center rounded-none border border-dark-border px-3 text-xs tracking-[2px] text-white transition-colors hover:border-gold hover:text-gold sm:px-4"
+          >
+            LOG OUT
+          </SubmitButton>
+        </form>
+      }
+    >
+      {children}
+    </DashboardShell>
   );
 }

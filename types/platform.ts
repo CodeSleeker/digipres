@@ -1,4 +1,5 @@
 import type { PlatformRoleEnum } from "./database";
+import type { EdgeConfigProbe } from "@/lib/tenant/edge-routing";
 
 /**
  * Platform (super admin) domain types. Distinct from tenant types: these
@@ -92,6 +93,12 @@ export interface PlatformHealth {
   edgeConfigConfigured: boolean;
   cronSecretConfigured: boolean;
   domainProvisioningConfigured: boolean;
+  /**
+   * Live detail behind `edgeConfigConfigured`: which variable supplied the
+   * connection, and whether the store actually answers. The boolean alone
+   * cannot distinguish "not configured" from "configured but broken".
+   */
+  edgeConfig: EdgeConfigProbe;
 }
 
 /** Cross-tenant growth over time. */

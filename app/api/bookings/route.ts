@@ -138,6 +138,7 @@ export async function POST(request: NextRequest) {
       { mobile: customer.mobile, smsStatus: customer.smsStatus },
       {
         businessName: business.name,
+        smsSenderId: business.smsSenderId,
         customerName: booking.name,
         service: booking.service,
         date: booking.date,

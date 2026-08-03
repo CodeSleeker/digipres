@@ -1,5 +1,8 @@
 import type { SmsSender, SmsSendOptions, SmsSendResult } from "./sender";
 import { smsSegments, toGsm7 } from "./gsm7";
+import { normalizeSenderId } from "./sender-id";
+
+export { normalizeSenderId };
 
 /**
  * PhilSMS-backed SmsSender. Speaks their REST API over plain fetch, same as the
@@ -15,51 +18,9 @@ import { smsSegments, toGsm7 } from "./gsm7";
  */
 export interface PhilSmsConfig {
   apiToken: string;
-  /**
-   * A fixed sender ID applied to EVERY message, ignoring the per-tenant name.
-   *
-   * Set it while only one label is approved (e.g. "PhilSMS"). Leave it blank to
-   * go dynamic: each message is then sent under the business it belongs to.
-   */
-  senderId?: string;
 }
 
 const ENDPOINT = "https://dashboard.philsms.com/api/v3/sms/send";
-
-/**
- * Alphanumeric sender IDs are capped at 11 characters by the GSM standard, and
- * the carrier silently truncates or rejects anything longer — so do it here,
- * predictably, where the result can be reasoned about.
- *
- * Whole words are preferred over a hard cut: "Ronie's Barber" becomes "Ronies"
- * rather than "Ronies Barb". A name that doesn't fit is better shortened at a
- * boundary a human chose than mid-syllable.
- *
- * Returns null when nothing usable survives, so the caller falls back rather
- * than sending an empty sender_id.
- */
-export function normalizeSenderId(raw: string): string | null {
-  const cleaned = raw
-    // Only letters, digits and spaces survive; apostrophes, "&" and accents are
-    // the common rejections.
-    .replace(/[^A-Za-z0-9 ]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  if (!cleaned) return null;
-  if (cleaned.length <= 11) return cleaned;
-
-  const words = cleaned.split(" ");
-  let out = "";
-  for (const word of words) {
-    const next = out ? `${out} ${word}` : word;
-    if (next.length > 11) break;
-    out = next;
-  }
-
-  // A single first word longer than the limit still has to be cut somewhere.
-  return out || words[0]!.slice(0, 11);
-}
 
 /**
  * PhilSMS expects a bare international number ("639977436111"), not E.164 with
@@ -78,20 +39,18 @@ export class PhilSmsSender implements SmsSender {
     body: string,
     options?: SmsSendOptions,
   ): Promise<SmsSendResult> {
-    // A configured sender ID WINS over the per-tenant name. It exists precisely
-    // for the case where only one label is approved with the carrier, so a
-    // business name must not be able to override it into a rejected send.
-    const senderId =
-      normalizeSenderId(this.config.senderId ?? "") ??
-      normalizeSenderId(options?.senderId ?? "");
+    // Comes from businesses.sms_sender_id and nowhere else. There is no env
+    // fallback and no business-name fallback by design (migration 0028).
+    const senderId = normalizeSenderId(options?.senderId ?? "");
 
     if (!senderId) {
-      // Failing loudly beats posting an empty sender_id and reading the
-      // carrier's error later: nothing here is recoverable at runtime.
+      // PhilSMS requires sender_id — unlike Semaphore, it has no account-level
+      // default to fall back on. Failing here, before the HTTP call, beats
+      // posting an empty field and decoding the carrier's rejection later.
       return {
         success: false,
         error:
-          "PhilSMS: no sender ID — set PHILSMS_SENDER_ID or pass the business name.",
+          "PhilSMS: no SMS sender ID set for this business — set one under /platform/businesses.",
       };
     }
 
@@ -166,16 +125,10 @@ export class PhilSmsSender implements SmsSender {
   }
 }
 
-/**
- * Build a PhilSmsConfig from env, or null when the token is missing.
- *
- * Only the token is required — a blank PHILSMS_SENDER_ID is the documented way
- * to ask for per-business sender IDs, not a half-configured provider.
- */
+/** Build a PhilSmsConfig from env, or null when the token is missing. */
 export function philSmsConfigFromEnv(
   env: Record<string, string | undefined> = process.env,
 ): PhilSmsConfig | null {
   const apiToken = env.PHILSMS_API_TOKEN?.trim();
-  if (!apiToken) return null;
-  return { apiToken, senderId: env.PHILSMS_SENDER_ID?.trim() || undefined };
+  return apiToken ? { apiToken } : null;
 }

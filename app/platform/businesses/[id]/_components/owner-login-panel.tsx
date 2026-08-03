@@ -38,7 +38,9 @@ export function OwnerLoginPanel({
         <input type="hidden" name="businessId" value={businessId} />
 
         <div className="flex flex-wrap items-end gap-3">
-          <label className="flex flex-col gap-1.5">
+          {/* Full width below sm, original fixed width above. These fields were
+              wider than a phone viewport and pushed the whole page sideways. */}
+          <label className="flex w-full flex-col gap-1.5 sm:w-auto">
             <span className="text-[0.7rem] uppercase tracking-[1.5px] text-gray">
               Login email
             </span>
@@ -47,7 +49,7 @@ export function OwnerLoginPanel({
               type="email"
               defaultValue={currentEmail ?? ""}
               required
-              className="min-w-[20rem] border border-dark-border bg-black px-3 py-2 text-sm text-white focus-visible:border-gold focus-visible:outline-none"
+              className="w-full border border-dark-border bg-black px-3 py-2 text-sm text-white focus-visible:border-gold focus-visible:outline-none sm:min-w-[20rem]"
             />
           </label>
 
@@ -103,7 +105,7 @@ export function OwnerLoginPanel({
           <input type="hidden" name="businessId" value={businessId} />
 
           <div className="flex flex-wrap items-end gap-3">
-            <label className="flex flex-col gap-1.5">
+            <label className="flex w-full flex-col gap-1.5 sm:w-auto">
               <span className="text-[0.7rem] uppercase tracking-[1.5px] text-gray">
                 New owner&apos;s email
               </span>
@@ -112,11 +114,11 @@ export function OwnerLoginPanel({
                 type="email"
                 required
                 placeholder="new-owner@example.com"
-                className="min-w-[18rem] border border-dark-border bg-black px-3 py-2 text-sm text-white placeholder:text-gray focus-visible:border-gold focus-visible:outline-none"
+                className="w-full border border-dark-border bg-black px-3 py-2 text-sm text-white placeholder:text-gray focus-visible:border-gold focus-visible:outline-none sm:min-w-[18rem]"
               />
             </label>
 
-            <label className="flex flex-col gap-1.5">
+            <label className="flex w-full flex-col gap-1.5 sm:w-auto">
               <span className="text-[0.7rem] uppercase tracking-[1.5px] text-gray">
                 Confirm
               </span>
@@ -125,7 +127,7 @@ export function OwnerLoginPanel({
                 autoComplete="off"
                 required
                 placeholder={`Type "${slug}"`}
-                className="min-w-[12rem] border border-dark-border bg-black px-3 py-2 text-sm text-white placeholder:text-gray focus-visible:border-gold focus-visible:outline-none"
+                className="w-full border border-dark-border bg-black px-3 py-2 text-sm text-white placeholder:text-gray focus-visible:border-gold focus-visible:outline-none sm:min-w-[12rem]"
               />
             </label>
 

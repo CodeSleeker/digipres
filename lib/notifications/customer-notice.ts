@@ -18,6 +18,11 @@ import { clipForSms } from "@/lib/sms/gsm7";
 
 export interface CustomerBookingNotice {
   businessName: string;
+  /**
+   * `businesses.sms_sender_id` — the label the customer sees, registered with
+   * the carrier. Separate from `businessName`, which is only message copy.
+   */
+  smsSenderId?: string | null;
   customerName: string;
   service: string | null;
   /** YYYY-MM-DD. */
@@ -105,7 +110,7 @@ async function send(
       // This one matters most: it's the text a CUSTOMER receives, and a booking
       // confirmation from "RoniesBarber" is recognised where one from a random
       // shortcode is ignored or reported as spam.
-      { senderId: notice.businessName },
+      { senderId: notice.smsSenderId ?? undefined },
     );
     return result.success ? "sent" : "failed";
   } catch (error) {

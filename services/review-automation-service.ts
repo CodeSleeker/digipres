@@ -39,25 +39,26 @@ export class ReviewAutomationService {
   ) {}
 
   /**
-   * The business name to send a queued message under, memoized in `cache`.
+   * The tenant's registered SMS sender ID, memoized in `cache`.
    *
-   * Best-effort: a failed lookup yields undefined, and the message still goes
-   * out under whatever the provider's configured default is. A review reminder
-   * is not worth losing over a name.
+   * `businesses.sms_sender_id`, not the business name — see migration 0028.
+   * Best-effort: a failed lookup yields undefined and the provider decides what
+   * that means (Semaphore uses its account default, PhilSMS declines).
    */
   private async senderIdFor(
     businessId: string,
     cache: Map<string, string | undefined>,
   ): Promise<string | undefined> {
     if (cache.has(businessId)) return cache.get(businessId);
-    let name: string | undefined;
+    let senderId: string | undefined;
     try {
-      name = (await this.businesses.findById(businessId))?.name;
+      senderId =
+        (await this.businesses.findById(businessId))?.smsSenderId ?? undefined;
     } catch {
-      name = undefined;
+      senderId = undefined;
     }
-    cache.set(businessId, name);
-    return name;
+    cache.set(businessId, senderId);
+    return senderId;
   }
 
   /** Called when an appointment transitions into 'completed'. */

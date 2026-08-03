@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getOwnerContext } from "@/lib/tenant/business-context";
+import {
+  DashboardShell,
+  NavLink,
+} from "@/components/admin/dashboard-shell";
 import { SuspendedNotice } from "./_components/suspended-notice";
 import { logout } from "@/lib/auth/actions";
 import { templateSections } from "@/templates/registry";
@@ -54,116 +57,65 @@ export default async function AdminLayout({
       : null;
 
   return (
-    <div className="flex min-h-screen bg-black text-white">
-      {/* Pinned nav. `self-start` is load-bearing: a flex item stretches to the
-          row's full height by default, and an element already as tall as its
-          container has nothing to stick to. `overflow-y-auto` keeps a long nav
-          (many features + every template section) reachable on short screens. */}
-      <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col gap-6 self-start overflow-y-auto border-r border-dark-border p-6">
-        <Link
-          href="/admin"
-          className="font-heading text-lg tracking-[2px] text-gold"
-        >
-          DASHBOARD
-        </Link>
+    <DashboardShell
+      brandLabel="DASHBOARD"
+      brandHref="/admin"
+      banner={
+        isImpersonating && business ? (
+          <ImpersonationBanner businessName={business.name} />
+        ) : null
+      }
+      nav={
         <nav className="flex flex-col gap-1 text-sm">
-          <Link
-            href="/admin"
-            className="py-1 text-gray-light transition-colors hover:text-gold"
-          >
-            Overview
-          </Link>
+          <NavLink href="/admin">Overview</NavLink>
           {features.analytics && (
-            <Link
-              href="/admin/analytics"
-              className="py-1 text-gray-light transition-colors hover:text-gold"
-            >
-              Analytics
-            </Link>
+            <NavLink href="/admin/analytics">Analytics</NavLink>
           )}
-          <Link
-            href="/admin/ai-visibility"
-            className="py-1 text-gray-light transition-colors hover:text-gold"
-          >
-            AI Visibility
-          </Link>
-          <Link
-            href="/admin/onboarding"
-            className="py-1 text-gray-light transition-colors hover:text-gold"
-          >
-            Google Profile
-          </Link>
-          <Link
-            href="/admin/settings"
-            className="py-1 text-gray-light transition-colors hover:text-gold"
-          >
-            Contact details
-          </Link>
+          <NavLink href="/admin/ai-visibility">AI Visibility</NavLink>
+          <NavLink href="/admin/onboarding">Google Profile</NavLink>
+          <NavLink href="/admin/settings">Contact details</NavLink>
           {features.custom_domains && (
-            <Link
-              href="/admin/domains"
-              className="py-1 text-gray-light transition-colors hover:text-gold"
-            >
-              Domains
-            </Link>
+            <NavLink href="/admin/domains">Domains</NavLink>
           )}
-          <Link
-            href="/admin/customers"
-            className="py-1 text-gray-light transition-colors hover:text-gold"
-          >
-            Customers
-          </Link>
+          <NavLink href="/admin/customers">Customers</NavLink>
           {features.appointments && (
-            <Link
+            <NavLink
               href="/admin/appointments"
-              className="flex items-center justify-between gap-2 py-1 text-gray-light transition-colors hover:text-gold"
+              className="flex items-center justify-between gap-2"
             >
               Appointments
               <PendingAppointmentsBadge serverCount={pendingAppointments} />
-            </Link>
+            </NavLink>
           )}
           {features.reviews && (
-            <Link
-              href="/admin/reviews"
-              className="py-1 text-gray-light transition-colors hover:text-gold"
-            >
-              Review Automation
-            </Link>
+            <NavLink href="/admin/reviews">Review Automation</NavLink>
           )}
           {features.ai_messages && (
-            <Link
-              href="/admin/ai-messages"
-              className="py-1 text-gray-light transition-colors hover:text-gold"
-            >
-              AI Messages
-            </Link>
+            <NavLink href="/admin/ai-messages">AI Messages</NavLink>
           )}
           <div className="mb-1 mt-4 text-[0.65rem] uppercase tracking-[2px] text-gray">
             Website
           </div>
           {/* Branding sits above the sections because it isn't one: it's on the
               business record and applies to every template. */}
-          <Link
-            href="/admin/branding"
-            className="py-1 text-gray-light transition-colors hover:text-gold"
-          >
-            Branding
-          </Link>
+          <NavLink href="/admin/branding">Branding</NavLink>
           {/* Only the sections this tenant's template actually renders. */}
           {templateSections(business?.templateCode).map((section) => (
-            <Link
+            <NavLink
               key={section}
               href={`/admin/website/${section}`}
-              className="py-1 capitalize text-gray-light transition-colors hover:text-gold"
+              className="capitalize"
             >
               {section}
-            </Link>
+            </NavLink>
           ))}
         </nav>
-        <div className="mt-auto flex flex-col gap-2">
+      }
+      navFooter={
+        <>
           {/* In the sidebar so its status line is visible; the toast it also
               renders is position-fixed, so where it sits in the DOM is
-              irrelevant. */}
+              irrelevant — including while the drawer is shut. */}
           {businessId && features.appointments && !blocked && (
             <LiveAppointments businessId={businessId} />
           )}
@@ -177,42 +129,47 @@ export default async function AdminLayout({
           >
             View live site ↗
           </a>
-        </div>
-      </aside>
-
-      <div className="flex-1">
-        {isImpersonating && business && (
-          <ImpersonationBanner businessName={business.name} />
-        )}
-        <header className="flex items-center justify-between border-b border-dark-border px-8 py-4">
-          <div className="flex flex-col">
-            {business ? (
-              <span className="text-sm text-white">
-                {business.name}
-                <span className="ml-2 text-xs text-gray">/{business.slug}</span>
-              </span>
-            ) : (
-              <span className="text-sm text-gray">No business yet</span>
-            )}
-            <span className="text-[0.7rem] text-gray">{user.email}</span>
-          </div>
-          <form action={logout}>
-            <SubmitButton
-              pendingLabel="SIGNING OUT…"
-              className="inline-flex h-8 items-center rounded-none border border-dark-border px-4 text-xs tracking-[2px] text-white transition-colors hover:border-gold hover:text-gold"
-            >
-              LOG OUT
-            </SubmitButton>
-          </form>
-        </header>
-        <main className="p-8">
-          {blocked && business ? (
-            <SuspendedNotice businessName={business.name} status={blocked} />
-          ) : (
-            children
-          )}
-        </main>
-      </div>
-    </div>
+        </>
+      }
+      headerLeft={
+        business ? (
+          <>
+            <span className="truncate text-sm text-white">
+              {business.name}
+              <span className="ml-2 text-xs text-gray">/{business.slug}</span>
+            </span>
+            <span className="truncate text-[0.7rem] text-gray">
+              {user.email}
+            </span>
+          </>
+        ) : (
+          <>
+            <span className="text-sm text-gray">No business yet</span>
+            <span className="truncate text-[0.7rem] text-gray">
+              {user.email}
+            </span>
+          </>
+        )
+      }
+      headerRight={
+        <form action={logout}>
+          <SubmitButton
+            pendingLabel="SIGNING OUT…"
+            className="inline-flex h-8 items-center rounded-none border border-dark-border px-3 text-xs tracking-[2px] text-white transition-colors hover:border-gold hover:text-gold sm:px-4"
+          >
+            {/* The word is redundant next to the icon-free header on a phone,
+                but "OUT" alone reads as a truncation bug — so keep it whole and
+                buy the room back from the padding instead. */}
+            LOG OUT
+          </SubmitButton>
+        </form>
+      }
+    >
+      {blocked && business ? (
+        <SuspendedNotice businessName={business.name} status={blocked} />
+      ) : (
+        children
+      )}
+    </DashboardShell>
   );
 }

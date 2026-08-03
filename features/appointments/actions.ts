@@ -185,6 +185,7 @@ async function tellCustomerItsConfirmed(
 
     const result = await notifyCustomerBookingConfirmed(business, customer, {
       businessName: business.name,
+      smsSenderId: business.smsSenderId,
       customerName: customer.name,
       service: appointment.service,
       date: appointment.startsAt.slice(0, 10),

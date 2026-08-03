@@ -87,3 +87,77 @@ export async function getTenantRouting(): Promise<TenantRouting | null> {
     return null;
   }
 }
+
+/** Which variable actually supplied the connection string. */
+export function edgeConfigSource(
+  env: Record<string, string | undefined> = process.env,
+): "GLOBAL_CONFIG" | "EDGE_CONFIG" | null {
+  if (env.GLOBAL_CONFIG?.trim()) return "GLOBAL_CONFIG";
+  if (env.EDGE_CONFIG?.trim()) return "EDGE_CONFIG";
+  return null;
+}
+
+export interface EdgeConfigProbe {
+  /** The variable the connection string came from, or null if neither is set. */
+  source: "GLOBAL_CONFIG" | "EDGE_CONFIG" | null;
+  /** Store id used by the WRITE path — derived from the URL unless set explicitly. */
+  storeId: string | null;
+  /** Live read result. null when there is nothing to read. */
+  reachable: boolean | null;
+  /** Verified hostnames currently published in the table. */
+  domainCount: number | null;
+  /** Why the read failed, safe to display (never contains the token). */
+  error: string | null;
+}
+
+/**
+ * Does the store actually answer — as opposed to "is a variable non-empty".
+ *
+ * The boolean this replaces on the health page could not tell those apart, so a
+ * connected-but-broken store (wrong token, deleted store, or a deployment that
+ * predates the variable being added) reported exactly the same as a working one.
+ * Since a routing miss falls back to the database rather than erroring, nothing
+ * else in the product would have shown a difference either.
+ *
+ * Best-effort and never throws: this is a diagnostic, and it must not be able to
+ * take the health page down.
+ */
+export async function probeEdgeConfig(): Promise<EdgeConfigProbe> {
+  const source = edgeConfigSource();
+  const storeId = edgeConfigStoreId() ?? null;
+  const connection = edgeConfigConnection();
+
+  if (!connection) {
+    return {
+      source: null,
+      storeId,
+      reachable: null,
+      domainCount: null,
+      error: null,
+    };
+  }
+
+  try {
+    // A dedicated client: reusing the module-level one would cache a failure
+    // from a previous request for the lifetime of the server process.
+    const probe = createClient(connection);
+    const table = await probe.get<TenantRouting>(TENANT_ROUTING_KEY);
+    return {
+      source,
+      storeId,
+      reachable: true,
+      domainCount: Object.keys(table?.domains ?? {}).length,
+      error: null,
+    };
+  } catch (error) {
+    return {
+      source,
+      storeId,
+      reachable: false,
+      domainCount: null,
+      // Message only. The connection string carries a token and must never
+      // reach a rendered page, even one behind the super admin guard.
+      error: error instanceof Error ? error.message.slice(0, 200) : "Unknown error",
+    };
+  }
+}

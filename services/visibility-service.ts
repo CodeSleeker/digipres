@@ -281,6 +281,7 @@ function baselineChecks(): VisibilityCheck[] {
     notifyEmail: null,
     notifyPhone: null,
     notifyCustomerSms: true,
+    smsSenderId: null,
     address: null,
     addressLocality: null,
     addressRegion: null,

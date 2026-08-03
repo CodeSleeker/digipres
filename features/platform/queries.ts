@@ -19,7 +19,10 @@ import { getEntitlement } from "@/features/billing/queries";
 import type { Entitlement, Plan } from "@/types/billing";
 import type { Business } from "@/types/business-entity";
 import type { BusinessDomain } from "@/types/domain";
-import { edgeConfigConnection } from "@/lib/tenant/edge-routing";
+import {
+  edgeConfigConnection,
+  probeEdgeConfig,
+} from "@/lib/tenant/edge-routing";
 import type {
   AuditListQuery,
   AuditListResult,
@@ -91,6 +94,9 @@ export async function getPlatformHealth(): Promise<PlatformHealth> {
   ).failedMessages();
   const minutes = minutesSince(lastRun?.startedAt);
 
+  // A live read, not just an env-var presence check — see probeEdgeConfig.
+  const edgeConfig = await probeEdgeConfig();
+
   return {
     lastRun,
     minutesSinceLastRun: minutes,
@@ -107,6 +113,7 @@ export async function getPlatformHealth(): Promise<PlatformHealth> {
         process.env.PHILSMS_API_TOKEN,
     ),
     edgeConfigConfigured: Boolean(edgeConfigConnection()),
+    edgeConfig,
     cronSecretConfigured: Boolean(process.env.CRON_SECRET),
     domainProvisioningConfigured: Boolean(
       process.env.VERCEL_API_TOKEN && process.env.VERCEL_PROJECT_ID,

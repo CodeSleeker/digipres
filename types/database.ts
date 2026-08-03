@@ -73,6 +73,7 @@ export interface Database {
           notify_email: string | null;
           notify_phone: string | null;
           notify_customer_sms: boolean;
+          sms_sender_id: string | null;
           cover_image_url: string | null;
           category: BusinessCategoryEnum;
           owner_name: string | null;
@@ -118,6 +119,7 @@ export interface Database {
           notify_email?: string | null;
           notify_phone?: string | null;
           notify_customer_sms?: boolean;
+          sms_sender_id?: string | null;
           cover_image_url?: string | null;
           category?: BusinessCategoryEnum;
           owner_name?: string | null;
@@ -163,6 +165,7 @@ export interface Database {
           notify_email?: string | null;
           notify_phone?: string | null;
           notify_customer_sms?: boolean;
+          sms_sender_id?: string | null;
           cover_image_url?: string | null;
           category?: BusinessCategoryEnum;
           owner_name?: string | null;

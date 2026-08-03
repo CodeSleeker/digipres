@@ -94,7 +94,7 @@ export function LifecyclePanel({
               name="confirmSlug"
               autoComplete="off"
               placeholder={`Type "${business.slug}" to confirm`}
-              className="min-w-[16rem] border border-dark-border bg-black px-3 py-2 text-sm text-white placeholder:text-gray focus-visible:border-gold focus-visible:outline-none"
+              className="w-full border border-dark-border bg-black px-3 py-2 text-sm text-white placeholder:text-gray focus-visible:border-gold focus-visible:outline-none sm:w-auto sm:min-w-[16rem]"
             />
             <SubmitButton
               pendingLabel="Removing…"

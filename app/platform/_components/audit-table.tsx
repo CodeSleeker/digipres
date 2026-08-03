@@ -48,7 +48,7 @@ export function AuditTable({ rows }: { rows: AuditEntry[] }) {
   }
 
   return (
-    <div className="overflow-x-auto border border-dark-border">
+    <div className="min-w-0 overflow-x-auto border border-dark-border">
       <table className="w-full min-w-[52rem] text-left text-sm">
         <thead className="border-b border-dark-border text-[0.7rem] uppercase tracking-[1px] text-gray">
           <tr>

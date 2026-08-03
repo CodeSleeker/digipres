@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   PhilSmsSender,
-  normalizeSenderId,
   philSmsConfigFromEnv,
   philSmsRecipient,
 } from "@/lib/sms/philsms-sender";
+import { normalizeSenderId } from "@/lib/sms/sender-id";
 
 describe("normalizeSenderId", () => {
-  it("passes a short clean name through", () => {
+  it("passes a short clean value through", () => {
     expect(normalizeSenderId("Ronies")).toBe("Ronies");
   });
 
@@ -17,7 +17,6 @@ describe("normalizeSenderId", () => {
   });
 
   it("drops whole trailing words rather than cutting mid-word", () => {
-    // 13 chars once cleaned, so it must shorten — at the space, not at 11.
     expect(normalizeSenderId("Ronie's Barber")).toBe("Ronie s");
     expect(normalizeSenderId("Metro Manila Cuts")).toBe("Metro");
   });
@@ -59,20 +58,23 @@ describe("philSmsConfigFromEnv", () => {
   it("needs only the token", () => {
     expect(philSmsConfigFromEnv({ PHILSMS_API_TOKEN: "t" })).toEqual({
       apiToken: "t",
-      senderId: undefined,
     });
   });
 
   it("is null without a token", () => {
-    expect(philSmsConfigFromEnv({ PHILSMS_SENDER_ID: "X" })).toBeNull();
+    expect(philSmsConfigFromEnv({})).toBeNull();
+    expect(philSmsConfigFromEnv({ PHILSMS_API_TOKEN: "  " })).toBeNull();
   });
 
-  it("treats a blank sender ID as dynamic, not as a value", () => {
+  it("ignores a legacy PHILSMS_SENDER_ID entirely", () => {
+    // The env-level sender ID was removed in favour of businesses.sms_sender_id
+    // (migration 0028). A leftover variable must not creep back into the config.
     const config = philSmsConfigFromEnv({
       PHILSMS_API_TOKEN: "t",
-      PHILSMS_SENDER_ID: "   ",
+      PHILSMS_SENDER_ID: "Legacy",
     });
-    expect(config?.senderId).toBeUndefined();
+    expect(config).toEqual({ apiToken: "t" });
+    expect(config).not.toHaveProperty("senderId");
   });
 });
 
@@ -97,61 +99,52 @@ describe("PhilSmsSender.send", () => {
     return JSON.parse(init.body) as Record<string, string>;
   }
 
+  const send = (body: string, senderId?: string) =>
+    new PhilSmsSender({ apiToken: "tok" }).send(
+      "+639977436111",
+      body,
+      senderId ? { senderId } : undefined,
+    );
+
   it("posts the documented shape and returns the message uid", async () => {
     const fetchMock = mockFetch(200, {
       status: "success",
       data: { uid: "msg_1" },
     });
 
-    const result = await new PhilSmsSender({
-      apiToken: "tok",
-      senderId: "PhilSMS",
-    }).send("+639977436111", "Test");
+    const result = await send("Hello there", "RoniesBarb");
 
     expect(result).toEqual({ success: true, providerMessageId: "msg_1" });
     expect(payloadOf(fetchMock)).toEqual({
       recipient: "639977436111",
-      sender_id: "PhilSMS",
+      sender_id: "RoniesBarb",
       type: "plain",
-      message: "Test",
+      message: "Hello there",
     });
   });
 
-  it("uses the business name when no fixed sender ID is configured", async () => {
+  it("takes the sender ID from the per-business option and nowhere else", async () => {
     const fetchMock = mockFetch(200, { status: "success" });
-
-    await new PhilSmsSender({ apiToken: "tok" }).send("+639170000000", "Hi", {
-      senderId: "Ronie's Barber",
-    });
-
+    await send("Hi", "Ronie's Barber");
     expect(payloadOf(fetchMock).sender_id).toBe("Ronie s");
   });
 
-  it("lets a configured sender ID WIN over the business name", async () => {
-    // The whole point of the fixed setting: only one label is approved with the
-    // carrier, so tenant data must not be able to override it into a rejection.
+  it("refuses to send when the business has no sender ID", async () => {
+    // PhilSMS has no account-level default, so there is nothing to fall back
+    // to — failing before the HTTP call beats decoding their rejection later.
     const fetchMock = mockFetch(200, { status: "success" });
 
-    await new PhilSmsSender({ apiToken: "tok", senderId: "PhilSMS" }).send(
-      "+639170000000",
-      "Hi",
-      { senderId: "Ronies Barber" },
-    );
-
-    expect(payloadOf(fetchMock).sender_id).toBe("PhilSMS");
-  });
-
-  it("fails loudly rather than posting an empty sender_id", async () => {
-    const fetchMock = mockFetch(200, { status: "success" });
-
-    const result = await new PhilSmsSender({ apiToken: "tok" }).send(
-      "+639170000000",
-      "Hi",
-    );
+    const result = await send("Hi");
 
     expect(result.success).toBe(false);
     expect(result.error).toMatch(/sender ID/i);
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("downgrades the body to GSM-7 before sending", async () => {
+    const fetchMock = mockFetch(200, { status: "success" });
+    await send("Ronie’s — café", "Ronies");
+    expect(payloadOf(fetchMock).message).toBe("Ronie's - café");
   });
 
   it("reports failure on an error status inside a 200 body", async () => {
@@ -160,10 +153,7 @@ describe("PhilSmsSender.send", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     mockFetch(200, { status: "error", message: "Invalid sender id" });
 
-    const result = await new PhilSmsSender({
-      apiToken: "tok",
-      senderId: "Nope",
-    }).send("+639170000000", "Hi");
+    const result = await send("Hi", "Nope");
 
     expect(result.success).toBe(false);
     expect(result.error).toContain("Invalid sender id");
@@ -178,20 +168,14 @@ describe("PhilSmsSender.send", () => {
       }),
     );
 
-    const result = await new PhilSmsSender({
-      apiToken: "tok",
-      senderId: "X",
-    }).send("+639170000000", "Hi");
+    const result = await send("Hi", "Ronies");
 
     expect(result).toEqual({ success: false, error: "network down" });
   });
 
   it("sends the token as a bearer credential", async () => {
     const fetchMock = mockFetch(200, { status: "success" });
-    await new PhilSmsSender({ apiToken: "tok", senderId: "X" }).send(
-      "+639170000000",
-      "Hi",
-    );
+    await send("Hi", "Ronies");
     const [, init] = fetchMock.mock.calls[0] as unknown as [
       string,
       { headers: Record<string, string> },

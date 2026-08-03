@@ -25,7 +25,10 @@ export function DetailsPanel({ business }: { business: Business }) {
       >
         <input type="hidden" name="businessId" value={business.id} />
 
-        <label className="flex flex-col gap-1.5">
+        {/* Full width on a phone, the old fixed width from sm up. A bare
+            `min-w-[20rem]` is wider than a 375px viewport once the panel's
+            padding is taken off, so it forced the page to scroll sideways. */}
+        <label className="flex w-full flex-col gap-1.5 sm:w-auto">
           <span className="text-[0.7rem] uppercase tracking-[1.5px] text-gray">
             Business name
           </span>
@@ -34,7 +37,7 @@ export function DetailsPanel({ business }: { business: Business }) {
             defaultValue={business.name}
             required
             maxLength={120}
-            className="min-w-[20rem] border border-dark-border bg-black px-3 py-2 text-sm text-white focus-visible:border-gold focus-visible:outline-none"
+            className="w-full border border-dark-border bg-black px-3 py-2 text-sm text-white focus-visible:border-gold focus-visible:outline-none sm:min-w-[20rem]"
           />
         </label>
 

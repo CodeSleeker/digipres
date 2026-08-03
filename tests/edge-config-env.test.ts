@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   edgeConfigConnection,
   edgeConfigStoreId,
+  edgeConfigSource,
 } from "@/lib/tenant/edge-routing";
 
 /**
@@ -69,5 +70,27 @@ describe("edgeConfigStoreId", () => {
         GLOBAL_CONFIG: "https://edge-config.vercel.com/v1/ecfg_zzz?token=t",
       }),
     ).toBe("ecfg_zzz");
+  });
+});
+
+describe("edgeConfigSource", () => {
+  it("names the variable that supplied the connection", () => {
+    expect(edgeConfigSource({ GLOBAL_CONFIG: CONNECTION })).toBe(
+      "GLOBAL_CONFIG",
+    );
+    expect(edgeConfigSource({ EDGE_CONFIG: CONNECTION })).toBe("EDGE_CONFIG");
+  });
+
+  it("prefers the current name when both are present", () => {
+    expect(
+      edgeConfigSource({ GLOBAL_CONFIG: CONNECTION, EDGE_CONFIG: CONNECTION }),
+    ).toBe("GLOBAL_CONFIG");
+  });
+
+  it("is null when neither is set, and treats blank as unset", () => {
+    // A variable declared-but-empty in .env is the common local case; it must
+    // not report as configured.
+    expect(edgeConfigSource({})).toBeNull();
+    expect(edgeConfigSource({ GLOBAL_CONFIG: "", EDGE_CONFIG: "  " })).toBeNull();
   });
 });

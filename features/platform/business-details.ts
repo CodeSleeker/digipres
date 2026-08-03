@@ -102,6 +102,80 @@ async function applyName(
   }
 }
 
+// ── SMS sender ID ───────────────────────────────────────────────────────────
+
+/**
+ * The alphanumeric label this tenant's texts are sent under (migration 0028).
+ *
+ * PLATFORM-ONLY, not in the client back office, and that is the point. A sender
+ * ID has to be REGISTERED with the carrier before it will be delivered — an
+ * unregistered one is rejected or silently relabelled. Letting a client type
+ * their own would produce a field that looks configurable but mostly breaks
+ * sending, so the value lives where the person who did the registering works.
+ *
+ * Writer-level rather than super admin: unlike repointing a login, the worst
+ * case here is that the tenant's texts get rejected by the carrier — visible,
+ * reversible, and not a path to their account.
+ */
+export async function updateSmsSenderId(formData: FormData): Promise<void> {
+  const { user, role } = await requirePlatformWriter();
+  const businessId = readBusinessId(formData);
+
+  const parsed = updateBusinessSchema
+    .pick({ smsSenderId: true })
+    .safeParse({ smsSenderId: formData.get("smsSenderId") });
+  if (!parsed.success) {
+    fail(
+      businessId,
+      parsed.error.issues[0]?.message ?? "Enter a valid sender ID.",
+    );
+  }
+
+  // Blank clears it. `?? null` rather than leaving it undefined, because the
+  // repository skips undefined keys — which would make "clear this field"
+  // silently do nothing.
+  const senderId = parsed.data.smsSenderId ?? null;
+  const error = await applySmsSenderId(businessId, senderId, user.id, role);
+  if (error) fail(businessId, error);
+
+  revalidatePath(`/platform/businesses/${businessId}`);
+  // Not on the public site — no tenant cache to invalidate.
+}
+
+async function applySmsSenderId(
+  businessId: string,
+  smsSenderId: string | null,
+  actorUserId: string,
+  actorRole: PlatformRole,
+): Promise<string | undefined> {
+  try {
+    const admin = createServiceClient();
+    const repo = new BusinessRepository(admin);
+
+    const existing = await repo.findById(businessId);
+    if (!existing) return "That business no longer exists.";
+
+    await repo.update(businessId, { smsSenderId });
+    await new AuditRepository(admin).record({
+      actorUserId,
+      actingBusinessId: businessId,
+      action: "business.updated",
+      entity: "business",
+      entityId: businessId,
+      metadata: {
+        field: "smsSenderId",
+        from: existing.smsSenderId,
+        to: smsSenderId,
+        actorRole,
+      },
+    });
+    return undefined;
+  } catch (error) {
+    logError(error, { scope: "platform:updateSmsSenderId" });
+    return "Could not update the sender ID.";
+  }
+}
+
 // ── Owner login email ───────────────────────────────────────────────────────
 
 /**

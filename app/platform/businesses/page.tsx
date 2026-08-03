@@ -33,7 +33,7 @@ export default async function PlatformBusinessesPage({
         </Link>
       </div>
 
-      <form className="flex gap-3">
+      <form className="flex flex-wrap gap-3">
         <input
           name="q"
           defaultValue={q ?? ""}
@@ -53,7 +53,7 @@ export default async function PlatformBusinessesPage({
           No businesses found.
         </p>
       ) : (
-        <div className="overflow-x-auto border border-dark-border">
+        <div className="min-w-0 overflow-x-auto border border-dark-border">
           <table className="w-full text-left text-sm">
             <thead className="bg-charcoal text-[0.7rem] uppercase tracking-[1px] text-gray">
               <tr>

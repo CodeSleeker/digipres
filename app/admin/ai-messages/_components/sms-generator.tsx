@@ -95,7 +95,7 @@ export function SmsGenerator({
             className={fieldClass}
           />
         </Field>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Tone">
             <select name="tone" defaultValue="warm" className={fieldClass}>
               {SMS_TONES.map((t) => (

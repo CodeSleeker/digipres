@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach, vi } from "vitest";
 import { getSmsSender } from "@/lib/sms/sender";
 import { TwilioSmsSender } from "@/lib/sms/twilio-sender";
 import { PhilSmsSender } from "@/lib/sms/philsms-sender";
+import { SemaphoreSmsSender } from "@/lib/sms/semaphore-sender";
 
 /**
  * Provider selection: the carrier named by SMS_PROVIDER, an auto-detect when
@@ -44,6 +45,12 @@ describe("getSmsSender auto-detect (SMS_PROVIDER blank)", () => {
         TWILIO_AUTH_TOKEN: "token_test",
       }),
     ).not.toBeInstanceOf(TwilioSmsSender);
+  });
+
+  it("picks up Semaphore when it is the only carrier configured", () => {
+    expect(getSmsSender({ SEMAPHORE_API_KEY: "k" })).toBeInstanceOf(
+      SemaphoreSmsSender,
+    );
   });
 
   it("picks up PhilSMS when it is the only carrier configured", () => {
@@ -98,10 +105,23 @@ describe("getSmsSender explicit SMS_PROVIDER", () => {
     expect(error).toHaveBeenCalled();
   });
 
+  it("honours semaphore", () => {
+    expect(
+      getSmsSender({ SMS_PROVIDER: "semaphore", SEMAPHORE_API_KEY: "k" }),
+    ).toBeInstanceOf(SemaphoreSmsSender);
+  });
+
   it("stubs and complains for a provider this build cannot speak", () => {
-    // semaphore is documented in .env.example but not implemented.
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const sender = getSmsSender({ ...TWILIO, SMS_PROVIDER: "nexmo" });
+    expect(sender).not.toBeInstanceOf(TwilioSmsSender);
+    expect(error).toHaveBeenCalled();
+  });
+
+  it("stubs when semaphore is named without its key", () => {
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     const sender = getSmsSender({ ...TWILIO, SMS_PROVIDER: "semaphore" });
+    expect(sender).not.toBeInstanceOf(SemaphoreSmsSender);
     expect(sender).not.toBeInstanceOf(TwilioSmsSender);
     expect(error).toHaveBeenCalled();
   });

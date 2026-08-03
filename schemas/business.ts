@@ -107,6 +107,31 @@ const optionalEmail = z.preprocess(
   z.string().email("Enter a valid email address.").nullable().optional(),
 );
 
+/**
+ * Alphanumeric SMS sender ID (migration 0028).
+ *
+ * The GSM cap is 11 characters and carriers reject anything outside
+ * [A-Za-z0-9 ] — so this validates rather than silently trimming. A sender ID
+ * that gets quietly truncated is one the carrier may not recognise as the
+ * registered value, and the message is then relabelled or dropped.
+ *
+ * Blank clears the column (null), which is a meaningful state: "no explicit
+ * sender, use the provider default where one exists".
+ */
+export const smsSenderIdSchema = z.preprocess(
+  emptyToNull,
+  z
+    .string()
+    .trim()
+    .max(11, "Sender IDs are limited to 11 characters.")
+    .regex(
+      /^[A-Za-z0-9][A-Za-z0-9 ]*$/,
+      "Use letters, numbers and spaces only, starting with a letter or number.",
+    )
+    .nullable()
+    .optional(),
+);
+
 const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/; // "HH:mm" 24h
 
 const dayHoursSchema = z
@@ -137,6 +162,7 @@ export const createBusinessSchema = z.object({
   notifyEmail: optionalEmail,
   notifyPhone: optionalPhone,
   notifyCustomerSms: checkboxBoolean,
+  smsSenderId: smsSenderIdSchema,
   /** Street line only; the components below carry the rest. */
   address: optionalText,
   addressLocality: optionalShortText,

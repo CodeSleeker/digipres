@@ -46,7 +46,7 @@ export default async function AppointmentsCalendarPage({
 
   return (
     <div className="grid gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-heading text-2xl tracking-[2px]">Appointments</h1>
         <Link
           href="/admin/appointments/new"
@@ -58,7 +58,7 @@ export default async function AppointmentsCalendarPage({
 
       <AppointmentTabs active="calendar" />
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href={`/admin/appointments/calendar?month=${shiftMonth(month, -1)}`}
           className="rounded-none border border-dark-border px-3 py-1 text-sm text-white transition-colors hover:border-gold hover:text-gold"
@@ -76,7 +76,7 @@ export default async function AppointmentsCalendarPage({
         </Link>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="min-w-0 overflow-x-auto">
         <div className="min-w-[720px]">
           <div className="grid grid-cols-7 border-b border-dark-border text-[0.65rem] uppercase tracking-[1.5px] text-gray">
             {WEEKDAYS.map((w) => (

@@ -32,7 +32,7 @@ export default async function CustomersPage({
 
   return (
     <div className="grid gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-heading text-2xl tracking-[2px]">Customers</h1>
           <p className="mt-1 text-sm text-gray">
@@ -106,7 +106,7 @@ export default async function CustomersPage({
       </form>
 
       {/* Table */}
-      <div className="overflow-x-auto border border-dark-border">
+      <div className="min-w-0 overflow-x-auto border border-dark-border">
         <table className="w-full min-w-[820px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-dark-border text-left text-[0.65rem] uppercase tracking-[1.5px] text-gray">
@@ -171,7 +171,7 @@ export default async function CustomersPage({
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between text-sm text-gray">
+      <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-gray">
         <span>
           {total === 0
             ? "No results"

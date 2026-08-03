@@ -10,6 +10,7 @@ import { startImpersonation } from "@/features/platform/impersonation";
 import { getPlatformRole } from "@/lib/auth/require-platform-admin";
 import { LifecyclePanel } from "./_components/lifecycle-panel";
 import { DetailsPanel } from "./_components/details-panel";
+import { SmsSenderPanel } from "./_components/sms-sender-panel";
 import { formatAddress } from "@/lib/businesses/address";
 import { OwnerLoginPanel } from "./_components/owner-login-panel";
 import { onboardingPercentage } from "@/types/onboarding";
@@ -146,7 +147,12 @@ export default async function PlatformBusinessDetailPage({
       )}
 
       {/* Read-only for read_only staff, same rule the other write panels use. */}
-      {role && role !== "read_only" && <DetailsPanel business={business} />}
+      {role && role !== "read_only" && (
+        <>
+          <DetailsPanel business={business} />
+          <SmsSenderPanel business={business} />
+        </>
+      )}
 
       {/* Super admin only — repointing a login is account-takeover territory. */}
       {role === "super_admin" && (
