@@ -27,6 +27,19 @@ export interface EmailMessage {
    * address always comes from EMAIL_FROM, the name is sanitised and quoted.
    */
   fromName?: string;
+  /**
+   * Where a reply should go, when that is not the From address.
+   *
+   * The platform sends from one verified domain, so hitting Reply on a lead
+   * notification would otherwise mail the platform itself. Setting this makes
+   * Reply go to the person who filled the form, which is the whole point of a
+   * bookings inbox.
+   *
+   * An ADDRESS only, no display name: this value comes from a stranger's form
+   * submission, and a display name is where header-injection lives (see
+   * `quoteDisplayName`). Sanitised in `replyToAddress` before it is sent.
+   */
+  replyTo?: string;
 }
 
 export interface EmailSendResult {
@@ -93,6 +106,27 @@ export function quoteDisplayName(raw: string): string | null {
   return `"${cleaned.replace(/([\\"])/g, "\\$1")}"`;
 }
 
+/**
+ * A Reply-To safe to put in a header, or null.
+ *
+ * Accepts a bare `user@host` and nothing else. The value originates in a public
+ * form, so the things it must not be able to do are carry a display name, smuggle
+ * a second recipient, or split the header — and the simplest way to guarantee
+ * all three is to refuse anything that is not one plain address.
+ *
+ * Returns null rather than a cleaned-up guess: a malformed Reply-To is worth
+ * dropping, and the body already names the sender.
+ */
+export function replyToAddress(raw: string | undefined): string | null {
+  if (!raw) return null;
+  const value = raw.replace(CONTROL_CHARS, "").trim();
+  // One address: no spaces, no commas or semicolons, no angle brackets.
+  if (!/^[^\s<>(),;:"\\[\]]+@[^\s<>(),;:"\\[\]]+\.[A-Za-z]{2,}$/.test(value)) {
+    return null;
+  }
+  return value.length <= 254 ? value : null;
+}
+
 /** `EMAIL_FROM`'s address, presented under `displayName`. */
 export function applyDisplayName(
   configuredFrom: string,
@@ -123,6 +157,11 @@ export class ResendEmailSender implements EmailSender {
           subject: message.subject,
           text: message.text,
           ...(message.html ? { html: message.html } : {}),
+          // Omitted entirely when it doesn't survive sanitising — Resend treats
+          // an empty reply_to as a value, not as "unset".
+          ...(replyToAddress(message.replyTo)
+            ? { reply_to: replyToAddress(message.replyTo) }
+            : {}),
         }),
       });
 
@@ -157,6 +196,9 @@ class LogEmailSender implements EmailSender {
       message.subject,
       message.text,
     );
+    if (message.replyTo) {
+      console.info("[email:stub] reply-to=%s", replyToAddress(message.replyTo));
+    }
     return { success: true, providerMessageId: `stub_${Date.now()}` };
   }
 }

@@ -74,7 +74,9 @@ export async function generateMetadata(): Promise<Metadata> {
             url: `${url}${OG_IMAGE.path}`,
             width: OG_IMAGE.width,
             height: OG_IMAGE.height,
-            alt: "Aliamz Digital — Digital Solutions. Real Impact.",
+            // Describes the image for someone who cannot see it, rather than
+            // transcribing the words on it.
+            alt: "The Aliamz Digital logo above the tagline 'Digital Solutions. Real Impact.'",
           },
         ],
       },
@@ -107,9 +109,15 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  /** `?sent=&form=` — set by the marketing form redirect, read server-side. */
+  searchParams: Promise<{ sent?: string; form?: string }>;
+}) {
   if (apexMode(process.env) === "landing") {
-    return <LandingPage />;
+    const { sent, form } = await searchParams;
+    return <LandingPage sent={sent} form={form} />;
   }
 
   // Dev preview: CMS saves call revalidatePath("/"), so edits appear here.

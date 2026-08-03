@@ -45,6 +45,10 @@ export type BusinessStatusEnum = "draft" | "active" | "suspended";
 
 export type JobStatusEnum = "success" | "failed";
 
+/** Which marketing form an enquiry arrived from (migration 0029). */
+export type LeadKindEnum = "consultation" | "contact";
+export type LeadStatusEnum = "new" | "contacted" | "closed" | "spam";
+
 export type SubscriptionStatusEnum =
   "trialing" | "active" | "past_due" | "canceled";
 
@@ -529,6 +533,55 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
+      };
+      leads: {
+        Row: {
+          id: string;
+          kind: LeadKindEnum;
+          name: string;
+          email: string;
+          phone: string | null;
+          project_type: string | null;
+          preferred_date: string | null;
+          preferred_time: string | null;
+          message: string | null;
+          status: LeadStatusEnum;
+          source_ip: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          kind?: LeadKindEnum;
+          name: string;
+          email: string;
+          phone?: string | null;
+          project_type?: string | null;
+          preferred_date?: string | null;
+          preferred_time?: string | null;
+          message?: string | null;
+          status?: LeadStatusEnum;
+          source_ip?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          kind?: LeadKindEnum;
+          name?: string;
+          email?: string;
+          phone?: string | null;
+          project_type?: string | null;
+          preferred_date?: string | null;
+          preferred_time?: string | null;
+          message?: string | null;
+          status?: LeadStatusEnum;
+          source_ip?: string | null;
+          updated_at?: string;
+        };
+        // Required by supabase-js's GenericSchema. Omit it and the whole
+        // Tables map stops matching the constraint, which silently degrades
+        // EVERY table's query types to `never` — not just this one.
         Relationships: [];
       };
       review_messages: {

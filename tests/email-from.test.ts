@@ -3,6 +3,7 @@ import {
   applyDisplayName,
   bareAddress,
   quoteDisplayName,
+  replyToAddress,
 } from "@/lib/email/sender";
 
 const CONFIGURED = "Aliamz Digital <bookings@aliamz.com>";
@@ -102,5 +103,62 @@ describe("quoteDisplayName", () => {
     expect(quoteDisplayName("")).toBeNull();
     expect(quoteDisplayName("   ")).toBeNull();
     expect(quoteDisplayName("\r\n\t")).toBeNull();
+  });
+});
+
+describe("replyToAddress", () => {
+  it("passes a plain address through", () => {
+    expect(replyToAddress("juan@example.com")).toBe("juan@example.com");
+    expect(replyToAddress("  juan.dela-cruz+tag@sub.example.co.uk  ")).toBe(
+      "juan.dela-cruz+tag@sub.example.co.uk",
+    );
+  });
+
+  it("is null when there is nothing to set", () => {
+    expect(replyToAddress(undefined)).toBeNull();
+    expect(replyToAddress("")).toBeNull();
+    expect(replyToAddress("   ")).toBeNull();
+  });
+
+  /*
+   * This value arrives from a public form and goes into a mail header, so the
+   * three things it must not be able to do are carry a display name, smuggle a
+   * second recipient, or split the header. Refusing anything that is not one
+   * bare address closes all three at once.
+   */
+  it("refuses a display name or angle-addr form", () => {
+    expect(replyToAddress("Evil <ceo@bank.example>")).toBeNull();
+    expect(replyToAddress("<juan@example.com>")).toBeNull();
+    expect(replyToAddress('"Juan" juan@example.com')).toBeNull();
+  });
+
+  it("refuses a second recipient", () => {
+    expect(replyToAddress("a@example.com, b@example.com")).toBeNull();
+    expect(replyToAddress("a@example.com; b@example.com")).toBeNull();
+  });
+
+  it("refuses header injection, including via control characters", () => {
+    for (const raw of [
+      "a@example.com\nBcc: victim@example.com",
+      "a@example.com\r\nSubject: spam",
+      "a@example.com\u0000",
+      "a@exam\u001fple.com",
+    ]) {
+      const result = replyToAddress(raw);
+      // Either rejected outright, or stripped back to a single clean address —
+      // never a value still carrying the injected header.
+      expect(result === null || /^[^\s]+@[^\s]+$/.test(result)).toBe(true);
+      expect(result ?? "").not.toMatch(/bcc|subject/i);
+    }
+  });
+
+  it("refuses something that is not an address at all", () => {
+    expect(replyToAddress("not-an-address")).toBeNull();
+    expect(replyToAddress("missing@tld")).toBeNull();
+    expect(replyToAddress("@example.com")).toBeNull();
+  });
+
+  it("refuses an absurdly long value", () => {
+    expect(replyToAddress(`${"a".repeat(250)}@example.com`)).toBeNull();
   });
 });

@@ -1,5 +1,10 @@
 import Link from "next/link";
 import { Monogram } from "./monogram";
+import {
+  BookingForm,
+  ContactForm,
+  FormNotice,
+} from "./lead-forms";
 
 /**
  * Aliamz Digital — the platform's own marketing page, served at the production
@@ -41,6 +46,22 @@ const CONTACT = {
   email: "hello@aliamz.com",
   phone: "+639977436111",
 };
+
+/**
+ * Every anchored section, in page order. Declared once and rendered twice — the
+ * inline header row on wide screens, the compact row beneath it on narrow ones
+ * — so the two can never fall out of step with each other or with the page.
+ */
+const SECTIONS = [
+  { href: "#services", label: "Services" },
+  { href: "#platform", label: "Platform" },
+  { href: "#how", label: "How it works" },
+  { href: "#booking", label: "Book a call" },
+  { href: "#contact", label: "Contact" },
+];
+
+const NAV_LINK =
+  "shrink-0 transition-colors hover:text-[#171920] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#7f6333]";
 
 /**
  * Custom software services.
@@ -143,7 +164,26 @@ const STEPS = [
   },
 ];
 
-export function LandingPage() {
+export function LandingPage({
+  /**
+   * Set by the redirect the form action performs
+   * (`/?sent=ok&form=consultation#booking`). The page is a pure server render,
+   * so this is how feedback reaches the visitor without shipping a client
+   * component to a marketing page.
+   *
+   * `form` is what keeps the notice in ONE section: the fragment scrolls the
+   * browser but never reaches the server, so it cannot be used to tell the two
+   * forms apart.
+   */
+  sent,
+  form,
+}: {
+  sent?: string;
+  form?: string;
+} = {}) {
+  const bookingNotice = form === "consultation" ? sent : undefined;
+  const contactNotice = form === "contact" ? sent : undefined;
+
   return (
     <div className="min-h-screen bg-[#f8f9fb] font-sans text-[#171920]">
       {/* Bypass the header for keyboard users; visible only when focused. */}
@@ -164,33 +204,49 @@ export function LandingPage() {
               Aliamz<span className="text-[#7f6333]"> Digital</span>
             </span>
           </span>
-          <nav aria-label="Primary" className="flex items-center gap-6">
-            {/* Hidden on the narrowest screens rather than wrapped: the two
-                anchors are shortcuts, and the sections are a short scroll away
-                on a phone anyway. Log in is the one that must always be here. */}
-            <a
-              href="#services"
-              className="text-sm font-medium text-[#555c6b] transition-colors hover:text-[#171920] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#7f6333] max-[560px]:hidden"
-            >
-              Services
-            </a>
-            <a
-              href="#platform"
-              className="text-sm font-medium text-[#555c6b] transition-colors hover:text-[#171920] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#7f6333] max-[560px]:hidden"
-            >
-              Platform
-            </a>
-            <Link
-              href="/login"
-              className="text-sm font-medium text-[#555c6b] transition-colors hover:text-[#171920] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#7f6333]"
-            >
+          <nav
+            aria-label="Primary"
+            className="flex items-center gap-6 text-sm font-medium text-[#555c6b]"
+          >
+            {/* Inline only where all five fit beside the wordmark. Below that
+                they move to their own row rather than wrapping into the logo
+                or being dropped, which is what used to happen. */}
+            <span className="hidden items-center gap-6 lg:flex">
+              {SECTIONS.map((s) => (
+                <a key={s.href} href={s.href} className={NAV_LINK}>
+                  {s.label}
+                </a>
+              ))}
+            </span>
+            <Link href="/login" className={NAV_LINK}>
               Log in
             </Link>
           </nav>
         </div>
+
+        {/*
+          The same links on narrow screens, as their own scrollable row.
+
+          A dropdown would be the usual answer, but this page ships no client
+          JavaScript, and a CSS-only <details> menu has no way to close itself
+          after an in-page anchor is followed — it would sit open over the
+          content you just jumped to. A scroll row has no state to get wrong.
+        */}
+        <div className="border-t border-[#dfe3e9] lg:hidden">
+          <nav
+            aria-label="Sections"
+            className="mx-auto flex max-w-5xl gap-4 overflow-x-auto px-6 py-3 text-xs font-medium text-[#555c6b]"
+          >
+            {SECTIONS.map((s) => (
+              <a key={s.href} href={s.href} className={NAV_LINK}>
+                {s.label}
+              </a>
+            ))}
+          </nav>
+        </div>
       </header>
 
-      <main id="main" className="scroll-mt-20">
+      <main id="main" className="scroll-mt-28 lg:scroll-mt-20">
         {/* Hero */}
         <section className="relative overflow-hidden">
           {/* The one eye-catching flourish: a soft gold glow behind the headline. */}
@@ -233,7 +289,7 @@ export function LandingPage() {
         <section
           id="services"
           aria-labelledby="services-heading"
-          className="scroll-mt-20 border-t border-[#dfe3e9]"
+          className="scroll-mt-28 lg:scroll-mt-20 border-t border-[#dfe3e9]"
         >
           <div className="mx-auto max-w-5xl px-6 py-20 max-[640px]:py-14">
             <h2
@@ -278,7 +334,7 @@ export function LandingPage() {
         <section
           id="platform"
           aria-labelledby="capabilities-heading"
-          className="scroll-mt-20 border-t border-[#dfe3e9]"
+          className="scroll-mt-28 lg:scroll-mt-20 border-t border-[#dfe3e9]"
         >
           <div className="mx-auto max-w-5xl px-6 py-20 max-[640px]:py-14">
             <h2
@@ -307,8 +363,9 @@ export function LandingPage() {
 
         {/* How it works */}
         <section
+          id="how"
           aria-labelledby="how-heading"
-          className="border-t border-[#dfe3e9] bg-[#eef1f5]"
+          className="scroll-mt-28 lg:scroll-mt-20 border-t border-[#dfe3e9] bg-[#eef1f5]"
         >
           <div className="mx-auto max-w-5xl px-6 py-20 max-[640px]:py-14">
             <h2
@@ -336,34 +393,118 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* Contact — the "Get started" target */}
+        {/* Booking — the "Get started" target. A consultation is the step
+            almost everyone actually wants first, so it comes before the
+            general contact form rather than after it. */}
+        <section
+          id="booking"
+          aria-labelledby="booking-heading"
+          // scroll-mt clears the sticky header — without it the anchor lands
+          // with the heading tucked underneath.
+          className="scroll-mt-28 lg:scroll-mt-20 border-t border-[#dfe3e9] bg-[#eef1f5]"
+        >
+          <div className="mx-auto max-w-5xl px-6 py-20 max-[640px]:py-14">
+            <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
+              <div>
+                <h2
+                  id="booking-heading"
+                  className="text-xs font-semibold uppercase tracking-[0.35em] text-[#7f6333]"
+                >
+                  Book a consultation
+                </h2>
+                <p className="mt-4 text-balance text-3xl font-semibold tracking-tight max-[640px]:text-2xl">
+                  Thirty minutes, no obligation.
+                </p>
+                <p className="mt-4 text-pretty leading-relaxed text-[#555c6b]">
+                  Tell us what you&apos;re trying to build and when suits you.
+                  We&apos;ll come back with an honest view of what it takes:
+                  scope, rough cost, and whether we&apos;re the right people
+                  for it at all.
+                </p>
+                <ul className="mt-6 grid list-none gap-2 text-sm text-[#555c6b]">
+                  {[
+                    "A real conversation, not a sales call",
+                    "We'll say if an off-the-shelf tool would serve you better",
+                    "Nothing is charged until scope is agreed",
+                  ].map((point) => (
+                    <li key={point} className="flex gap-3">
+                      {/* A dot, not a dash: the page deliberately carries no
+                          em dashes, and a hyphen reads as a stray character. */}
+                      <span aria-hidden="true" className="text-[#d4a555]">
+                        •
+                      </span>
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="border border-[#dfe3e9] bg-[#f8f9fb] p-6 max-[640px]:p-5">
+                <FormNotice status={bookingNotice} />
+                <BookingForm />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Contact — for everything that isn't a consultation. */}
         <section
           id="contact"
           aria-labelledby="contact-heading"
-          // scroll-mt clears the sticky header — without it "Get started" lands
-          // with the heading tucked underneath.
-          className="scroll-mt-20 border-t border-[#dfe3e9]"
+          className="scroll-mt-28 lg:scroll-mt-20 border-t border-[#dfe3e9]"
         >
-          <div className="mx-auto max-w-5xl px-6 py-20 text-center max-[640px]:py-14">
-            <h2
-              id="contact-heading"
-              className="text-balance text-3xl font-semibold tracking-tight max-[640px]:text-2xl"
-            >
-              Let&apos;s talk about what you&apos;re building.
-            </h2>
-            <p className="mx-auto mt-4 max-w-lg text-[#555c6b]">
-              Whether it&apos;s a system to scope or a website that needs to be
-              live before your next busy weekend, tell us what you need and
-              we&apos;ll tell you honestly what it takes.
-            </p>
-            <div className="mt-8 grid justify-center gap-2 text-lg font-medium">
-              <a
-                href={`mailto:${CONTACT.email}`}
-                className="text-[#7f6333] underline decoration-[#d4a555] decoration-2 underline-offset-8 transition-colors hover:text-[#171920] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#7f6333]"
-              >
-                {CONTACT.email}
-              </a>
-              <span className="text-[#555c6b]">{CONTACT.phone}</span>
+          <div className="mx-auto max-w-5xl px-6 py-20 max-[640px]:py-14">
+            <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
+              <div>
+                <h2
+                  id="contact-heading"
+                  className="text-xs font-semibold uppercase tracking-[0.35em] text-[#7f6333]"
+                >
+                  Contact us
+                </h2>
+                <p className="mt-4 text-balance text-3xl font-semibold tracking-tight max-[640px]:text-2xl">
+                  Or just send us a message.
+                </p>
+                <p className="mt-4 text-pretty leading-relaxed text-[#555c6b]">
+                  A question, a quote, or an existing system that needs looking
+                  at. We read everything and reply to all of it.
+                </p>
+
+                <dl className="mt-8 grid gap-4 text-sm">
+                  <div>
+                    <dt className="text-xs font-medium uppercase tracking-[0.2em] text-[#555c6b]">
+                      Email
+                    </dt>
+                    <dd className="mt-1">
+                      <a
+                        href={`mailto:${CONTACT.email}`}
+                        className="text-[#7f6333] underline decoration-[#d4a555] decoration-2 underline-offset-8 transition-colors hover:text-[#171920] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#7f6333]"
+                      >
+                        {CONTACT.email}
+                      </a>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-medium uppercase tracking-[0.2em] text-[#555c6b]">
+                      Phone
+                    </dt>
+                    {/* tel: so a phone dials it instead of the reader copying digits. */}
+                    <dd className="mt-1">
+                      <a
+                        href={`tel:${CONTACT.phone.replace(/[^+\d]/g, "")}`}
+                        className="text-[#171920] transition-colors hover:text-[#7f6333] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#7f6333]"
+                      >
+                        {CONTACT.phone}
+                      </a>
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+
+              <div className="border border-[#dfe3e9] bg-[#f8f9fb] p-6 max-[640px]:p-5">
+                <FormNotice status={contactNotice} />
+                <ContactForm />
+              </div>
             </div>
           </div>
         </section>
