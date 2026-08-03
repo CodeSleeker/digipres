@@ -16,9 +16,13 @@ import { loadTemplate } from "@/templates/registry";
  */
 export async function generateMetadata(): Promise<Metadata> {
   if (apexMode(process.env) === "landing") {
-    const title = "Aliamz Digital — Websites & growth for local businesses";
+    // "·" is the separator the rest of the site's titles already use
+    // ("Sign in · Aliamz Digital"), so the brand reads consistently in a tab
+    // strip and in search results.
+    const title =
+      "Aliamz Digital · Custom software, web, mobile, AI & IoT development";
     const description =
-      "We build and run your website, review automation and customer tools in one dashboard, so you can focus on the work.";
+      "We design and build custom software: web and mobile applications, AI, IoT and enterprise systems. We also run a ready-made website, reviews and CRM platform for local businesses.";
     return {
       title,
       description,

@@ -42,10 +42,17 @@ export const metadata: Metadata = {
    * public site with no way to override it. As config it is merely the default,
    * and app/s/[slug] replaces it with the tenant's own (lib/tenant/icons.ts).
    */
+  /*
+   * The AD mark alone — no wordmark, no strapline. At the 16px a tab actually
+   * renders, anything more is an unreadable smudge.
+   *
+   * PNG rather than SVG: the mark is a gradient render, so a vector version
+   * would be a trace of the artwork rather than the artwork.
+   */
   icons: {
     icon: [
-      { url: "/brand/icon.svg", type: "image/svg+xml" },
       { url: "/brand/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/brand/icon-512.png", type: "image/png", sizes: "512x512" },
     ],
     apple: [{ url: "/brand/apple-icon.png", sizes: "180x180" }],
   },
