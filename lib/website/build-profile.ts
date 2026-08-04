@@ -36,6 +36,18 @@ export function buildBusinessProfile(
 
   return {
     ...base,
+    // The tenant's OWN slug, not the template default's.
+    //
+    // `base` is a real profile (lib/businesses/ronies.ts) doubling as the
+    // barber/luxury default, so without this every tenant on that template
+    // carries slug "ronies". It went unnoticed because that WAS the first
+    // client's slug — the coincidence held until they were renamed.
+    //
+    // It is not cosmetic: the booking form posts this slug as the tenant hint
+    // for requests whose host doesn't identify a tenant (the apex path
+    // /s/<slug>), so a stale value sends the booking to a business that may no
+    // longer exist.
+    slug: business.slug,
     brand: resolveBrand(base, business),
     seo: {
       title: business.name || base.seo.title,
