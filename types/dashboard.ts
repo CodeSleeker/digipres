@@ -25,6 +25,8 @@ export interface DashboardStats {
   pendingReviews: number;
   /** Review-automation messages that reached the carrier (sent or delivered). */
   messagesSent: number;
+  /** Review-automation messages still waiting their turn (queued). */
+  messagesQueued: number;
   recentCustomers: RecentCustomer[];
 }
 
@@ -34,5 +36,6 @@ export const EMPTY_DASHBOARD_STATS: DashboardStats = {
   totalCustomers: 0,
   pendingReviews: 0,
   messagesSent: 0,
+  messagesQueued: 0,
   recentCustomers: [],
 };

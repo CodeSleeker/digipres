@@ -16,6 +16,32 @@ import {
 import { RecentCustomers } from "./_components/recent-customers";
 
 /**
+ * Hint under "Messages Sent".
+ *
+ * The count covers every step of the review campaign — thank-you, review
+ * request, reminder — which runs over eight days. A static caption could only
+ * ever name the campaign, and every name we tried ("review-automation texts",
+ * "follow-up texts") read as one specific step, making a lone thank-you look
+ * like an ask that had already gone out.
+ *
+ * So the hint states what the number leaves out instead. "1" with "2 more
+ * scheduled" is unambiguous in a way no adjective was going to be.
+ *
+ * Note this is not a total of all texts a customer receives: booking
+ * confirmations go out through notifyCustomerBookingConfirmed and never touch
+ * review_messages.
+ */
+function messagesHint(sent: number, queued: number): string {
+  if (queued > 0) {
+    return `${queued} more scheduled to go out`;
+  }
+  // "Sent", not "delivered": the count is `status in (sent, delivered)`, and
+  // delivered only arrives via the carrier's status webhook — a text that left
+  // and then bounced would read as delivered here.
+  return sent > 0 ? "All scheduled texts have gone out" : "None sent yet";
+}
+
+/**
  * Dashboard overview: at-a-glance metric cards, recent customers, and quick
  * access to the editable website sections. Analytics-backed cards (Google
  * rating, website visitors) are shown as placeholders until analytics lands.
@@ -73,10 +99,7 @@ export default async function AdminHome() {
         <StatCard
           label="Messages Sent"
           value={stats.messagesSent}
-          // "Sent", not "delivered": the count is `status in (sent, delivered)`,
-          // and delivered only arrives via the carrier's status webhook. A text
-          // that left and then bounced would have read as delivered here.
-          hint="Review-automation texts sent"
+          hint={messagesHint(stats.messagesSent, stats.messagesQueued)}
           icon={<ChatIcon />}
           href="/admin/reviews"
         />

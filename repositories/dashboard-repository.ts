@@ -67,6 +67,23 @@ export class DashboardRepository {
     return count ?? 0;
   }
 
+  /**
+   * Messages still waiting to go out (queued, including rescheduled retries).
+   *
+   * Pairs with countMessagesSent so the dashboard can say what the sent number
+   * leaves out: a campaign runs over eight days, so "1 sent" on its own can't
+   * distinguish "just started" from "finished".
+   */
+  async countMessagesQueued(businessId: string): Promise<number> {
+    const { count, error } = await this.supabase
+      .from("review_messages")
+      .select("*", { count: "exact", head: true })
+      .eq("business_id", businessId)
+      .eq("status", "queued");
+    if (error) throw error;
+    return count ?? 0;
+  }
+
   /** The most recently added active customers (newest first). */
   async recentCustomers(
     businessId: string,

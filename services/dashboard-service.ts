@@ -20,6 +20,7 @@ export class DashboardService {
       totalCustomers,
       pendingReviews,
       messagesSent,
+      messagesQueued,
       recentCustomers,
     ] = await Promise.all([
       this.dashboard.countAppointmentsBetween(
@@ -30,6 +31,7 @@ export class DashboardService {
       this.dashboard.countCustomers(businessId),
       this.dashboard.countCustomersByReviewStatus(businessId, "requested"),
       this.dashboard.countMessagesSent(businessId),
+      this.dashboard.countMessagesQueued(businessId),
       this.dashboard.recentCustomers(businessId, RECENT_CUSTOMERS_LIMIT),
     ]);
 
@@ -39,6 +41,7 @@ export class DashboardService {
       totalCustomers,
       pendingReviews,
       messagesSent,
+      messagesQueued,
       recentCustomers,
     };
   }

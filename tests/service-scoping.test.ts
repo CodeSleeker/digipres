@@ -65,6 +65,7 @@ describe("dashboard service", () => {
       countCustomers: vi.fn(async () => 0),
       countCustomersByReviewStatus: vi.fn(async () => 0),
       countMessagesSent: vi.fn(async () => 0),
+      countMessagesQueued: vi.fn(async () => 0),
       recentCustomers: vi.fn(async () => []),
     };
     await new DashboardService(repo as unknown as DashboardRepository).getStats(
