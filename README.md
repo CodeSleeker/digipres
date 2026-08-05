@@ -127,13 +127,14 @@ services/       business rules (all tenant services are business-scoped)
 repositories/   data access (every query filtered by business_id)
 lib/            tenant resolution, auth, security, jobs, images
 templates/      industry website templates (html mockups + React ports)
-supabase/       migrations 0001–0018 (forward-only; see docs/operations.md)
-tests/          229 tests incl. DB-level RLS isolation
+supabase/       migrations 0001–0031 (forward-only; see docs/operations.md)
+tests/          613 tests incl. DB-level RLS isolation
 ```
 
 ## Documentation
 
 - [docs/deployment.md](docs/deployment.md) — **production deployment, step by step**
 - [docs/operations.md](docs/operations.md) — seeding, migration/rollback policy, cron jobs
+- [docs/client-onboarding-faq.md](docs/client-onboarding-faq.md) — FAQ section: client walkthrough, interview script, why the default is empty
 - [docs/architecture/multi-tenancy.md](docs/architecture/multi-tenancy.md) — tenancy model, RLS, routing, impersonation
 - [docs/production-readiness-review-8.md](docs/production-readiness-review-8.md) — latest audit (94/100) + launch checklist

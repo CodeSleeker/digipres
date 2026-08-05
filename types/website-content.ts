@@ -6,6 +6,7 @@ import type {
   GalleryItem,
   Product,
   BookingOption,
+  FaqItem,
   FooterColumn,
 } from "./business";
 
@@ -74,6 +75,15 @@ export interface TestimonialsContent {
   items: TestimonialEntry[];
 }
 
+/**
+ * Question/answer pairs. Unlike every other section, an un-customized tenant
+ * has NOTHING here to fall back to — see the note on WebsiteContent.faq.
+ */
+export interface FaqContent {
+  heading: SectionHeading;
+  items: FaqItem[];
+}
+
 export interface ContactContent {
   label: string;
   titleLines: string[];
@@ -105,6 +115,12 @@ export interface WebsiteContent {
   gallery: GalleryContent | null;
   products: ProductsContent | null;
   testimonials: TestimonialsContent | null;
+  /**
+   * `null` here means "no FAQ", not "use the template default" — the barber
+   * default carries zero items on purpose, so the two collapse to the same
+   * thing: nothing rendered and no FAQPage schema emitted.
+   */
+  faq: FaqContent | null;
   contact: ContactContent | null;
   footer: FooterContent | null;
 }
@@ -120,6 +136,9 @@ export const WEBSITE_SECTIONS: WebsiteSection[] = [
   "gallery",
   "products",
   "testimonials",
+  // Between testimonials and contact: objections get answered immediately
+  // before the booking CTA, which is where a reader expects them.
+  "faq",
   "contact",
   "footer",
 ];
@@ -133,6 +152,7 @@ export const SECTION_COLUMN: Record<WebsiteSection, string> = {
   gallery: "gallery_content",
   products: "products_content",
   testimonials: "testimonials_content",
+  faq: "faq_content",
   contact: "contact_content",
   footer: "footer_content",
 };

@@ -19,6 +19,7 @@ import {
   type GalleryContent,
   type ProductsContent,
   type TestimonialsContent,
+  type FaqContent,
   type ContactContent,
   type FooterContent,
 } from "@/types/website-content";
@@ -303,6 +304,7 @@ function toDomain(row: BusinessRow): Business {
       products: (row.products_content as unknown as ProductsContent) ?? null,
       testimonials:
         (row.testimonials_content as unknown as TestimonialsContent) ?? null,
+      faq: (row.faq_content as unknown as FaqContent) ?? null,
       contact: (row.contact_content as unknown as ContactContent) ?? null,
       footer: (row.footer_content as unknown as FooterContent) ?? null,
     },

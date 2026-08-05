@@ -33,7 +33,9 @@ const PLATFORM = {
   hasRobots: true, // app/robots.ts
   hasSitemap: true, // app/sitemap.ts (lists active tenant slugs)
   hasJsonLd: true, // LocalBusiness JSON-LD emitted on tenant pages
-  hasFaqSection: false, // WebsiteContent has no FAQ section
+  // No `hasFaqSection` here on purpose. The FAQ section exists platform-wide
+  // (migration 0031), but whether a given tenant HAS questions is their own
+  // data — see faqItemCount, which the check reads instead.
   hasCoordinatesField: false, // Business entity has no lat/lng
   hasImageAltField: false, // gallery/hero images have no dedicated alt field
 } as const;
@@ -65,10 +67,21 @@ function galleryImageCount(business: Business): number {
   return business.content.gallery?.items.length ?? 0;
 }
 
+/**
+ * Published questions, counted the same way buildFaqJsonLd counts them: a row
+ * missing either half is dropped from the markup, so it must not score here.
+ */
+function faqItemCount(business: Business): number {
+  return (business.content.faq?.items ?? []).filter(
+    (item) => item.question.trim() && item.answer.trim(),
+  ).length;
+}
+
 function buildChecks(b: Business): VisibilityCheck[] {
   const descLen = b.description?.trim().length ?? 0;
   const gallery = galleryImageCount(b);
   const openDays = openDayCount(b);
+  const faqCount = faqItemCount(b);
 
   // Which LocalBusiness fields are ready to emit.
   const localReady: string[] = [];
@@ -117,12 +130,19 @@ function buildChecks(b: Business): VisibilityCheck[] {
       label: "FAQ",
       category: "content",
       weight: 6,
-      status: PLATFORM.hasFaqSection ? "pass" : "fail",
-      finding: PLATFORM.hasFaqSection
-        ? "An FAQ section with FAQPage schema is present."
-        : "No FAQ content exists. FAQs are a strong signal for AI answer engines and can earn rich results.",
+      // Per-tenant, not platform-level. The capability now exists for everyone,
+      // so a constant here would award the points to every client the moment we
+      // deployed — including the ones with an empty FAQ and no FAQPage markup.
+      // Three is where a list starts reading as coverage rather than a token.
+      status: faqCount >= 3 ? "pass" : faqCount > 0 ? "warn" : "fail",
+      finding:
+        faqCount === 0
+          ? "No FAQ content exists. Question/answer pairs are the format AI assistants quote from most readily."
+          : `${faqCount} question${faqCount === 1 ? "" : "s"} published with FAQPage schema.`,
       recommendation:
-        "Add an editable FAQ section (question/answer pairs) and emit FAQPage JSON-LD so assistants can quote direct answers.",
+        faqCount >= 3
+          ? "Keep answers current, and add questions as customers ask them."
+          : "Add question/answer pairs under Website → FAQ. Answer what customers ask before booking (parking, walk-ins, payment, how long it takes) and write each answer so it stands on its own.",
     },
 
     /* --- Metadata --- */
@@ -317,6 +337,7 @@ function baselineChecks(): VisibilityCheck[] {
       gallery: null,
       products: null,
       testimonials: null,
+      faq: null,
       contact: null,
       footer: null,
     },

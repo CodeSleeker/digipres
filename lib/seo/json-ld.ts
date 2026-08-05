@@ -1,6 +1,49 @@
 import type { Business } from "@/types/business-entity";
 import type { BusinessCategory } from "@/types/business-entity";
+import type { FaqItem } from "@/types/business";
 import { postalAddress } from "@/lib/businesses/address";
+
+/**
+ * Build a schema.org FAQPage node from the questions a tenant has published.
+ *
+ * Returns null when there is nothing to describe. That gate is not tidiness:
+ * Google's structured-data policy requires FAQ markup to correspond to content
+ * visible on the page, and an empty or hidden FAQPage is a documented
+ * violation. The caller passes the SAME array the template renders, so the two
+ * cannot drift.
+ *
+ * Worth being straight about the payoff: Google restricted FAQ RICH RESULTS in
+ * August 2023 to authoritative government and health sites, so this will not
+ * produce expandable snippets in ordinary search. It remains valid structured
+ * data, and it is the form AI answer engines quote from most readily — which is
+ * the reason it is here.
+ *
+ * `acceptedAnswer.text` may contain HTML per the spec, but we emit the owner's
+ * plain text unchanged: the value is JSON-encoded into a script tag by
+ * components/json-ld, and inventing markup would only create a second
+ * representation to keep in sync with the page.
+ */
+export function buildFaqJsonLd(
+  items: FaqItem[],
+): Record<string, unknown> | null {
+  const questions = items.filter(
+    (item) => item.question.trim() && item.answer.trim(),
+  );
+  if (!questions.length) return null;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: questions.map((item) => ({
+      "@type": "Question",
+      name: item.question.trim(),
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer.trim(),
+      },
+    })),
+  };
+}
 
 /** 0 = Sunday … 6 = Saturday → schema.org day names. */
 const DAY_NAMES = [

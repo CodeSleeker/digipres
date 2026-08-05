@@ -129,6 +129,8 @@ const base = {
       },
     ],
   },
+  nav: [],
+  faq: { heading: { label: "l", title: "t" }, items: [] },
   contact: { details: [] },
   footer: { socials: [] },
 } as unknown as BusinessProfile;

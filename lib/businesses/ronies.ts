@@ -28,6 +28,8 @@ export const ronies: BusinessProfile = {
     { label: "Barbers", href: "#barbers" },
     { label: "Gallery", href: "#gallery" },
     { label: "Reviews", href: "#testimonials" },
+    // Filtered out by build-profile for tenants with no FAQ items.
+    { label: "FAQ", href: "#faq" },
     { label: "Contact", href: "#contact" },
   ],
   navCta: { label: "BOOK NOW", href: "#contact" },
@@ -332,6 +334,30 @@ export const ronies: BusinessProfile = {
         initials: "KS",
       },
     ],
+  },
+  /**
+   * Heading only. `items` is deliberately EMPTY, unlike every other section
+   * here.
+   *
+   * The rest of this file is demo content that a tenant overrides; when they
+   * don't, they publish a plausible-looking barbershop. That is survivable for
+   * a gallery photo and was not for the testimonials — real names attached to
+   * quotes nobody said. An FAQ is the same hazard in a worse place: "Do you
+   * accept walk-ins? Yes" is a factual promise, and once it is in FAQPage
+   * markup an answer engine will repeat it as the business's own words.
+   *
+   * Google's structured-data policy also requires FAQ markup to match content
+   * visible on the page, so seeding it and then hiding it is not an option
+   * either. Empty means the section and its schema both stay absent until the
+   * owner writes real answers.
+   */
+  faq: {
+    heading: {
+      label: "Good to Know",
+      title: "FREQUENTLY ASKED",
+      subtitle: "Everything you need before your first visit",
+    },
+    items: [],
   },
   ctaBanner: {
     label: "Ready?",

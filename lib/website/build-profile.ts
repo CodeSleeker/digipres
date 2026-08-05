@@ -33,9 +33,16 @@ export function buildBusinessProfile(
   business: Business,
 ): BusinessProfile {
   const { content } = business;
+  const faq = content.faq ?? base.faq;
 
   return {
     ...base,
+    // The FAQ link is dropped when there is nothing to jump to. `nav` is a
+    // static array on the template default, so an unconditional entry would
+    // give every tenant without an FAQ an anchor that scrolls nowhere.
+    nav: faq.items.length
+      ? base.nav
+      : base.nav.filter((item) => item.href !== "#faq"),
     // The tenant's OWN slug, not the template default's.
     //
     // `base` is a real profile (lib/businesses/ronies.ts) doubling as the
@@ -60,6 +67,7 @@ export function buildBusinessProfile(
     gallery: content.gallery ?? base.gallery,
     products: content.products ?? base.products,
     testimonials: buildTestimonials(base, business),
+    faq,
     contact: buildContact(base, business),
     footer: buildFooter(base, business),
   };

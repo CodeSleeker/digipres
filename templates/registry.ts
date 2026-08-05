@@ -63,6 +63,7 @@ export const TEMPLATES: TemplateOption[] = [
       "gallery",
       "products",
       "testimonials",
+      "faq",
       "contact",
       "footer",
     ],

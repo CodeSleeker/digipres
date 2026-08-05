@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { loadTenantBySlug } from "@/lib/tenant/profile";
 import { canonicalUrlFor } from "@/lib/tenant/urls";
 import { tenantIcons } from "@/lib/tenant/icons";
-import { buildLocalBusinessJsonLd } from "@/lib/seo/json-ld";
+import { buildLocalBusinessJsonLd, buildFaqJsonLd } from "@/lib/seo/json-ld";
 import { JsonLd } from "@/components/json-ld";
 import { loadTemplate } from "@/templates/registry";
 
@@ -57,6 +57,11 @@ export default async function TenantSitePage({
   // The tenant's own template — an unknown code falls back rather than 500s.
   const { Component } = await loadTemplate(tenant.business.templateCode);
 
+  // Built from the RESOLVED profile, not the raw record: that is the same array
+  // the template renders, so the markup can never describe questions the page
+  // doesn't show. Null when the tenant has published none.
+  const faqJsonLd = buildFaqJsonLd(tenant.profile.faq.items);
+
   return (
     <div data-theme={tenant.business.themeCode}>
       <JsonLd
@@ -65,6 +70,7 @@ export default async function TenantSitePage({
           canonicalUrlFor(slug, tenant.primaryHostname),
         )}
       />
+      {faqJsonLd && <JsonLd data={faqJsonLd} />}
       <Component business={tenant.profile} />
     </div>
   );

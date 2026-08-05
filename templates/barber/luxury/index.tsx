@@ -12,6 +12,7 @@ import { Barbers } from "./sections/barbers";
 import { Gallery } from "./sections/gallery";
 import { Products } from "./sections/products";
 import { Testimonials } from "./sections/testimonials";
+import { Faq } from "./sections/faq";
 import { CtaBanner } from "./sections/cta-banner";
 import { Contact } from "./sections/contact";
 import { SiteFooter } from "./sections/site-footer";
@@ -59,6 +60,9 @@ export function LuxuryBarberTemplate({
         <Gallery business={business} />
         <Products business={business} />
         <Testimonials business={business} />
+        {/* Answers the objections immediately before the booking CTA. Renders
+            nothing when the tenant has written no questions. */}
+        <Faq business={business} />
         <CtaBanner business={business} />
         <Contact business={business} />
       </main>

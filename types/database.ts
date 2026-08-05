@@ -95,6 +95,7 @@ export interface Database {
           gallery_content: Json | null;
           products_content: Json | null;
           testimonials_content: Json | null;
+          faq_content: Json | null;
           contact_content: Json | null;
           footer_content: Json | null;
           google_onboarding: Json | null;
@@ -142,6 +143,7 @@ export interface Database {
           gallery_content?: Json | null;
           products_content?: Json | null;
           testimonials_content?: Json | null;
+          faq_content?: Json | null;
           contact_content?: Json | null;
           footer_content?: Json | null;
           google_onboarding?: Json | null;
@@ -189,6 +191,7 @@ export interface Database {
           gallery_content?: Json | null;
           products_content?: Json | null;
           testimonials_content?: Json | null;
+          faq_content?: Json | null;
           contact_content?: Json | null;
           footer_content?: Json | null;
           google_onboarding?: Json | null;

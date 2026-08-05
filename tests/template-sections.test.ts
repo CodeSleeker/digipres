@@ -84,6 +84,10 @@ const base = {
     heading: { label: "Shop", title: "GROOMING ESSENTIALS" },
     items: [{ icon: "🧴", name: "POMADE", description: "d", price: "₱450" }],
   },
+  // Required by the merge (nav filtering reads faq.items) even though these
+  // tests are about barbers and products.
+  nav: [],
+  faq: { heading: { label: "l", title: "t" }, items: [] },
   contact: { details: [] },
   footer: { socials: [] },
 } as unknown as BusinessProfile;

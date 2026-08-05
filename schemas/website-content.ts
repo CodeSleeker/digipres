@@ -205,6 +205,32 @@ export const testimonialsSchema = z.object({
     .min(1, "Add at least one testimonial."),
 });
 
+// ── FAQ ──────────────────────────────────────────────────────────────────────
+/**
+ * Question/answer pairs.
+ *
+ * `items` may be EMPTY — the only section where that is allowed. Every other
+ * section falls back to template content when a tenant saves nothing, so an
+ * empty save would publish a blank strip. Here the section simply disappears,
+ * which is the correct outcome for a shop that has no FAQ yet and the only way
+ * an owner can remove one they no longer want.
+ *
+ * The length caps are the FAQPage contract as much as a UI one: an answer that
+ * runs to essay length stops being quotable by an answer engine, which is the
+ * entire reason this section exists.
+ */
+export const faqSchema = z.object({
+  heading: headingSchema,
+  items: z
+    .array(
+      z.object({
+        question: requiredText("Question is required.").max(300),
+        answer: requiredText("Answer is required.").max(1200),
+      }),
+    )
+    .max(30, "Add at most 30 questions."),
+});
+
 // ── Gallery ──────────────────────────────────────────────────────────────────
 export const gallerySchema = z.object({
   heading: headingSchema,
@@ -268,6 +294,7 @@ export const SECTION_SCHEMA = {
   gallery: gallerySchema,
   products: productsSchema,
   testimonials: testimonialsSchema,
+  faq: faqSchema,
   contact: contactSchema,
   footer: footerSchema,
 } satisfies Record<WebsiteSection, z.ZodTypeAny>;
@@ -279,5 +306,6 @@ export type BarbersFormValues = z.infer<typeof barbersSchema>;
 export type GalleryFormValues = z.infer<typeof gallerySchema>;
 export type ProductsFormValues = z.infer<typeof productsSchema>;
 export type TestimonialsFormValues = z.infer<typeof testimonialsSchema>;
+export type FaqFormValues = z.infer<typeof faqSchema>;
 export type ContactFormValues = z.infer<typeof contactSchema>;
 export type FooterFormValues = z.infer<typeof footerSchema>;

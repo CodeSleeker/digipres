@@ -16,6 +16,7 @@ import { ServicesForm } from "../_forms/services-form";
 import { BarbersForm } from "../_forms/barbers-form";
 import { GalleryForm } from "../_forms/gallery-form";
 import { ProductsForm } from "../_forms/products-form";
+import { FaqForm } from "../_forms/faq-form";
 import { ContactForm } from "../_forms/contact-form";
 import { FooterForm } from "../_forms/footer-form";
 import { SocialLinksForm } from "../_forms/social-links-form";
@@ -141,6 +142,11 @@ function renderForm(
           }
         />
       );
+    case "faq":
+      // The only section whose default is genuinely empty — the template ships
+      // a heading and no questions, so a new tenant starts from a blank list
+      // rather than from someone else's answers.
+      return <FaqForm defaultValues={content?.faq ?? base.faq} />;
     case "contact":
       return (
         <ContactForm

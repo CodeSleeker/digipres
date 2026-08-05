@@ -20,6 +20,8 @@ const base = {
   gallery: {},
   products: {},
   testimonials: {},
+  nav: [],
+  faq: { heading: { label: "l", title: "t" }, items: [] },
   contact: {
     label: "l",
     titleLines: [],

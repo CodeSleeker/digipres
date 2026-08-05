@@ -168,6 +168,19 @@ export interface FooterColumn {
   links: NavLink[];
 }
 
+/**
+ * One question and its answer.
+ *
+ * Plain strings, not rich text: the same values are rendered on the page AND
+ * placed inside FAQPage JSON-LD, and structured data must carry the answer as
+ * text. Keeping one representation means the two can never disagree — which
+ * Google's structured-data policy treats as a violation, not a nitpick.
+ */
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+
 export interface SectionHeading {
   label: string;
   title: string;
@@ -226,6 +239,14 @@ export interface BusinessProfile {
   testimonials: {
     heading: SectionHeading;
     items: Testimonial[];
+  };
+  /**
+   * Empty `items` is the normal state, not a defect: the template default ships
+   * with none, so a tenant who hasn't written their own renders no section.
+   */
+  faq: {
+    heading: SectionHeading;
+    items: FaqItem[];
   };
   ctaBanner: {
     label: string;
