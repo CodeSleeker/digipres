@@ -18,10 +18,15 @@ export function GalleryItem({
       )}
     >
       {/* Real <img> with alt — indexable and announced; the figcaption below
-          adds the credit. Height comes from the gallery's grid tracks. */}
+          adds the credit. Height comes from the gallery's grid tracks.
+
+          The owner's description when they've written one, else the title.
+          The fallback is a compromise, not the goal: the title is repeated in
+          the figcaption two lines down, so a screen reader announces it twice
+          and learns the listener nothing about the picture. */}
       <TenantImage
         src={item.image}
-        alt={item.title}
+        alt={item.alt ?? item.title}
         sizes={
           item.wide
             ? "(max-width: 480px) 100vw, 50vw"

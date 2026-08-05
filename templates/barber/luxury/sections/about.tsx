@@ -17,10 +17,13 @@ export function About({ business }: { business: BusinessProfile }) {
           {/* Image */}
           <div className="reveal relative max-[768px]:max-w-full max-[768px]:overflow-hidden">
             <div className="relative aspect-[3/4] w-full overflow-hidden">
-              {/* Atmospheric (decorative) — the adjacent copy carries meaning. */}
+              {/* Decorative by default — the adjacent copy carries the meaning,
+                  so alt="" is correct and a screen reader skips it. An owner
+                  whose photo shows something the words don't (the shop floor,
+                  the owner at work) can describe it and promote it. */}
               <TenantImage
                 src={about.image}
-                alt=""
+                alt={about.imageAlt ?? ""}
                 sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-center brightness-[0.85] contrast-[1.05]"
               />

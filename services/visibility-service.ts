@@ -37,7 +37,8 @@ const PLATFORM = {
   // (migration 0031), but whether a given tenant HAS questions is their own
   // data — see faqItemCount, which the check reads instead.
   hasCoordinatesField: false, // Business entity has no lat/lng
-  hasImageAltField: false, // gallery/hero images have no dedicated alt field
+  // No `hasImageAltField` either: gallery items now carry an `alt`, so what
+  // matters is how many of THIS tenant's photos have one — see describedImageCount.
 } as const;
 
 export class VisibilityService {
@@ -68,6 +69,21 @@ function galleryImageCount(business: Business): number {
 }
 
 /**
+ * Gallery photos carrying a real description.
+ *
+ * An alt equal to the title is NOT counted. It is what the template did before
+ * this field existed, and it leaves a screen-reader user hearing the same words
+ * twice — scoring it would reward the exact defect the field was added to fix.
+ * (The save schema refuses it too; this guards content stored before that.)
+ */
+function describedImageCount(business: Business): number {
+  return (business.content.gallery?.items ?? []).filter((item) => {
+    const alt = item.alt?.trim();
+    return Boolean(alt) && alt!.toLowerCase() !== item.title.trim().toLowerCase();
+  }).length;
+}
+
+/**
  * Published questions, counted the same way buildFaqJsonLd counts them: a row
  * missing either half is dropped from the markup, so it must not score here.
  */
@@ -82,6 +98,7 @@ function buildChecks(b: Business): VisibilityCheck[] {
   const gallery = galleryImageCount(b);
   const openDays = openDayCount(b);
   const faqCount = faqItemCount(b);
+  const described = describedImageCount(b);
 
   // Which LocalBusiness fields are ready to emit.
   const localReady: string[] = [];
@@ -250,14 +267,25 @@ function buildChecks(b: Business): VisibilityCheck[] {
       label: "Image Alt Text",
       category: "media",
       weight: 6,
-      status: PLATFORM.hasImageAltField ? "pass" : gallery > 0 ? "warn" : "warn",
-      finding: PLATFORM.hasImageAltField
-        ? "Images carry descriptive alt text."
-        : `Images (logo, cover${
-            gallery > 0 ? `, ${gallery} gallery item${gallery > 1 ? "s" : ""}` : ""
-          }) have no dedicated alt-text field; titles are used as a fallback.`,
+      // Per-tenant, and scoped to the images that actually need describing.
+      //
+      // The old wording named the logo and the cover, and both were wrong: the
+      // logo's alt is derived (empty when the name sits beside it as text, the
+      // name when it doesn't), and the cover is never rendered as an <img> at
+      // all — it only feeds the JSON-LD `image` value, where alt has no
+      // meaning. That left gallery photos, which is the real gap.
+      status:
+        gallery === 0 ? "warn" : described === gallery ? "pass" : described > 0 ? "warn" : "fail",
+      finding:
+        gallery === 0
+          ? "No gallery images to describe yet."
+          : described === gallery
+            ? `All ${gallery} gallery image${gallery > 1 ? "s carry" : " carries"} a description.`
+            : `${gallery - described} of ${gallery} gallery images have no description, so the title is announced instead — and it is already on screen beside the photo.`,
       recommendation:
-        "Add an alt-text field to images and write descriptive alts (subject + context) for the logo, cover, and every gallery image.",
+        described === gallery && gallery > 0
+          ? "Keep descriptions in step with the photos when they are replaced."
+          : "Fill in 'Describe the photo' under Website → Gallery. Say what is in the shot (subject, then context) rather than repeating the title.",
     },
 
     /* --- Technical --- */

@@ -54,6 +54,30 @@ const optionalProfileUrl = z
   .transform((value) => (value === "" ? undefined : value))
   .optional();
 
+/**
+ * Alt text: what the image SHOWS, for a reader who can't see it.
+ *
+ * Blank is allowed and meaningful — see the per-field notes on where it means
+ * "decorative" and where it means "fall back to the title".
+ *
+ * The "photo of" rule is not pedantry: assistive tech already announces that
+ * the element is an image, so "Photo of a skin fade" is read as "image, photo
+ * of a skin fade". The prefix costs the listener time and carries nothing.
+ */
+const REDUNDANT_ALT_PREFIX =
+  /^\s*(an?\s+)?(image|photo(graph)?|picture|pic|graphic|screenshot)\s+(of|showing)\b/i;
+
+const altText = z
+  .string()
+  .trim()
+  .max(250, "Keep alt text under 250 characters.")
+  .refine(
+    (value) => !REDUNDANT_ALT_PREFIX.test(value),
+    'Just describe the image — screen readers already say "image", so "photo of…" is read twice.',
+  )
+  .transform((value) => (value === "" ? undefined : value))
+  .optional();
+
 const ctaSchema = z.object({
   label: requiredText("Button label is required."),
   href: link,
@@ -118,6 +142,8 @@ export const aboutSchema = z.object({
   features: optionalStringList(12),
   cta: ctaSchema,
   image: imageRef,
+  // Blank keeps the photo decorative (alt=""), which is the right default here.
+  imageAlt: altText,
   badgeValue: requiredText("Badge value is required."),
   badgeLabel: requiredText("Badge label is required."),
 });
@@ -236,17 +262,38 @@ export const gallerySchema = z.object({
   heading: headingSchema,
   items: z
     .array(
-      z.object({
-        title: requiredText("Title is required."),
-        by: text.max(120),
-        // Blank becomes undefined so the template renders no empty line.
-        caption: text
-          .max(200)
-          .transform((value) => (value === "" ? undefined : value))
-          .optional(),
-        image: imageRef,
-        wide: z.boolean().optional(),
-      }),
+      z
+        .object({
+          title: requiredText("Title is required."),
+          by: text.max(120),
+          // Blank becomes undefined so the template renders no empty line.
+          caption: text
+            .max(200)
+            .transform((value) => (value === "" ? undefined : value))
+            .optional(),
+          image: imageRef,
+          alt: altText,
+          wide: z.boolean().optional(),
+        })
+        /*
+         * Refused: alt text identical to the title.
+         *
+         * That is the exact defect this field was added to fix — the title is
+         * already rendered in the figcaption below the photo, so repeating it
+         * makes a screen reader announce the same words twice and describe
+         * nothing. Allowing it would let the alt be "filled in", and the
+         * visibility score awarded, without a single reader being better off.
+         */
+        .refine(
+          (item) =>
+            !item.alt ||
+            item.alt.trim().toLowerCase() !== item.title.trim().toLowerCase(),
+          {
+            path: ["alt"],
+            message:
+              "Describe what the photo shows — repeating the title tells a screen-reader user nothing new.",
+          },
+        ),
     )
     .min(1, "Add at least one gallery item."),
 });

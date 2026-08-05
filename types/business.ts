@@ -103,6 +103,14 @@ export interface About {
   features: string[];
   cta: CtaButton;
   image: string;
+  /**
+   * Alt text for the photo. Optional, and BLANK IS CORRECT by default: the
+   * image is an atmospheric shot beside copy that already carries the meaning,
+   * so it renders alt="" and screen readers skip it. Filling this in promotes
+   * it to a meaningful image — worth doing only when the photo actually shows
+   * something the words don't (the shop interior, the owner at work).
+   */
+  imageAlt?: string;
   badgeValue: string;
   badgeLabel: string;
 }
@@ -121,6 +129,15 @@ export interface GalleryItem {
   /** Optional line beneath the title, e.g. "Happy client — fresh skin fade". */
   caption?: string;
   image: string;
+  /**
+   * What the photo SHOWS, for readers who can't see it.
+   *
+   * Distinct from `title` on purpose. The title is a label for the work and is
+   * already visible in the figcaption, so using it as alt made a screen reader
+   * announce the same string twice and describe nothing. Falls back to `title`
+   * when blank — imperfect, but better than an unlabelled photo.
+   */
+  alt?: string;
   /** Spans two columns in the desktop grid (mockup `.span-2`). */
   wide?: boolean;
 }

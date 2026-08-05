@@ -1,10 +1,20 @@
-# Client onboarding: the FAQ section
+# Client onboarding: FAQ and image descriptions
+
+Two onboarding tasks that share a shape — both store the client's own facts in a
+form machines can use, and both start empty on purpose.
+
+- [The FAQ section](#the-faq-section)
+- [Image descriptions (alt text)](#image-descriptions-alt-text)
+
+---
+
+## The FAQ section
 
 A guide for walking a client through their FAQ, and the reasoning behind how it
 behaves. Written to be usable in front of a client — the questions in
 "Interview script" can be asked verbatim.
 
-## Why this section matters more than it looks
+### Why this section matters more than it looks
 
 Everything else on a client's site is marketing prose. The FAQ is the only place
 where their business facts are stored as **discrete question/answer pairs**, and
@@ -22,7 +32,7 @@ local business will *not* get expandable snippets in search from this. Say so
 before a client infers otherwise. The value is AI answer engines and on-page
 conversion, and that value is real — just not the one clients assume.
 
-## What the client can do
+### What the client can do
 
 Everything is under **Website → FAQ** in their admin.
 
@@ -45,7 +55,7 @@ Every other section falls back to template content when a client saves nothing,
 so an empty save there would publish a blank strip. The FAQ is different by
 design — an owner has to be able to take a published answer down.
 
-## What a new client starts with
+### What a new client starts with
 
 **Nothing.** The template ships a heading and zero questions.
 
@@ -63,7 +73,7 @@ markup to match content visible on the page.
 So the section and its schema both stay absent until the owner writes real
 answers. **Filling this in is an onboarding task, not a launch blocker.**
 
-## Interview script
+### Interview script
 
 Ask these in person. They map one-to-one onto good questions, and every answer
 is a fact only the owner has.
@@ -82,7 +92,7 @@ is a fact only the owner has.
 Question 10 is usually the most valuable one. Owners know their real FAQ
 already; they just have not written it down.
 
-## Writing guidance to give the client
+### Writing guidance to give the client
 
 - **Answer so it stands alone.** An assistant quotes the answer without the
   question around it. "Yes" is useless; "Walk-ins are welcome, but booking ahead
@@ -96,7 +106,7 @@ already; they just have not written it down.
 - Three questions is the minimum that reads as real coverage — that is the
   threshold the visibility score uses.
 
-## How it scores
+### How it scores
 
 The AI Visibility report (`services/visibility-service.ts`) checks the client's
 own questions, not whether the platform supports the feature:
@@ -110,7 +120,7 @@ own questions, not whether the platform supports the feature:
 A question missing either half is not counted — it is dropped from the markup
 too, so scoring it would credit something no assistant can read.
 
-## Related fields worth capturing in the same visit
+### Related fields worth capturing in the same visit
 
 The FAQ interview surfaces answers that belong in structured fields as well.
 Capture them once and they feed the FAQ, the `LocalBusiness` schema, the share
@@ -128,7 +138,7 @@ card and the Google Business Profile together:
   Duplicate descriptions across tenants are a real liability once you have more
   than one client live.
 
-## Technical notes
+### Technical notes
 
 - Storage: `businesses.faq_content` (jsonb, migration `0031_faq_content.sql`).
   `null` means no FAQ, exactly as for the other `*_content` columns.
@@ -144,3 +154,81 @@ card and the Google Business Profile together:
 - Public pages are ISR with `revalidate = 3600`. Saving through the admin
   revalidates immediately; a direct database write can take up to an hour to
   appear.
+
+---
+
+## Image descriptions (alt text)
+
+### What alt text actually is
+
+The text a browser uses **in place of** an image: read aloud by screen readers,
+shown when an image fails to load, indexed by image search, and increasingly
+what a vision model reads to caption a page.
+
+### The bug this replaced
+
+The gallery used to pass the item's **title** as its alt text. That satisfies
+every automated "has alt" check while doing none of alt text's work — the title
+is already rendered in the caption two lines below the photo, so a screen-reader
+user heard:
+
+> "TEXTURED CROP FADE" … "TEXTURED CROP FADE"
+
+Two announcements, nothing learned about the picture. The save form now refuses
+an alt identical to its title, and the visibility score does not count one.
+
+### What the client fills in
+
+**Website → Gallery → "Describe the photo"**, one per image.
+
+**Website → About → "Describe the image"** is optional and usually stays blank —
+that photo sits beside copy that carries the meaning, so an empty alt is
+*correct* and screen readers skip it. Fill it only when the photo shows
+something the words do not, like the shop floor or the owner at work.
+
+### Two images that deliberately have no field
+
+- **The logo.** Its alt is derived, not typed: empty when the business name sits
+  beside it as real text (announcing it twice is the same bug as above), and the
+  business name when the name exists only as a wordmark image. An owner editing
+  this could only make it worse.
+- **The cover image.** It is never rendered as an `<img>`. It supplies the
+  `image` value in `LocalBusiness` JSON-LD, where alt text has no meaning.
+
+An earlier version of the visibility report told you to write alts for both.
+That advice was wrong and has been corrected.
+
+### How to write one
+
+- **Say what is in the shot, not what the piece is called.** "Close view of a
+  razored line above a faded side" — not "TEXTURED CROP FADE".
+- **Subject first, then context.** Someone listening should be able to stop
+  after four words and still have the gist.
+- **Do not start with "photo of" or "image of".** Assistive tech already
+  announces that it is an image, so the prefix is read twice. The form refuses
+  these openings.
+- **One sentence.** Capped at 250 characters.
+- **No keyword stuffing.** It is read aloud to a person, and search engines have
+  discounted stuffed alts for a decade.
+
+### How it scores
+
+| Gallery photos described | Status |
+| --- | --- |
+| none | fail |
+| some | warn |
+| all | pass |
+
+An alt that merely repeats its title is not counted, even where older content
+already stored one.
+
+### Technical notes
+
+- Storage: `alt` on each item in `businesses.gallery_content`, and `imageAlt` in
+  `about_content`. Both are JSONB, so **no migration was needed**.
+- Blank is stored as absent rather than as an empty string, so "not described"
+  and "deliberately decorative" stay distinguishable.
+- Gallery rendering falls back to the title when no description exists. That is
+  a compromise for old content, not the goal — an unlabelled photo is worse.
+- Barber portraits already build their alt from name and role, and hero, craft
+  and about images are decorative by default.

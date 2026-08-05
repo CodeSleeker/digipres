@@ -135,6 +135,6 @@ tests/          613 tests incl. DB-level RLS isolation
 
 - [docs/deployment.md](docs/deployment.md) — **production deployment, step by step**
 - [docs/operations.md](docs/operations.md) — seeding, migration/rollback policy, cron jobs
-- [docs/client-onboarding-faq.md](docs/client-onboarding-faq.md) — FAQ section: client walkthrough, interview script, why the default is empty
+- [docs/client-onboarding-faq.md](docs/client-onboarding-faq.md) — FAQ + image descriptions: client walkthrough, interview script, why the defaults are empty
 - [docs/architecture/multi-tenancy.md](docs/architecture/multi-tenancy.md) — tenancy model, RLS, routing, impersonation
 - [docs/production-readiness-review-8.md](docs/production-readiness-review-8.md) — latest audit (94/100) + launch checklist

@@ -43,6 +43,12 @@ export function GalleryForm({
 
       <div className="grid gap-3">
         <SubHeading>Gallery items</SubHeading>
+        <p className="text-xs leading-relaxed text-gray">
+          &ldquo;Describe the photo&rdquo; is read aloud to visitors using a
+          screen reader and is what image search indexes. Say what is actually
+          in the shot, not what the piece is called — the title is already on
+          screen beside it.
+        </p>
         {items.fields.map((field, i) => (
           <RepeatableRow
             key={field.id}
@@ -69,6 +75,12 @@ export function GalleryForm({
               label="Caption (optional)"
               placeholder="Happy client — fresh skin fade"
             />
+            <TextField
+              form={form}
+              name={`items.${i}.alt`}
+              label="Describe the photo"
+              placeholder="Close-up of a high skin fade, tapered to the neckline"
+            />
             <CheckField
               form={form}
               name={`items.${i}.wide`}
@@ -83,6 +95,7 @@ export function GalleryForm({
               by: "",
               caption: "",
               image: "",
+              alt: "",
               wide: false,
             })
           }

@@ -38,6 +38,12 @@ export function AboutForm({
         label="Image"
         businessId={businessId}
       />
+      <TextField
+        form={form}
+        name="imageAlt"
+        label="Describe the image (optional)"
+        placeholder="The shop floor with three barber chairs and a client mid-cut"
+      />
       <div className="grid gap-3 sm:grid-cols-2">
         <TextField form={form} name="badgeValue" label="Badge value" />
         <TextField form={form} name="badgeLabel" label="Badge label" />
