@@ -23,11 +23,11 @@ import { Spinner } from "@/components/ui/submit-button";
  */
 
 export const fieldClass =
-  "h-auto w-full rounded-none border border-dark-border bg-charcoal px-3 py-2 text-sm text-white shadow-none outline-none transition-colors focus-visible:border-gold focus-visible:ring-0";
+  "h-auto w-full rounded-none border border-admin-line bg-admin-field px-3 py-2 text-sm text-admin-fg shadow-none outline-none transition-colors focus-visible:border-admin-accent focus-visible:ring-0";
 
 export function SubHeading({ children }: { children: ReactNode }) {
   return (
-    <h2 className="font-heading text-lg tracking-[2px] text-white">
+    <h2 className="font-admin-heading text-lg tracking-[2px] text-admin-fg">
       {children}
     </h2>
   );
@@ -67,7 +67,7 @@ export function Field({
     <div className="flex flex-col gap-1.5">
       <Label
         htmlFor={htmlFor}
-        className="text-[0.7rem] font-normal uppercase tracking-[1.5px] text-gray"
+        className="text-[0.7rem] font-normal uppercase tracking-[1.5px] text-admin-muted"
       >
         {label}
       </Label>
@@ -151,7 +151,7 @@ export function StringListField<T extends FieldValues>({
             onChange={(e) => field.onChange(e.target.value.split("\n"))}
             onBlur={field.onBlur}
           />
-          {hint && <span className="text-[0.65rem] text-gray">{hint}</span>}
+          {hint && <span className="text-[0.65rem] text-admin-muted">{hint}</span>}
         </Field>
       )}
     />
@@ -186,7 +186,7 @@ export function NumberField<T extends FieldValues>({
         // a message about a type the owner never chose.
         {...form.register(name, { valueAsNumber: true })}
       />
-      {hint && <span className="text-[0.65rem] text-gray">{hint}</span>}
+      {hint && <span className="text-[0.65rem] text-admin-muted">{hint}</span>}
     </Field>
   );
 }
@@ -224,8 +224,8 @@ export function CheckField<T extends FieldValues>({
   label: string;
 }) {
   return (
-    <label className="flex items-center gap-2 text-sm text-gray-light">
-      <input type="checkbox" className="accent-gold" {...form.register(name)} />
+    <label className="flex items-center gap-2 text-sm text-admin-fg/80">
+      <input type="checkbox" className="accent-admin-accent" {...form.register(name)} />
       {label}
     </label>
   );
@@ -241,16 +241,16 @@ export function RepeatableRow({
   children: ReactNode;
 }) {
   return (
-    <div className="rounded border border-dark-border bg-dark p-4">
+    <div className="rounded border border-admin-line bg-admin-panel p-4">
       <div className="mb-3 flex items-center justify-between">
-        <span className="text-[0.7rem] uppercase tracking-[2px] text-gold">
+        <span className="text-[0.7rem] uppercase tracking-[2px] text-admin-accent">
           {title}
         </span>
         {onRemove && (
           <button
             type="button"
             onClick={onRemove}
-            className="text-xs text-gray transition-colors hover:text-destructive"
+            className="text-xs text-admin-muted transition-colors hover:text-destructive"
           >
             Remove
           </button>
@@ -272,7 +272,7 @@ export function AddButton({
     <button
       type="button"
       onClick={onClick}
-      className="w-full rounded border border-dashed border-dark-border py-2 text-xs uppercase tracking-[2px] text-gray transition-colors hover:border-gold hover:text-gold"
+      className="w-full rounded border border-dashed border-admin-line py-2 text-xs uppercase tracking-[2px] text-admin-muted transition-colors hover:border-admin-accent hover:text-admin-accent"
     >
       + {children}
     </button>
@@ -287,12 +287,12 @@ export function SubmitBar({
   result: CmsFormState | null;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-4 border-t border-dark-border pt-5">
+    <div className="flex flex-wrap items-center gap-4 border-t border-admin-line pt-5">
       <Button
         type="submit"
         disabled={pending}
         aria-busy={pending}
-        className="rounded-none bg-gold font-heading tracking-[2px] text-black hover:bg-gold-light"
+        className="rounded-none bg-admin-accent font-admin-heading tracking-[2px] text-admin-on-accent hover:bg-admin-accent-hover"
       >
         {pending ? (
           <span className="inline-flex items-center gap-2">

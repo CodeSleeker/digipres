@@ -11,9 +11,9 @@ import type { Business } from "@/types/business-entity";
  */
 export function DetailsPanel({ business }: { business: Business }) {
   return (
-    <section className="border border-dark-border bg-dark p-6">
-      <h2 className="font-heading text-lg tracking-[2px]">Business details</h2>
-      <p className="mt-1 max-w-2xl text-xs leading-relaxed text-gray">
+    <section className="border border-admin-line bg-admin-panel p-6">
+      <h2 className="font-admin-heading text-lg tracking-[2px]">Business details</h2>
+      <p className="mt-1 max-w-2xl text-xs leading-relaxed text-admin-muted">
         The name appears on the client&apos;s website — the header, the page
         title and its search-engine listing — so saving here republishes their
         site. The change is recorded in the audit trail against your account.
@@ -29,7 +29,7 @@ export function DetailsPanel({ business }: { business: Business }) {
             `min-w-[20rem]` is wider than a 375px viewport once the panel's
             padding is taken off, so it forced the page to scroll sideways. */}
         <label className="flex w-full flex-col gap-1.5 sm:w-auto">
-          <span className="text-[0.7rem] uppercase tracking-[1.5px] text-gray">
+          <span className="text-[0.7rem] uppercase tracking-[1.5px] text-admin-muted">
             Business name
           </span>
           <input
@@ -37,21 +37,21 @@ export function DetailsPanel({ business }: { business: Business }) {
             defaultValue={business.name}
             required
             maxLength={120}
-            className="w-full border border-dark-border bg-black px-3 py-2 text-sm text-white focus-visible:border-gold focus-visible:outline-none sm:min-w-[20rem]"
+            className="w-full border border-admin-line bg-admin px-3 py-2 text-sm text-admin-fg focus-visible:border-admin-accent focus-visible:outline-none sm:min-w-[20rem]"
           />
         </label>
 
         <SubmitButton
           pendingLabel="Saving…"
-          className="border border-gold px-4 py-2 text-xs uppercase tracking-[2px] text-gold transition-colors hover:bg-gold hover:text-black"
+          className="border border-admin-accent px-4 py-2 text-xs uppercase tracking-[2px] text-admin-accent transition-colors hover:bg-admin-accent hover:text-admin-on-accent"
         >
           Save name
         </SubmitButton>
       </form>
 
-      <p className="mt-3 text-xs text-gray">
+      <p className="mt-3 text-xs text-admin-muted">
         Address:{" "}
-        <span className="text-gray-light">/{business.slug}</span> — the slug is
+        <span className="text-admin-fg/80">/{business.slug}</span> — the slug is
         the live site&apos;s URL and isn&apos;t editable here.
       </p>
     </section>

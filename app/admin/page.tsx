@@ -56,8 +56,8 @@ export default async function AdminHome() {
   return (
     <div className="grid gap-8">
       <div>
-        <h1 className="font-heading text-2xl tracking-[2px]">Dashboard</h1>
-        <p className="mt-1 text-sm text-gray">
+        <h1 className="font-admin-heading text-2xl tracking-[2px]">Dashboard</h1>
+        <p className="mt-1 text-sm text-admin-muted">
           {business
             ? `Managing ${business.name} (/${business.slug}).`
             : "Start the Google Business Profile setup to create your business."}
@@ -125,10 +125,10 @@ export default async function AdminHome() {
 
       {/* Website content shortcuts */}
       <div>
-        <h2 className="mb-1 font-heading text-lg tracking-[2px]">
+        <h2 className="mb-1 font-admin-heading text-lg tracking-[2px]">
           Website Content
         </h2>
-        <p className="text-sm text-gray">
+        <p className="text-sm text-admin-muted">
           Edit the sections of your public website. Changes publish instantly.
         </p>
       </div>
@@ -137,12 +137,12 @@ export default async function AdminHome() {
           <Link
             key={section}
             href={`/admin/website/${section}`}
-            className="border border-dark-border bg-dark p-5 transition-colors hover:border-gold"
+            className="border border-admin-line bg-admin-panel p-5 transition-colors hover:border-admin-accent"
           >
-            <span className="font-heading text-lg capitalize tracking-[2px]">
+            <span className="font-admin-heading text-lg capitalize tracking-[2px]">
               {section}
             </span>
-            <p className="mt-1 text-xs text-gray">Edit the {section} section</p>
+            <p className="mt-1 text-xs text-admin-muted">Edit the {section} section</p>
           </Link>
         ))}
       </div>

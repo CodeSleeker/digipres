@@ -136,6 +136,73 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   BACK-OFFICE CHROME — follows the tenant's theme
+
+   The signed-in surfaces (/admin for a client, /platform for the
+   agency) are styled from these rather than from any one template's
+   palette. `lib/admin/theme.ts` sets the underlying properties per
+   tenant; the values below are only the fallback, so a surface that
+   forgets to set them still renders as the platform's own dark theme
+   instead of as unstyled markup.
+
+   `field`, `accent-hover` and the tints are DERIVED with color-mix so
+   they follow whatever palette arrives — no per-theme value to invent,
+   and a light palette darkens its hover where a dark one lightens it.
+═══════════════════════════════════════════════════════════════ */
+:root {
+  --admin-bg: #0a0a0a;
+  --admin-panel: #1a1a1a;
+  --admin-line: #2a2a2a;
+  --admin-fg: #f5f5f5;
+  --admin-muted: #888888;
+  --admin-accent: #c9a96e;
+  --admin-on-accent: #0a0a0a;
+  --admin-font-heading: var(--font-bebas);
+}
+
+@theme inline {
+  --color-admin: var(--admin-bg);
+  --color-admin-panel: var(--admin-panel);
+  --color-admin-line: var(--admin-line);
+  --color-admin-fg: var(--admin-fg);
+  --color-admin-muted: var(--admin-muted);
+  --color-admin-accent: var(--admin-accent);
+  --color-admin-on-accent: var(--admin-on-accent);
+
+  /* An input sits a step off its panel, in whichever direction the
+     palette runs. */
+  --color-admin-field: color-mix(
+    in srgb,
+    var(--admin-bg) 65%,
+    var(--admin-panel)
+  );
+  /* Hover moves the accent TOWARDS the text colour: lighter on a dark
+     ground, darker on a light one, without a second stored colour. */
+  --color-admin-accent-hover: color-mix(
+    in srgb,
+    var(--admin-accent) 82%,
+    var(--admin-fg)
+  );
+  /* The wash behind an accent icon tile. */
+  --color-admin-accent-wash: color-mix(
+    in srgb,
+    var(--admin-accent) 12%,
+    transparent
+  );
+
+  --font-admin-heading: var(--admin-font-heading), sans-serif;
+}
+
+/* Native controls — date pickers, selects, scrollbars — follow the
+   palette instead of staying dark under a light dashboard. */
+[data-admin-theme] {
+  color-scheme: dark;
+}
+[data-admin-theme="light"] {
+  color-scheme: light;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    shadcn/ui token layer (kept so ui primitives render in-theme)
 ═══════════════════════════════════════════════════════════════ */
 @theme inline {

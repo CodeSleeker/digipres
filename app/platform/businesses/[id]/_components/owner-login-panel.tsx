@@ -26,9 +26,9 @@ export function OwnerLoginPanel({
   publicEmail: string | null;
 }) {
   return (
-    <section className="border border-dark-border bg-dark p-6">
-      <h2 className="font-heading text-lg tracking-[2px]">Owner login</h2>
-      <p className="mt-1 max-w-2xl text-xs leading-relaxed text-gray">
+    <section className="border border-admin-line bg-admin-panel p-6">
+      <h2 className="font-admin-heading text-lg tracking-[2px]">Owner login</h2>
+      <p className="mt-1 max-w-2xl text-xs leading-relaxed text-admin-muted">
         The address this client signs in with. The change takes effect
         immediately and the old address stops working. Recorded in the audit
         trail against your account.
@@ -41,7 +41,7 @@ export function OwnerLoginPanel({
           {/* Full width below sm, original fixed width above. These fields were
               wider than a phone viewport and pushed the whole page sideways. */}
           <label className="flex w-full flex-col gap-1.5 sm:w-auto">
-            <span className="text-[0.7rem] uppercase tracking-[1.5px] text-gray">
+            <span className="text-[0.7rem] uppercase tracking-[1.5px] text-admin-muted">
               Login email
             </span>
             <input
@@ -49,29 +49,29 @@ export function OwnerLoginPanel({
               type="email"
               defaultValue={currentEmail ?? ""}
               required
-              className="w-full border border-dark-border bg-black px-3 py-2 text-sm text-white focus-visible:border-gold focus-visible:outline-none sm:min-w-[20rem]"
+              className="w-full border border-admin-line bg-admin px-3 py-2 text-sm text-admin-fg focus-visible:border-admin-accent focus-visible:outline-none sm:min-w-[20rem]"
             />
           </label>
 
           <SubmitButton
             pendingLabel="Changing…"
-            className="border border-gold px-4 py-2 text-xs uppercase tracking-[2px] text-gold transition-colors hover:bg-gold hover:text-black"
+            className="border border-admin-accent px-4 py-2 text-xs uppercase tracking-[2px] text-admin-accent transition-colors hover:bg-admin-accent hover:text-admin-on-accent"
           >
             Change login email
           </SubmitButton>
         </div>
 
-        <label className="flex items-start gap-2 text-sm text-gray-light">
+        <label className="flex items-start gap-2 text-sm text-admin-fg/80">
           <input
             type="checkbox"
             name="requireNewPassword"
             value="yes"
             defaultChecked
-            className="mt-0.5 accent-gold"
+            className="mt-0.5 accent-admin-accent"
           />
           <span>
             Make them set a new password
-            <span className="mt-1 block text-xs leading-relaxed text-gray">
+            <span className="mt-1 block text-xs leading-relaxed text-admin-muted">
               Their current password is discarded and a reset link is emailed to
               the new address — they can&apos;t get back in until they use it.
               Leave this off if you&apos;re only fixing a typo and they should
@@ -83,15 +83,15 @@ export function OwnerLoginPanel({
 
       {/* The two are constantly confused, so the other one is shown here rather
           than left for someone to discover after changing the wrong thing. */}
-      <p className="mt-3 text-xs text-gray">
+      <p className="mt-3 text-xs text-admin-muted">
         Public contact email on their website:{" "}
-        <span className="text-gray-light">{publicEmail ?? "—"}</span> — separate
+        <span className="text-admin-fg/80">{publicEmail ?? "—"}</span> — separate
         from this, and not changed here.
       </p>
 
-      <div className="mt-8 border-t border-dark-border pt-6">
-        <h3 className="text-sm text-white">Transfer to a new owner</h3>
-        <p className="mt-2 max-w-2xl text-xs leading-relaxed text-gray">
+      <div className="mt-8 border-t border-admin-line pt-6">
+        <h3 className="text-sm text-admin-fg">Transfer to a new owner</h3>
+        <p className="mt-2 max-w-2xl text-xs leading-relaxed text-admin-muted">
           For a business that genuinely changes hands. The new owner is invited
           by email, sets their own password, and inherits the shop with every
           customer, booking and page intact — nothing is deleted. Use the field
@@ -106,7 +106,7 @@ export function OwnerLoginPanel({
 
           <div className="flex flex-wrap items-end gap-3">
             <label className="flex w-full flex-col gap-1.5 sm:w-auto">
-              <span className="text-[0.7rem] uppercase tracking-[1.5px] text-gray">
+              <span className="text-[0.7rem] uppercase tracking-[1.5px] text-admin-muted">
                 New owner&apos;s email
               </span>
               <input
@@ -114,12 +114,12 @@ export function OwnerLoginPanel({
                 type="email"
                 required
                 placeholder="new-owner@example.com"
-                className="w-full border border-dark-border bg-black px-3 py-2 text-sm text-white placeholder:text-gray focus-visible:border-gold focus-visible:outline-none sm:min-w-[18rem]"
+                className="w-full border border-admin-line bg-admin px-3 py-2 text-sm text-admin-fg placeholder:text-admin-muted focus-visible:border-admin-accent focus-visible:outline-none sm:min-w-[18rem]"
               />
             </label>
 
             <label className="flex w-full flex-col gap-1.5 sm:w-auto">
-              <span className="text-[0.7rem] uppercase tracking-[1.5px] text-gray">
+              <span className="text-[0.7rem] uppercase tracking-[1.5px] text-admin-muted">
                 Confirm
               </span>
               <input
@@ -127,28 +127,28 @@ export function OwnerLoginPanel({
                 autoComplete="off"
                 required
                 placeholder={`Type "${slug}"`}
-                className="w-full border border-dark-border bg-black px-3 py-2 text-sm text-white placeholder:text-gray focus-visible:border-gold focus-visible:outline-none sm:min-w-[12rem]"
+                className="w-full border border-admin-line bg-admin px-3 py-2 text-sm text-admin-fg placeholder:text-admin-muted focus-visible:border-admin-accent focus-visible:outline-none sm:min-w-[12rem]"
               />
             </label>
 
             <SubmitButton
               pendingLabel="Transferring…"
-              className="border border-destructive px-4 py-2 text-xs uppercase tracking-[2px] text-destructive transition-colors hover:bg-destructive hover:text-white"
+              className="border border-destructive px-4 py-2 text-xs uppercase tracking-[2px] text-destructive transition-colors hover:bg-destructive hover:text-admin-fg"
             >
               Transfer
             </SubmitButton>
           </div>
 
-          <label className="flex items-start gap-2 text-sm text-gray-light">
+          <label className="flex items-start gap-2 text-sm text-admin-fg/80">
             <input
               type="checkbox"
               name="removePreviousOwner"
               value="yes"
-              className="mt-0.5 accent-gold"
+              className="mt-0.5 accent-admin-accent"
             />
             <span>
               Also delete the previous owner&apos;s account
-              <span className="mt-1 block text-xs leading-relaxed text-gray">
+              <span className="mt-1 block text-xs leading-relaxed text-admin-muted">
                 Irreversible, and only safe once the transfer has gone through —
                 which is why it happens last. Their past actions stay in the
                 audit trail. Leave this off to keep the account around while the

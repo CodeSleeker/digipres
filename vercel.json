@@ -8,6 +8,11 @@
     {
       "path": "/api/jobs/retention",
       "schedule": "20 3 * * *"
+    },
+    {
+      "comment": "Sunday 08:00 Philippine time. Vercel crons run in UTC and `businesses` has no timezone column, so the hour is chosen for PH (UTC+8) rather than derived per tenant.",
+      "path": "/api/jobs/subscriber-digest",
+      "schedule": "0 0 * * 0"
     }
   ]
 }

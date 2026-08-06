@@ -32,7 +32,7 @@ export function PendingAppointmentsBadge({
 
   return (
     <span
-      className="min-w-5 rounded-full bg-gold px-1.5 py-0.5 text-center text-[0.65rem] font-semibold leading-none text-black"
+      className="min-w-5 rounded-full bg-admin-accent px-1.5 py-0.5 text-center text-[0.65rem] font-semibold leading-none text-admin-on-accent"
       // The number alone is ambiguous out of context — a screen reader would
       // otherwise just say "Appointments 3".
       aria-label={`${total} awaiting confirmation`}

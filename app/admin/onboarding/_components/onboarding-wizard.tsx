@@ -193,13 +193,13 @@ export function OnboardingWizard({ view }: { view: OnboardingView }) {
       {/* Steps + progress */}
       <aside className="flex flex-col gap-5">
         <div>
-          <div className="mb-1 flex items-center justify-between text-xs text-gray">
+          <div className="mb-1 flex items-center justify-between text-xs text-admin-muted">
             <span>Setup progress</span>
-            <span className="text-gold">{percentage}%</span>
+            <span className="text-admin-accent">{percentage}%</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-dark-border">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-admin-line">
             <div
-              className="h-full rounded-full bg-gold transition-all duration-500"
+              className="h-full rounded-full bg-admin-accent transition-all duration-500"
               style={{ width: `${percentage}%` }}
             />
           </div>
@@ -217,18 +217,18 @@ export function OnboardingWizard({ view }: { view: OnboardingView }) {
                   className={cn(
                     "flex w-full items-center gap-3 rounded px-3 py-2 text-left text-sm transition-colors",
                     active
-                      ? "bg-dark text-white"
-                      : "text-gray-light hover:text-white",
+                      ? "bg-admin-panel text-admin-fg"
+                      : "text-admin-fg/80 hover:text-admin-fg",
                   )}
                 >
                   <span
                     className={cn(
                       "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[0.65rem]",
                       done
-                        ? "bg-gold text-black"
+                        ? "bg-admin-accent text-admin-on-accent"
                         : active
-                          ? "border border-gold text-gold"
-                          : "border border-dark-border text-gray",
+                          ? "border border-admin-accent text-admin-accent"
+                          : "border border-admin-line text-admin-muted",
                     )}
                   >
                     {done ? "✓" : s.index}
@@ -244,21 +244,21 @@ export function OnboardingWizard({ view }: { view: OnboardingView }) {
       {/* Current step */}
       <section className="min-w-0">
         <div className="mb-6">
-          <h2 className="font-heading text-xl tracking-[2px] text-white">
+          <h2 className="font-admin-heading text-xl tracking-[2px] text-admin-fg">
             {step.index}. {step.title}
           </h2>
-          <p className="mt-1 text-sm text-gray">{step.blurb}</p>
+          <p className="mt-1 text-sm text-admin-muted">{step.blurb}</p>
         </div>
 
         <div className="grid max-w-xl gap-5">{renderStep(step.id, form)}</div>
 
-        <div className="mt-8 flex flex-wrap items-center gap-4 border-t border-dark-border pt-5">
+        <div className="mt-8 flex flex-wrap items-center gap-4 border-t border-admin-line pt-5">
           <Button
             type="button"
             variant="outline"
             disabled={current === 0}
             onClick={() => goTo(current - 1)}
-            className="rounded-none border-dark-border text-white hover:border-gold hover:text-gold"
+            className="rounded-none border-admin-line text-admin-fg hover:border-admin-accent hover:text-admin-accent"
           >
             Back
           </Button>
@@ -267,7 +267,7 @@ export function OnboardingWizard({ view }: { view: OnboardingView }) {
             disabled={saving}
             aria-busy={saving}
             onClick={handleSave}
-            className="rounded-none bg-gold font-heading tracking-[2px] text-black hover:bg-gold-light"
+            className="rounded-none bg-admin-accent font-admin-heading tracking-[2px] text-admin-on-accent hover:bg-admin-accent-hover"
           >
             {saving ? (
               <span className="inline-flex items-center gap-2">
@@ -374,7 +374,7 @@ function renderStep(
             name="coverImageUrl"
             label="Cover image URL"
           />
-          <p className="text-xs text-gray">
+          <p className="text-xs text-admin-muted">
             Paste image URLs for now. (Direct file uploads can be added later.)
           </p>
         </>
@@ -399,7 +399,7 @@ function renderStep(
             label="Google review link"
             placeholder="https://g.page/r/..."
           />
-          <p className="text-xs text-gray">
+          <p className="text-xs text-admin-muted">
             In Google Business Profile → Ask for reviews, copy your short review
             link and paste it here.
           </p>
@@ -420,11 +420,11 @@ function HoursEditor({
           key={i}
           className="grid grid-cols-[100px_auto_1fr_1fr] items-center gap-3"
         >
-          <span className="text-sm text-gray-light">{DAY_NAMES[i]}</span>
-          <label className="flex items-center gap-2 text-xs text-gray">
+          <span className="text-sm text-admin-fg/80">{DAY_NAMES[i]}</span>
+          <label className="flex items-center gap-2 text-xs text-admin-muted">
             <input
               type="checkbox"
-              className="accent-gold"
+              className="accent-admin-accent"
               {...form.register(`hours.${i}.closed`)}
             />
             Closed
@@ -449,7 +449,7 @@ function HoursEditor({
 
 function VerificationGuide() {
   return (
-    <div className="grid gap-4 text-sm leading-relaxed text-gray-light">
+    <div className="grid gap-4 text-sm leading-relaxed text-admin-fg/80">
       <p>
         Google verifies that you own the business before your profile goes live.
         Follow these steps in your Google Business Profile account:
@@ -457,7 +457,7 @@ function VerificationGuide() {
       <ol className="grid list-decimal gap-2 pl-5">
         <li>Sign in to your Google account and search for your business name.</li>
         <li>
-          Select <span className="text-gold">Own this business?</span> and choose
+          Select <span className="text-admin-accent">Own this business?</span> and choose
           a verification method (postcard, phone, email, or video).
         </li>
         <li>
@@ -466,7 +466,7 @@ function VerificationGuide() {
         </li>
         <li>Once verified, publish your profile and keep details up to date.</li>
       </ol>
-      <p className="text-xs text-gray">
+      <p className="text-xs text-admin-muted">
         This is a guide only — verification happens on Google, not here. Mark
         this step done once you&apos;ve started the process.
       </p>

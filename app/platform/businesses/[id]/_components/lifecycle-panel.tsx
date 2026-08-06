@@ -33,18 +33,18 @@ export function LifecyclePanel({
   const canWrite = role !== "read_only";
 
   return (
-    <section className="border border-dark-border bg-dark p-6">
-      <h2 className="font-heading text-lg tracking-[2px]">Lifecycle</h2>
+    <section className="border border-admin-line bg-admin-panel p-6">
+      <h2 className="font-admin-heading text-lg tracking-[2px]">Lifecycle</h2>
 
-      <p className="mt-3 text-sm text-gray-light">
-        <span className="mr-2 inline-block border border-dark-border px-2 py-0.5 text-[0.65rem] uppercase tracking-[2px] text-gold">
+      <p className="mt-3 text-sm text-admin-fg/80">
+        <span className="mr-2 inline-block border border-admin-line px-2 py-0.5 text-[0.65rem] uppercase tracking-[2px] text-admin-accent">
           {business.status}
         </span>
         {STATUS_COPY[business.status]}
       </p>
 
       {!canWrite && (
-        <p className="mt-4 text-xs text-gray">
+        <p className="mt-4 text-xs text-admin-muted">
           Read-only access — lifecycle changes require support or super admin.
         </p>
       )}
@@ -56,7 +56,7 @@ export function LifecyclePanel({
               <input type="hidden" name="businessId" value={business.id} />
               <SubmitButton
                 pendingLabel="Suspending…"
-                className="border border-dark-border px-4 py-2 text-xs uppercase tracking-[2px] text-white transition-colors hover:border-gold hover:text-gold"
+                className="border border-admin-line px-4 py-2 text-xs uppercase tracking-[2px] text-admin-fg transition-colors hover:border-admin-accent hover:text-admin-accent"
               >
                 Suspend service
               </SubmitButton>
@@ -66,7 +66,7 @@ export function LifecyclePanel({
               <input type="hidden" name="businessId" value={business.id} />
               <SubmitButton
                 pendingLabel="Reactivating…"
-                className="border border-gold px-4 py-2 text-xs uppercase tracking-[2px] text-gold transition-colors hover:bg-gold hover:text-black"
+                className="border border-admin-accent px-4 py-2 text-xs uppercase tracking-[2px] text-admin-accent transition-colors hover:bg-admin-accent hover:text-admin-on-accent"
               >
                 Reactivate
               </SubmitButton>
@@ -76,9 +76,9 @@ export function LifecyclePanel({
       )}
 
       {isSuperAdmin && (
-        <div className="mt-8 border-t border-dark-border pt-6">
+        <div className="mt-8 border-t border-admin-line pt-6">
           <h3 className="text-sm text-destructive">Remove this client</h3>
-          <p className="mt-2 max-w-2xl text-xs leading-relaxed text-gray">
+          <p className="mt-2 max-w-2xl text-xs leading-relaxed text-admin-muted">
             Takes the site offline and removes the business from the platform.
             The record is retained (soft delete), so this can be undone in the
             database — and the slug and owner account become free to reuse. To
@@ -94,11 +94,11 @@ export function LifecyclePanel({
               name="confirmSlug"
               autoComplete="off"
               placeholder={`Type "${business.slug}" to confirm`}
-              className="w-full border border-dark-border bg-black px-3 py-2 text-sm text-white placeholder:text-gray focus-visible:border-gold focus-visible:outline-none sm:w-auto sm:min-w-[16rem]"
+              className="w-full border border-admin-line bg-admin px-3 py-2 text-sm text-admin-fg placeholder:text-admin-muted focus-visible:border-admin-accent focus-visible:outline-none sm:w-auto sm:min-w-[16rem]"
             />
             <SubmitButton
               pendingLabel="Removing…"
-              className="border border-destructive px-4 py-2 text-xs uppercase tracking-[2px] text-destructive transition-colors hover:bg-destructive hover:text-white"
+              className="border border-destructive px-4 py-2 text-xs uppercase tracking-[2px] text-destructive transition-colors hover:bg-destructive hover:text-admin-fg"
             >
               Remove
             </SubmitButton>

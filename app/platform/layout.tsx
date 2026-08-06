@@ -40,24 +40,24 @@ export default async function PlatformLayout({
       navFooter={
         <Link
           href="/admin"
-          className="text-xs text-gray transition-colors hover:text-gold"
+          className="text-xs text-admin-muted transition-colors hover:text-admin-accent"
         >
           ← My business back office
         </Link>
       }
       headerLeft={
         <>
-          <span className="truncate text-sm text-white">
+          <span className="truncate text-sm text-admin-fg">
             {PLATFORM_ROLE_LABEL[role]}
           </span>
-          <span className="truncate text-[0.7rem] text-gray">{user.email}</span>
+          <span className="truncate text-[0.7rem] text-admin-muted">{user.email}</span>
         </>
       }
       headerRight={
         <form action={logout}>
           <SubmitButton
             pendingLabel="SIGNING OUT…"
-            className="inline-flex h-8 items-center rounded-none border border-dark-border px-3 text-xs tracking-[2px] text-white transition-colors hover:border-gold hover:text-gold sm:px-4"
+            className="inline-flex h-8 items-center rounded-none border border-admin-line px-3 text-xs tracking-[2px] text-admin-fg transition-colors hover:border-admin-accent hover:text-admin-accent sm:px-4"
           >
             LOG OUT
           </SubmitButton>

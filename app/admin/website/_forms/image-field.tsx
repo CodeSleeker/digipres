@@ -156,15 +156,15 @@ export function ImageField<T extends FieldValues>({
             aria-label={`Upload ${label.toLowerCase()}`}
             onChange={(e) => onPick(e.target.files?.[0])}
             disabled={busy}
-            className="text-xs text-gray file:mr-3 file:border file:border-dark-border file:bg-dark file:px-3 file:py-1.5 file:text-xs file:uppercase file:tracking-[2px] file:text-gold hover:file:border-gold"
+            className="text-xs text-admin-muted file:mr-3 file:border file:border-admin-line file:bg-admin-panel file:px-3 file:py-1.5 file:text-xs file:uppercase file:tracking-[2px] file:text-admin-accent hover:file:border-admin-accent"
           />
         ) : (
-          <p className="text-xs text-gray">
+          <p className="text-xs text-admin-muted">
             Finish creating your business profile to upload a photo. You can
             still paste a link above.
           </p>
         )}
-        {busy && <span className="text-xs text-gray">Uploading…</span>}
+        {busy && <span className="text-xs text-admin-muted">Uploading…</span>}
         {current && !busy && (
           /* Plain <img>: this is an admin preview of an arbitrary URL, and
              next/image throws on hosts outside remotePatterns. */
@@ -172,7 +172,7 @@ export function ImageField<T extends FieldValues>({
           <img
             src={current}
             alt=""
-            className="h-12 w-12 border border-dark-border object-cover"
+            className="h-12 w-12 border border-admin-line object-cover"
           />
         )}
       </div>

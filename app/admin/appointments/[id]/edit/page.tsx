@@ -26,11 +26,11 @@ export default async function EditAppointmentPage({
       <div>
         <Link
           href="/admin/appointments"
-          className="text-xs text-gray transition-colors hover:text-gold"
+          className="text-xs text-admin-muted transition-colors hover:text-admin-accent"
         >
           ← Back to appointments
         </Link>
-        <h1 className="mt-2 font-heading text-2xl tracking-[2px]">
+        <h1 className="mt-2 font-admin-heading text-2xl tracking-[2px]">
           Edit Appointment
         </h1>
       </div>

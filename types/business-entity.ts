@@ -61,6 +61,28 @@ export interface Business {
    */
   smsSenderId: string | null;
   /**
+   * The address this tenant's weekly digest is sent from, on a domain THEY
+   * control — never the platform's.
+   *
+   * Bulk mail and transactional mail must not share a sending reputation: a
+   * newsletter complaint against one client would otherwise push every other
+   * client's booking confirmations into spam. Keeping each tenant on their own
+   * domain makes that impossible by construction.
+   */
+  newsletterFromEmail: string | null;
+  /** Display name on the digest. Falls back to the business name. */
+  newsletterFromName: string | null;
+  /**
+   * Whether the sending domain has been checked (SPF/DKIM) and the digest may
+   * actually send.
+   *
+   * Set by the platform after verifying DNS, never by the owner — otherwise
+   * anyone could send as a domain they merely typed in. Enforced in the
+   * database (migration 0033), not just here. Changing the address clears it.
+   */
+  newsletterVerified: boolean;
+  newsletterVerifiedAt: string | null;
+  /**
    * Street line ONLY. The remaining components are the fields below.
    *
    * Rows created before migration 0027 hold a whole address here; that still

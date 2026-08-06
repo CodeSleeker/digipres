@@ -40,10 +40,10 @@ export function SocialLinksForm({
   return (
     <form action={action} className="grid max-w-2xl gap-4">
       <div>
-        <h2 className="font-heading text-lg tracking-[2px] text-white">
+        <h2 className="font-admin-heading text-lg tracking-[2px] text-admin-fg">
           Social links
         </h2>
-        <p className="mt-1 text-xs leading-relaxed text-gray">
+        <p className="mt-1 text-xs leading-relaxed text-admin-muted">
           Each icon appears in your footer only when its link is filled in.
           Clear a field to remove that icon.
         </p>
@@ -53,7 +53,7 @@ export function SocialLinksForm({
         <div key={platform.name} className="flex flex-col gap-1.5">
           <Label
             htmlFor={platform.name}
-            className="text-[0.7rem] font-normal uppercase tracking-[1.5px] text-gray"
+            className="text-[0.7rem] font-normal uppercase tracking-[1.5px] text-admin-muted"
           >
             {platform.label}
           </Label>
@@ -74,12 +74,12 @@ export function SocialLinksForm({
         </div>
       ))}
 
-      <div className="flex flex-wrap items-center gap-4 border-t border-dark-border pt-5">
+      <div className="flex flex-wrap items-center gap-4 border-t border-admin-line pt-5">
         <Button
           type="submit"
           disabled={pending}
           aria-busy={pending}
-          className="rounded-none bg-gold font-heading tracking-[2px] text-black hover:bg-gold-light"
+          className="rounded-none bg-admin-accent font-admin-heading tracking-[2px] text-admin-on-accent hover:bg-admin-accent-hover"
         >
           {pending ? (
             <span className="inline-flex items-center gap-2">

@@ -40,6 +40,33 @@ export interface EmailMessage {
    * `quoteDisplayName`). Sanitised in `replyToAddress` before it is sent.
    */
   replyTo?: string;
+  /**
+   * Send from a DIFFERENT address entirely — the tenant's own.
+   *
+   * Read the note on `fromName` first: it exists because letting a caller set
+   * the whole From header would let client-edited data choose the address. This
+   * does not reopen that hole, because the value here is not client-edited in
+   * the same sense — it is a sending domain the platform verified (SPF/DKIM)
+   * and recorded as `businesses.newsletter_verified`, which the database will
+   * not let an owner set for themselves (migration 0033).
+   *
+   * The rule for callers is therefore absolute: pass this ONLY after checking
+   * the tenant's sender is verified. It exists for bulk mail — a newsletter
+   * complaint must land on the sender's own domain and never on the platform
+   * address that also carries booking confirmations.
+   *
+   * Sanitised like `replyTo`: one bare address or it is ignored.
+   */
+  fromAddress?: string;
+  /**
+   * One-click unsubscribe (RFC 8058).
+   *
+   * Bulk mail without it is treated as more likely to be spam by the big
+   * providers, and the alternative — a reader with no visible way out — is how
+   * a list earns complaints instead of unsubscribes. Setting this makes Gmail
+   * and Outlook draw their own Unsubscribe button next to the sender.
+   */
+  listUnsubscribeUrl?: string;
 }
 
 export interface EmailSendResult {
@@ -137,6 +164,23 @@ export function applyDisplayName(
 }
 
 /**
+ * The From header for one message: the tenant's own verified address when the
+ * caller supplied one, otherwise the platform's.
+ *
+ * The override goes through the same one-bare-address sanitiser as Reply-To. A
+ * value that does not survive it falls back to the configured address rather
+ * than being patched up — sending as the platform is a visible, harmless
+ * outcome, where a half-cleaned header is neither.
+ */
+export function resolveFrom(
+  configuredFrom: string,
+  message: Pick<EmailMessage, "fromAddress" | "fromName">,
+): string {
+  const own = replyToAddress(message.fromAddress);
+  return applyDisplayName(own ?? configuredFrom, message.fromName);
+}
+
+/**
  * Resend over plain `fetch` rather than their SDK — one HTTP call does not
  * justify a dependency, and this keeps the module usable in any runtime.
  */
@@ -152,11 +196,25 @@ export class ResendEmailSender implements EmailSender {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: applyDisplayName(this.config.from, message.fromName),
+          from: resolveFrom(this.config.from, message),
           to: [message.to],
           subject: message.subject,
           text: message.text,
           ...(message.html ? { html: message.html } : {}),
+          /*
+           * `List-Unsubscribe-Post` is what makes it ONE click: without it the
+           * mail client only offers the link, and the reader has to land on a
+           * page and confirm. Both headers together are what Gmail and Outlook
+           * require to draw their own button.
+           */
+          ...(message.listUnsubscribeUrl
+            ? {
+                headers: {
+                  "List-Unsubscribe": `<${message.listUnsubscribeUrl}>`,
+                  "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+                },
+              }
+            : {}),
           // Omitted entirely when it doesn't survive sanitising — Resend treats
           // an empty reply_to as a value, not as "unset".
           ...(replyToAddress(message.replyTo)
@@ -188,10 +246,7 @@ class LogEmailSender implements EmailSender {
       "[email:stub] from=%o to=%s subject=%o body=%o",
       // Mirrors what the real sender would build, so the stub is a useful
       // preview of the From header rather than just of the body.
-      applyDisplayName(
-        process.env.EMAIL_FROM ?? "(EMAIL_FROM unset)",
-        message.fromName,
-      ),
+      resolveFrom(process.env.EMAIL_FROM ?? "(EMAIL_FROM unset)", message),
       message.to,
       message.subject,
       message.text,

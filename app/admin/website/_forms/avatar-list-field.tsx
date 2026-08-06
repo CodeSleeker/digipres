@@ -36,7 +36,7 @@ export function AvatarListField<T extends FieldValues>({
               onChange={(e) => field.onChange(e.target.value.split("\n"))}
               onBlur={field.onBlur}
             />
-            <span className="text-[0.65rem] text-gray">
+            <span className="text-[0.65rem] text-admin-muted">
               One image URL per line, up to six. Leave blank for no faces.
             </span>
             {urls.filter(Boolean).length > 0 && (
@@ -49,7 +49,7 @@ export function AvatarListField<T extends FieldValues>({
                     key={url}
                     src={url}
                     alt=""
-                    className="h-8 w-8 rounded-full border border-dark-border object-cover"
+                    className="h-8 w-8 rounded-full border border-admin-line object-cover"
                   />
                 ))}
               </div>

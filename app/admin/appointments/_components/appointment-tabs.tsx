@@ -5,14 +5,14 @@ import { cn } from "@/lib/utils";
 export function AppointmentTabs({ active }: { active: "list" | "calendar" }) {
   const tab = "border-b-2 px-1 pb-2 text-sm transition-colors";
   return (
-    <div className="flex gap-6 border-b border-dark-border">
+    <div className="flex gap-6 border-b border-admin-line">
       <Link
         href="/admin/appointments"
         className={cn(
           tab,
           active === "list"
-            ? "border-gold text-white"
-            : "border-transparent text-gray hover:text-gold",
+            ? "border-admin-accent text-admin-fg"
+            : "border-transparent text-admin-muted hover:text-admin-accent",
         )}
       >
         List
@@ -22,8 +22,8 @@ export function AppointmentTabs({ active }: { active: "list" | "calendar" }) {
         className={cn(
           tab,
           active === "calendar"
-            ? "border-gold text-white"
-            : "border-transparent text-gray hover:text-gold",
+            ? "border-admin-accent text-admin-fg"
+            : "border-transparent text-admin-muted hover:text-admin-accent",
         )}
       >
         Calendar

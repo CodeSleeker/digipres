@@ -67,6 +67,27 @@ export class BusinessRepository {
   }
 
   /**
+   * Every business cleared to send its own email, for the platform-wide jobs.
+   *
+   * Filtered in the QUERY rather than by loading all tenants and checking in
+   * memory: the digest runs across the whole platform, and the set that can
+   * send is a small fraction of it. Service-role only — the owner policies
+   * would narrow this to a single row.
+   */
+  async listNewsletterSenders(): Promise<Business[]> {
+    const { data, error } = await this.supabase
+      .from("businesses")
+      .select("*")
+      .is("deleted_at", null)
+      .eq("status", "active")
+      .eq("newsletter_verified", true)
+      .not("newsletter_from_email", "is", null)
+      .order("created_at", { ascending: true });
+    if (error) throw error;
+    return (data ?? []).map(toDomain);
+  }
+
+  /**
    * PUBLIC tenant lookup. Only `active` businesses resolve — a `draft` tenant
    * hasn't launched and a `suspended` one has had service stopped, so neither
    * should serve a website. The caller renders a 404, exactly as for an unknown
@@ -163,6 +184,18 @@ export class BusinessRepository {
       patch.notify_customer_sms = input.notifyCustomerSms;
     if (input.smsSenderId !== undefined)
       patch.sms_sender_id = input.smsSenderId;
+    if (input.newsletterFromEmail !== undefined)
+      patch.newsletter_from_email = input.newsletterFromEmail;
+    if (input.newsletterFromName !== undefined)
+      patch.newsletter_from_name = input.newsletterFromName;
+    // Only a service-role caller may set these; the database refuses an owner
+    // session outright (migration 0033).
+    if (input.newsletterVerified !== undefined) {
+      patch.newsletter_verified = input.newsletterVerified;
+      patch.newsletter_verified_at = input.newsletterVerified
+        ? new Date().toISOString()
+        : null;
+    }
     if (input.address !== undefined) patch.address = input.address;
     if (input.addressLocality !== undefined)
       patch.address_locality = input.addressLocality;
@@ -278,6 +311,10 @@ function toDomain(row: BusinessRow): Business {
     notifyPhone: row.notify_phone,
     notifyCustomerSms: row.notify_customer_sms ?? true,
     smsSenderId: row.sms_sender_id ?? null,
+    newsletterFromEmail: row.newsletter_from_email ?? null,
+    newsletterFromName: row.newsletter_from_name ?? null,
+    newsletterVerified: row.newsletter_verified ?? false,
+    newsletterVerifiedAt: row.newsletter_verified_at ?? null,
     address: row.address,
     addressLocality: row.address_locality,
     addressRegion: row.address_region,

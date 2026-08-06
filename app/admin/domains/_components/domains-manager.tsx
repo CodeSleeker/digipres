@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/submit-button";
 
 const fieldClass =
-  "h-auto w-full rounded-none border border-dark-border bg-charcoal px-3 py-2 text-sm text-white outline-none transition-colors focus:border-gold";
+  "h-auto w-full rounded-none border border-admin-line bg-admin-field px-3 py-2 text-sm text-admin-fg outline-none transition-colors focus:border-admin-accent";
 
 /**
  * A per-row action link that shows its own progress.
@@ -92,11 +92,11 @@ export function DomainsManager({
   return (
     <div className="grid gap-8">
       {/* Add a domain */}
-      <section className="border border-dark-border bg-dark p-5">
-        <h2 className="font-heading text-lg tracking-[2px]">
+      <section className="border border-admin-line bg-admin-panel p-5">
+        <h2 className="font-admin-heading text-lg tracking-[2px]">
           Connect a domain
         </h2>
-        <p className="mt-1 text-sm text-gray">
+        <p className="mt-1 text-sm text-admin-muted">
           Add your apex domain and, if you use it, the <code>www</code> version —
           both point at the same site.
         </p>
@@ -111,7 +111,7 @@ export function DomainsManager({
           <Button
             type="submit"
             disabled={adding}
-            className="rounded-none bg-gold font-heading tracking-[2px] text-black hover:bg-gold-light"
+            className="rounded-none bg-admin-accent font-admin-heading tracking-[2px] text-admin-on-accent hover:bg-admin-accent-hover"
           >
             {adding ? (
               <span className="inline-flex items-center gap-2">
@@ -139,16 +139,16 @@ export function DomainsManager({
 
       {/* Existing domains */}
       <section className="grid gap-3">
-        <h2 className="font-heading text-lg tracking-[2px]">Your domains</h2>
+        <h2 className="font-admin-heading text-lg tracking-[2px]">Your domains</h2>
 
         {domains.length === 0 ? (
-          <p className="border border-dark-border bg-dark p-5 text-sm text-gray">
+          <p className="border border-admin-line bg-admin-panel p-5 text-sm text-admin-muted">
             No custom domains yet.
             {platformUrl && (
               <>
                 {" "}
                 Your site is live at{" "}
-                <span className="text-gold">{platformUrl}</span>.
+                <span className="text-admin-accent">{platformUrl}</span>.
               </>
             )}
           </p>
@@ -159,11 +159,11 @@ export function DomainsManager({
               return (
                 <li
                   key={domain.id}
-                  className="border border-dark-border bg-dark p-4"
+                  className="border border-admin-line bg-admin-panel p-4"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <span className="text-sm text-white">
+                      <span className="text-sm text-admin-fg">
                         {domain.hostname}
                       </span>
                       {domain.isPrimary && <Badge tone="gold">Primary</Badge>}
@@ -183,7 +183,7 @@ export function DomainsManager({
                             run(verifyDomain, domain.id, "verify")
                           }
                           pendingLabel="Verifying…"
-                          className="text-gold hover:text-gold-light"
+                          className="text-admin-accent hover:text-admin-accent-hover"
                         >
                           Verify
                         </RowAction>
@@ -196,7 +196,7 @@ export function DomainsManager({
                             run(setPrimaryDomain, domain.id, "primary")
                           }
                           pendingLabel="Updating…"
-                          className="text-gray hover:text-gold"
+                          className="text-admin-muted hover:text-admin-accent"
                         >
                           Make primary
                         </RowAction>
@@ -206,7 +206,7 @@ export function DomainsManager({
                         disabled={pending}
                         onClick={() => run(removeDomain, domain.id, "remove")}
                         pendingLabel="Removing…"
-                        className="text-gray hover:text-destructive"
+                        className="text-admin-muted hover:text-destructive"
                       >
                         Remove
                       </RowAction>
@@ -238,18 +238,18 @@ export function DomainsManager({
 
 function DnsRecords({ instructions }: { instructions: DnsInstruction[] }) {
   return (
-    <div className="mt-4 overflow-x-auto border border-dark-border">
+    <div className="mt-4 overflow-x-auto border border-admin-line">
       <table className="w-full text-left text-xs">
-        <thead className="bg-charcoal text-gray">
+        <thead className="bg-admin-field text-admin-muted">
           <tr>
             <th className="px-3 py-2 font-normal">Type</th>
             <th className="px-3 py-2 font-normal">Name</th>
             <th className="px-3 py-2 font-normal">Value</th>
           </tr>
         </thead>
-        <tbody className="text-gray-light">
+        <tbody className="text-admin-fg/80">
           {instructions.map((record, i) => (
-            <tr key={i} className="border-t border-dark-border">
+            <tr key={i} className="border-t border-admin-line">
               <td className="px-3 py-2">{record.type}</td>
               <td className="break-all px-3 py-2 font-mono">{record.name}</td>
               <td className="break-all px-3 py-2 font-mono">{record.value}</td>
@@ -269,7 +269,7 @@ function Badge({
   children: React.ReactNode;
 }) {
   const tones = {
-    gold: "border-gold/40 text-gold",
+    gold: "border-admin-accent/40 text-admin-accent",
     green: "border-[#6cbf84]/40 text-[#6cbf84]",
     amber: "border-[#d8b26a]/40 text-[#d8b26a]",
   } as const;

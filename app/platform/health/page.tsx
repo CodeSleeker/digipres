@@ -62,8 +62,8 @@ export default async function PlatformHealthPage() {
   return (
     <div className="grid gap-8">
       <div>
-        <h1 className="font-heading text-2xl tracking-[2px]">System Health</h1>
-        <p className="mt-1 max-w-2xl text-sm text-gray">
+        <h1 className="font-admin-heading text-2xl tracking-[2px]">System Health</h1>
+        <p className="mt-1 max-w-2xl text-sm text-admin-muted">
           Review automation runs on a schedule. If the processor stops, the
           queue grows silently — this page makes that visible.
         </p>
@@ -122,10 +122,10 @@ export default async function PlatformHealthPage() {
 
       {health.lastRun && (
         <section>
-          <h2 className="mb-3 font-heading text-lg tracking-[2px]">
+          <h2 className="mb-3 font-admin-heading text-lg tracking-[2px]">
             Last run detail
           </h2>
-          <div className="border border-dark-border bg-dark p-5 text-sm text-gray-light">
+          <div className="border border-admin-line bg-admin-panel p-5 text-sm text-admin-fg/80">
             <p>
               {new Date(health.lastRun.startedAt).toLocaleString()} —{" "}
               <span
@@ -138,7 +138,7 @@ export default async function PlatformHealthPage() {
                 {health.lastRun.status}
               </span>
             </p>
-            <p className="mt-2 text-xs text-gray">
+            <p className="mt-2 text-xs text-admin-muted">
               Processed {health.lastRun.processed} · sent {health.lastRun.sent}{" "}
               · failed {health.lastRun.failed}
             </p>
@@ -152,21 +152,21 @@ export default async function PlatformHealthPage() {
       )}
 
       <section>
-        <h2 className="mb-3 font-heading text-lg tracking-[2px]">
+        <h2 className="mb-3 font-admin-heading text-lg tracking-[2px]">
           Environment capabilities
         </h2>
         <ul className="grid gap-2">
           {capabilities.map(([name, ok, hint]) => (
             <li
               key={name}
-              className="flex flex-wrap items-center gap-3 border border-dark-border bg-dark px-4 py-3 text-sm"
+              className="flex flex-wrap items-center gap-3 border border-admin-line bg-admin-panel px-4 py-3 text-sm"
             >
               <span
                 className={`h-2.5 w-2.5 shrink-0 rounded-full ${ok ? "bg-[#6cbf84]" : "bg-[#d8b26a]"}`}
                 aria-hidden="true"
               />
-              <span className="text-white">{name}</span>
-              <span className="text-xs text-gray">{hint}</span>
+              <span className="text-admin-fg">{name}</span>
+              <span className="text-xs text-admin-muted">{hint}</span>
               <span
                 className={`ml-auto text-xs uppercase tracking-[1px] ${ok ? "text-[#6cbf84]" : "text-[#d8b26a]"}`}
               >

@@ -12,6 +12,7 @@ import { getPlatformRole } from "@/lib/auth/require-platform-admin";
 import { LifecyclePanel } from "./_components/lifecycle-panel";
 import { DetailsPanel } from "./_components/details-panel";
 import { SmsSenderPanel } from "./_components/sms-sender-panel";
+import { NewsletterPanel } from "./_components/newsletter-panel";
 import { formatAddress } from "@/lib/businesses/address";
 import { OwnerLoginPanel } from "./_components/owner-login-panel";
 import { onboardingPercentage } from "@/types/onboarding";
@@ -52,14 +53,14 @@ export default async function PlatformBusinessDetailPage({
       <div>
         <Link
           href="/platform/businesses"
-          className="text-xs text-gray transition-colors hover:text-gold"
+          className="text-xs text-admin-muted transition-colors hover:text-admin-accent"
         >
           ← All businesses
         </Link>
-        <h1 className="mt-2 font-heading text-2xl tracking-[2px]">
+        <h1 className="mt-2 font-admin-heading text-2xl tracking-[2px]">
           {business.name}
         </h1>
-        <p className="mt-1 text-sm text-gray">
+        <p className="mt-1 text-sm text-admin-muted">
           Onboarding {onboardingPercentage(business.onboarding)}% complete
           {business.deletedAt && " · archived"}
         </p>
@@ -73,14 +74,14 @@ export default async function PlatformBusinessDetailPage({
       </section>
 
       <section>
-        <h2 className="mb-3 font-heading text-lg tracking-[2px]">Profile</h2>
-        <dl className="grid gap-px overflow-hidden border border-dark-border bg-dark-border sm:grid-cols-2">
+        <h2 className="mb-3 font-admin-heading text-lg tracking-[2px]">Profile</h2>
+        <dl className="grid gap-px overflow-hidden border border-admin-line bg-admin-line sm:grid-cols-2">
           {facts.map(([label, value]) => (
-            <div key={label} className="bg-dark px-4 py-3">
-              <dt className="text-[0.65rem] uppercase tracking-[1.5px] text-gray">
+            <div key={label} className="bg-admin-panel px-4 py-3">
+              <dt className="text-[0.65rem] uppercase tracking-[1.5px] text-admin-muted">
                 {label}
               </dt>
-              <dd className="mt-1 break-words text-sm text-gray-light">
+              <dd className="mt-1 break-words text-sm text-admin-fg/80">
                 {value}
               </dd>
             </div>
@@ -89,9 +90,9 @@ export default async function PlatformBusinessDetailPage({
       </section>
 
       <section>
-        <h2 className="mb-3 font-heading text-lg tracking-[2px]">Domains</h2>
+        <h2 className="mb-3 font-admin-heading text-lg tracking-[2px]">Domains</h2>
         {domains.length === 0 ? (
-          <p className="border border-dark-border bg-dark p-5 text-sm text-gray">
+          <p className="border border-admin-line bg-admin-panel p-5 text-sm text-admin-muted">
             No custom domains connected.
           </p>
         ) : (
@@ -99,11 +100,11 @@ export default async function PlatformBusinessDetailPage({
             {domains.map((d) => (
               <li
                 key={d.id}
-                className="flex flex-wrap items-center gap-3 border border-dark-border bg-dark px-4 py-3 text-sm"
+                className="flex flex-wrap items-center gap-3 border border-admin-line bg-admin-panel px-4 py-3 text-sm"
               >
-                <span className="text-white">{d.hostname}</span>
+                <span className="text-admin-fg">{d.hostname}</span>
                 {d.isPrimary && (
-                  <span className="rounded-full border border-gold/40 px-2 py-0.5 text-[0.6rem] uppercase tracking-[1px] text-gold">
+                  <span className="rounded-full border border-admin-accent/40 px-2 py-0.5 text-[0.6rem] uppercase tracking-[1px] text-admin-accent">
                     Primary
                   </span>
                 )}
@@ -152,6 +153,7 @@ export default async function PlatformBusinessDetailPage({
         <>
           <DetailsPanel business={business} />
           <SmsSenderPanel business={business} />
+          <NewsletterPanel business={business} />
         </>
       )}
 
@@ -165,9 +167,9 @@ export default async function PlatformBusinessDetailPage({
         />
       )}
 
-      <section className="border-t border-dark-border pt-6">
-        <h2 className="font-heading text-lg tracking-[2px]">Support</h2>
-        <p className="mt-1 max-w-2xl text-sm text-gray">
+      <section className="border-t border-admin-line pt-6">
+        <h2 className="font-admin-heading text-lg tracking-[2px]">Support</h2>
+        <p className="mt-1 max-w-2xl text-sm text-admin-muted">
           Open this client&apos;s back office as them, to help with setup or
           troubleshooting. The session lasts 30 minutes, shows a banner
           throughout, and every change made inside it is written to the audit
@@ -178,14 +180,14 @@ export default async function PlatformBusinessDetailPage({
             <input type="hidden" name="businessId" value={business.id} />
             <SubmitButton
               pendingLabel="Starting session…"
-              className="inline-flex items-center border border-gold px-4 py-2 text-xs uppercase tracking-[2px] text-gold transition-colors hover:bg-gold hover:text-black"
+              className="inline-flex items-center border border-admin-accent px-4 py-2 text-xs uppercase tracking-[2px] text-admin-accent transition-colors hover:bg-admin-accent hover:text-admin-on-accent"
             >
               Act as this business
             </SubmitButton>
           </form>
           <Link
             href={`/platform/audit?business=${business.id}`}
-            className="text-xs text-gray transition-colors hover:text-gold"
+            className="text-xs text-admin-muted transition-colors hover:text-admin-accent"
           >
             View audit trail →
           </Link>

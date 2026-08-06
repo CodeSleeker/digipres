@@ -16,13 +16,13 @@ export function SuspendedNotice({
 
   return (
     <div className="mx-auto max-w-xl py-16 text-center">
-      <p className="text-xs uppercase tracking-[3px] text-gold">
+      <p className="text-xs uppercase tracking-[3px] text-admin-accent">
         {draft ? "Not published yet" : "Account suspended"}
       </p>
-      <h1 className="mt-3 font-heading text-2xl tracking-[2px]">
+      <h1 className="mt-3 font-admin-heading text-2xl tracking-[2px]">
         {businessName}
       </h1>
-      <p className="mt-4 text-sm leading-relaxed text-gray-light">
+      <p className="mt-4 text-sm leading-relaxed text-admin-fg/80">
         {draft ? (
           <>
             This business hasn&apos;t been published yet, so the website
@@ -37,7 +37,7 @@ export function SuspendedNotice({
           </>
         )}
       </p>
-      <p className="mt-6 text-sm text-gray">
+      <p className="mt-6 text-sm text-admin-muted">
         Please contact support to restore access.
       </p>
     </div>

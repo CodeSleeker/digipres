@@ -23,12 +23,12 @@ export function ProcessNowButton() {
             router.refresh();
           })
         }
-        className="rounded-none border-dark-border text-white hover:border-gold hover:text-gold"
+        className="rounded-none border-admin-line text-admin-fg hover:border-admin-accent hover:text-admin-accent"
       >
         {pending ? "Processing…" : "Process due now"}
       </Button>
       {result && !result.error && (
-        <span className="text-sm text-gray">
+        <span className="text-sm text-admin-muted">
           Sent {result.sent}, failed {result.failed} of {result.processed}.
         </span>
       )}

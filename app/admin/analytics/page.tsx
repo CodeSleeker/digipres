@@ -22,8 +22,8 @@ export default async function AnalyticsPage() {
   return (
     <div className="grid gap-8">
       <div>
-        <h1 className="font-heading text-2xl tracking-[2px]">Analytics</h1>
-        <p className="mt-1 text-sm text-gray">
+        <h1 className="font-admin-heading text-2xl tracking-[2px]">Analytics</h1>
+        <p className="mt-1 text-sm text-admin-muted">
           Trends over the last {a.months} months.
           {!a.hasBusiness &&
             " Create your business profile to start collecting data."}
@@ -140,7 +140,7 @@ export default async function AnalyticsPage() {
             color={CHART.gray}
             dashed
           />
-          <p className="mt-3 text-[0.7rem] text-gray">
+          <p className="mt-3 text-[0.7rem] text-admin-muted">
             Connect a web-analytics provider to replace this with live traffic.
           </p>
         </ChartCard>
@@ -151,7 +151,7 @@ export default async function AnalyticsPage() {
           badge="Sample data"
         >
           <StarBars rows={a.googleReviews.distribution} />
-          <p className="mt-4 text-[0.7rem] text-gray">
+          <p className="mt-4 text-[0.7rem] text-admin-muted">
             Connect the Google Business Profile API to replace this with real
             ratings.
           </p>

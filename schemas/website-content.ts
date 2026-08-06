@@ -490,6 +490,27 @@ export const footerSchema = z.object({
     .max(6),
   copyright: requiredText("Copyright is required."),
   credit: text.max(200),
+  /**
+   * The mailing-list sign-up copy.
+   *
+   * A block, so clearing the title removes the whole thing — which is how an
+   * owner turns the box off from their side. (It is also hidden outright until
+   * the platform verifies their sending domain; this is the copy, not the
+   * switch.)
+   *
+   * `consent` is stored verbatim against every subscriber who signs up under
+   * it, so it is capped generously and never rewritten.
+   */
+  newsletter: optionalBlock(
+    {
+      title: text.max(80),
+      text: text.max(400),
+      placeholder: text.max(80),
+      buttonLabel: text.max(40),
+      consent: text.max(500),
+    },
+    "title",
+  ),
 });
 
 /** Section name → its schema, for the generic save action. */

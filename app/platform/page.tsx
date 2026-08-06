@@ -12,10 +12,10 @@ export default async function PlatformOverviewPage() {
   return (
     <div className="grid gap-8">
       <div>
-        <h1 className="font-heading text-2xl tracking-[2px]">
+        <h1 className="font-admin-heading text-2xl tracking-[2px]">
           Platform Overview
         </h1>
-        <p className="mt-1 text-sm text-gray">
+        <p className="mt-1 text-sm text-admin-muted">
           Totals across every business on the platform.
         </p>
       </div>
@@ -44,10 +44,10 @@ export default async function PlatformOverviewPage() {
       </section>
 
       <div>
-        <h2 className="mb-1 font-heading text-lg tracking-[2px]">
+        <h2 className="mb-1 font-admin-heading text-lg tracking-[2px]">
           Review automation
         </h2>
-        <p className="text-sm text-gray">
+        <p className="text-sm text-admin-muted">
           Queue health across the platform. A growing queue or rising failures
           means the scheduler or carrier needs attention.
         </p>
@@ -75,7 +75,7 @@ export default async function PlatformOverviewPage() {
 
       <Link
         href="/platform/businesses"
-        className="text-sm text-gold transition-colors hover:text-gold-light"
+        className="text-sm text-admin-accent transition-colors hover:text-admin-accent-hover"
       >
         View all businesses →
       </Link>

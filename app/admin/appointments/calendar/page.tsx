@@ -9,8 +9,8 @@ type SearchParams = Record<string, string | string[] | undefined>;
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const CHIP_TONE: Record<AppointmentStatus, string> = {
-  scheduled: "text-gray-light",
-  confirmed: "text-gold",
+  scheduled: "text-admin-fg/80",
+  confirmed: "text-admin-accent",
   completed: "text-green-400",
   cancelled: "text-red-400 line-through",
   no_show: "text-red-400",
@@ -47,10 +47,10 @@ export default async function AppointmentsCalendarPage({
   return (
     <div className="grid gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-heading text-2xl tracking-[2px]">Appointments</h1>
+        <h1 className="font-admin-heading text-2xl tracking-[2px]">Appointments</h1>
         <Link
           href="/admin/appointments/new"
-          className="rounded-none bg-gold px-4 py-2 font-heading text-sm tracking-[2px] text-black transition-colors hover:bg-gold-light"
+          className="rounded-none bg-admin-accent px-4 py-2 font-admin-heading text-sm tracking-[2px] text-admin-on-accent transition-colors hover:bg-admin-accent-hover"
         >
           + NEW APPOINTMENT
         </Link>
@@ -61,16 +61,16 @@ export default async function AppointmentsCalendarPage({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href={`/admin/appointments/calendar?month=${shiftMonth(month, -1)}`}
-          className="rounded-none border border-dark-border px-3 py-1 text-sm text-white transition-colors hover:border-gold hover:text-gold"
+          className="rounded-none border border-admin-line px-3 py-1 text-sm text-admin-fg transition-colors hover:border-admin-accent hover:text-admin-accent"
         >
           ← Prev
         </Link>
-        <span className="font-heading text-lg tracking-[2px]">
+        <span className="font-admin-heading text-lg tracking-[2px]">
           {monthLabel(month)}
         </span>
         <Link
           href={`/admin/appointments/calendar?month=${shiftMonth(month, 1)}`}
-          className="rounded-none border border-dark-border px-3 py-1 text-sm text-white transition-colors hover:border-gold hover:text-gold"
+          className="rounded-none border border-admin-line px-3 py-1 text-sm text-admin-fg transition-colors hover:border-admin-accent hover:text-admin-accent"
         >
           Next →
         </Link>
@@ -78,7 +78,7 @@ export default async function AppointmentsCalendarPage({
 
       <div className="min-w-0 overflow-x-auto">
         <div className="min-w-[720px]">
-          <div className="grid grid-cols-7 border-b border-dark-border text-[0.65rem] uppercase tracking-[1.5px] text-gray">
+          <div className="grid grid-cols-7 border-b border-admin-line text-[0.65rem] uppercase tracking-[1.5px] text-admin-muted">
             {WEEKDAYS.map((w) => (
               <div key={w} className="p-2">
                 {w}
@@ -91,7 +91,7 @@ export default async function AppointmentsCalendarPage({
                 return (
                   <div
                     key={`blank-${i}`}
-                    className="min-h-24 border-b border-r border-dark-border/50 bg-black"
+                    className="min-h-24 border-b border-r border-admin-line/50 bg-admin"
                   />
                 );
               }
@@ -101,13 +101,13 @@ export default async function AppointmentsCalendarPage({
               return (
                 <div
                   key={date}
-                  className="min-h-24 border-b border-r border-dark-border/50 p-1.5"
+                  className="min-h-24 border-b border-r border-admin-line/50 p-1.5"
                 >
                   <div
                     className={
                       isToday
-                        ? "mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-gold text-[0.7rem] text-black"
-                        : "mb-1 text-[0.7rem] text-gray"
+                        ? "mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-admin-accent text-[0.7rem] text-admin-on-accent"
+                        : "mb-1 text-[0.7rem] text-admin-muted"
                     }
                   >
                     {day}

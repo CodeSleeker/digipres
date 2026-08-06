@@ -131,11 +131,11 @@ export function CustomerForm(props: Props) {
         </Field>
       </div>
 
-      <div className="flex flex-wrap items-center gap-4 border-t border-dark-border pt-5">
+      <div className="flex flex-wrap items-center gap-4 border-t border-admin-line pt-5">
         <Button
           type="submit"
           disabled={pending}
-          className="rounded-none bg-gold font-heading tracking-[2px] text-black hover:bg-gold-light"
+          className="rounded-none bg-admin-accent font-admin-heading tracking-[2px] text-admin-on-accent hover:bg-admin-accent-hover"
         >
           {pending
             ? "SAVING…"
@@ -148,7 +148,7 @@ export function CustomerForm(props: Props) {
           variant="outline"
           onClick={() => router.push("/admin/customers")}
           className={cn(
-            "rounded-none border-dark-border text-white hover:border-gold hover:text-gold",
+            "rounded-none border-admin-line text-admin-fg hover:border-admin-accent hover:text-admin-accent",
           )}
         >
           Cancel

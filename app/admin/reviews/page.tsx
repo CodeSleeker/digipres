@@ -14,11 +14,11 @@ import { ProcessNowButton } from "./_components/process-now-button";
 type SearchParams = Record<string, string | string[] | undefined>;
 
 const TONE: Record<ReviewMessageStatus, string> = {
-  queued: "border-dark-border text-gray-light",
-  sent: "border-gold/40 text-gold",
+  queued: "border-admin-line text-admin-fg/80",
+  sent: "border-admin-accent/40 text-admin-accent",
   delivered: "border-green-500/40 text-green-400",
   failed: "border-red-500/40 text-red-400",
-  cancelled: "border-dark-border text-gray",
+  cancelled: "border-admin-line text-admin-muted",
 };
 
 export default async function ReviewsPage({
@@ -41,10 +41,10 @@ export default async function ReviewsPage({
     <div className="grid gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-heading text-2xl tracking-[2px]">
+          <h1 className="font-admin-heading text-2xl tracking-[2px]">
             Review Automation
           </h1>
-          <p className="mt-1 max-w-2xl text-sm text-gray">
+          <p className="mt-1 max-w-2xl text-sm text-admin-muted">
             Messages are queued when an appointment is completed (thank-you now,
             review request in 3 days, reminder in 5 more) and cancelled if the
             customer reviews. SMS sending is stubbed until a provider is
@@ -56,14 +56,14 @@ export default async function ReviewsPage({
 
       <form
         method="get"
-        className="flex flex-wrap items-end gap-3 border border-dark-border bg-dark p-4"
+        className="flex flex-wrap items-end gap-3 border border-admin-line bg-admin-panel p-4"
       >
-        <label className="flex flex-col gap-1 text-[0.7rem] uppercase tracking-[1.5px] text-gray">
+        <label className="flex flex-col gap-1 text-[0.7rem] uppercase tracking-[1.5px] text-admin-muted">
           Status
           <select
             name="status"
             defaultValue={query.status ?? ""}
-            className="h-9 rounded-none border border-dark-border bg-charcoal px-3 text-sm text-white outline-none focus:border-gold"
+            className="h-9 rounded-none border border-admin-line bg-admin-field px-3 text-sm text-admin-fg outline-none focus:border-admin-accent"
           >
             <option value="">All</option>
             {REVIEW_MESSAGE_STATUSES.map((s) => (
@@ -75,22 +75,22 @@ export default async function ReviewsPage({
         </label>
         <SubmitButton
           pendingLabel="Applying…"
-          className="inline-flex h-9 items-center rounded-none border border-dark-border px-4 text-sm text-white transition-colors hover:border-gold hover:text-gold"
+          className="inline-flex h-9 items-center rounded-none border border-admin-line px-4 text-sm text-admin-fg transition-colors hover:border-admin-accent hover:text-admin-accent"
         >
           Apply
         </SubmitButton>
         <Link
           href="/admin/reviews"
-          className="h-9 px-3 text-sm leading-9 text-gray transition-colors hover:text-gold"
+          className="h-9 px-3 text-sm leading-9 text-admin-muted transition-colors hover:text-admin-accent"
         >
           Clear
         </Link>
       </form>
 
-      <div className="min-w-0 overflow-x-auto border border-dark-border">
+      <div className="min-w-0 overflow-x-auto border border-admin-line">
         <table className="w-full min-w-[820px] border-collapse text-sm">
           <thead>
-            <tr className="border-b border-dark-border text-left text-[0.65rem] uppercase tracking-[1.5px] text-gray">
+            <tr className="border-b border-admin-line text-left text-[0.65rem] uppercase tracking-[1.5px] text-admin-muted">
               <th className="p-3 font-normal">Customer</th>
               <th className="p-3 font-normal">Step</th>
               <th className="p-3 font-normal">Status</th>
@@ -102,7 +102,7 @@ export default async function ReviewsPage({
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-8 text-center text-gray">
+                <td colSpan={6} className="p-8 text-center text-admin-muted">
                   No review messages yet. Complete an appointment to start one.
                 </td>
               </tr>
@@ -110,11 +110,11 @@ export default async function ReviewsPage({
             {rows.map((m) => (
               <tr
                 key={m.id}
-                className="border-b border-dark-border/60 text-gray-light last:border-0"
+                className="border-b border-admin-line/60 text-admin-fg/80 last:border-0"
               >
                 <td className="p-3">
-                  <div className="text-white">{m.customerName}</div>
-                  <div className="text-xs text-gray">{m.toMobile}</div>
+                  <div className="text-admin-fg">{m.customerName}</div>
+                  <div className="text-xs text-admin-muted">{m.toMobile}</div>
                 </td>
                 <td className="p-3">{REVIEW_STEP_LABEL[m.step]}</td>
                 <td className="p-3">
@@ -138,7 +138,7 @@ export default async function ReviewsPage({
         </table>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-gray">
+      <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-admin-muted">
         <span>{total} total</span>
         <div className="flex items-center gap-2">
           <PageLink status={query.status} page={page - 1} disabled={page <= 1}>
@@ -176,7 +176,7 @@ function PageLink({
   children: React.ReactNode;
 }) {
   if (disabled) {
-    return <span className="px-3 py-1 text-dark-border">{children}</span>;
+    return <span className="px-3 py-1 text-admin-line">{children}</span>;
   }
   const params = new URLSearchParams();
   if (status) params.set("status", status);
@@ -184,7 +184,7 @@ function PageLink({
   return (
     <Link
       href={`/admin/reviews?${params.toString()}`}
-      className="rounded-none border border-dark-border px-3 py-1 text-white transition-colors hover:border-gold hover:text-gold"
+      className="rounded-none border border-admin-line px-3 py-1 text-admin-fg transition-colors hover:border-admin-accent hover:text-admin-accent"
     >
       {children}
     </Link>

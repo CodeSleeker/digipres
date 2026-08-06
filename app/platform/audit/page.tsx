@@ -29,8 +29,8 @@ export default async function PlatformAuditPage({
   return (
     <div className="grid gap-6">
       <div>
-        <h1 className="font-heading text-2xl tracking-[2px]">Audit Trail</h1>
-        <p className="mt-1 max-w-2xl text-sm text-gray">
+        <h1 className="font-admin-heading text-2xl tracking-[2px]">Audit Trail</h1>
+        <p className="mt-1 max-w-2xl text-sm text-admin-muted">
           {business
             ? "Staff activity for this business."
             : "Staff activity across every client. Owners editing their own data are not listed — only actions taken on a client's behalf."}
@@ -40,7 +40,7 @@ export default async function PlatformAuditPage({
       {business && (
         <Link
           href="/platform/audit"
-          className="text-xs text-gray transition-colors hover:text-gold"
+          className="text-xs text-admin-muted transition-colors hover:text-admin-accent"
         >
           ← All businesses
         </Link>
@@ -49,9 +49,9 @@ export default async function PlatformAuditPage({
       <AuditTable rows={trail.rows} />
 
       {trail.pageCount > 1 && (
-        <nav className="flex items-center gap-4 text-xs text-gray">
+        <nav className="flex items-center gap-4 text-xs text-admin-muted">
           {page > 1 ? (
-            <Link href={href(page - 1)} className="hover:text-gold">
+            <Link href={href(page - 1)} className="hover:text-admin-accent">
               ← Newer
             </Link>
           ) : (
@@ -61,7 +61,7 @@ export default async function PlatformAuditPage({
             Page {trail.page} of {trail.pageCount} · {trail.total} entries
           </span>
           {page < trail.pageCount ? (
-            <Link href={href(page + 1)} className="hover:text-gold">
+            <Link href={href(page + 1)} className="hover:text-admin-accent">
               Older →
             </Link>
           ) : (

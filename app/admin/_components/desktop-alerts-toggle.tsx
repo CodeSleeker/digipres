@@ -73,7 +73,7 @@ export function DesktopAlertsToggle() {
 
   if (state === "denied") {
     return (
-      <p className="text-[0.65rem] leading-relaxed text-gray">
+      <p className="text-[0.65rem] leading-relaxed text-admin-muted">
         Desktop alerts are blocked for this site. Turn them back on in your
         browser’s site settings.
       </p>
@@ -93,7 +93,7 @@ export function DesktopAlertsToggle() {
           emit(); // re-read the permission we just changed
         }
       }}
-      className="text-left text-xs text-gray transition-colors hover:text-gold disabled:opacity-60"
+      className="text-left text-xs text-admin-muted transition-colors hover:text-admin-accent disabled:opacity-60"
     >
       {asking ? "Waiting for your browser…" : "Enable desktop alerts"}
     </button>

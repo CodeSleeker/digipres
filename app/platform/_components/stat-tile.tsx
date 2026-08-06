@@ -15,17 +15,17 @@ export function StatTile({
       ? "text-[#c1666b]"
       : tone === "warn"
         ? "text-[#d8b26a]"
-        : "text-white";
+        : "text-admin-fg";
 
   return (
-    <div className="border border-dark-border bg-dark p-5">
-      <div className={`font-heading text-3xl leading-none ${valueTone}`}>
+    <div className="border border-admin-line bg-admin-panel p-5">
+      <div className={`font-admin-heading text-3xl leading-none ${valueTone}`}>
         {value}
       </div>
-      <div className="mt-2 text-[0.7rem] uppercase tracking-[1.5px] text-gray-light">
+      <div className="mt-2 text-[0.7rem] uppercase tracking-[1.5px] text-admin-fg/80">
         {label}
       </div>
-      {hint && <p className="mt-1 text-xs text-gray">{hint}</p>}
+      {hint && <p className="mt-1 text-xs text-admin-muted">{hint}</p>}
     </div>
   );
 }

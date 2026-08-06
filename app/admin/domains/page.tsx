@@ -19,8 +19,8 @@ export default async function DomainsPage() {
   return (
     <div className="grid gap-6">
       <div>
-        <h1 className="font-heading text-2xl tracking-[2px]">Domains</h1>
-        <p className="mt-1 max-w-2xl text-sm text-gray">
+        <h1 className="font-admin-heading text-2xl tracking-[2px]">Domains</h1>
+        <p className="mt-1 max-w-2xl text-sm text-admin-muted">
           Use your own domain for your website. Add it here, point the DNS
           records at us, then verify. Your primary domain becomes the canonical
           address — every other one redirects to it.

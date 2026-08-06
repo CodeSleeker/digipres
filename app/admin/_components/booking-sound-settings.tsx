@@ -58,7 +58,7 @@ export function BookingSoundSettings() {
           setBookingSoundEnabled(!enabled);
           if (!enabled) playBookingChime({ soundId, volume });
         }}
-        className="text-left text-xs text-gray transition-colors hover:text-gold"
+        className="text-left text-xs text-admin-muted transition-colors hover:text-admin-accent"
       >
         {enabled ? "Booking sound: on" : "Booking sound: off"}
       </button>
@@ -73,7 +73,7 @@ export function BookingSoundSettings() {
                 setBookingSoundId(event.target.value);
                 playBookingChime({ soundId: event.target.value, volume });
               }}
-              className="w-full rounded-none border border-dark-border bg-charcoal px-2 py-1 text-[0.7rem] text-white outline-none focus:border-gold"
+              className="w-full rounded-none border border-admin-line bg-admin-field px-2 py-1 text-[0.7rem] text-admin-fg outline-none focus:border-admin-accent"
             >
               {BOOKING_SOUNDS.map((sound) => (
                 <option key={sound.id} value={sound.id}>
@@ -85,7 +85,7 @@ export function BookingSoundSettings() {
 
           <label className="flex items-center gap-2">
             <span className="sr-only">Booking sound volume</span>
-            <span aria-hidden="true" className="text-[0.65rem] text-gray">
+            <span aria-hidden="true" className="text-[0.65rem] text-admin-muted">
               Vol
             </span>
             <input
@@ -101,7 +101,7 @@ export function BookingSoundSettings() {
               // would otherwise fire a chime per tick.
               onPointerUp={() => playBookingChime({ soundId, volume })}
               onKeyUp={() => playBookingChime({ soundId, volume })}
-              className="h-1 w-full accent-gold"
+              className="h-1 w-full accent-admin-accent"
             />
           </label>
         </>

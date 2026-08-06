@@ -15,10 +15,10 @@ export default async function PlatformAnalyticsPage() {
   return (
     <div className="grid gap-8">
       <div>
-        <h1 className="font-heading text-2xl tracking-[2px]">
+        <h1 className="font-admin-heading text-2xl tracking-[2px]">
           Platform Analytics
         </h1>
-        <p className="mt-1 text-sm text-gray">
+        <p className="mt-1 text-sm text-admin-muted">
           Growth across all businesses over the last {growth.months} months.
         </p>
       </div>

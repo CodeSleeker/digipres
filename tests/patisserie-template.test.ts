@@ -256,7 +256,36 @@ describe("patisserie/boutique registration", () => {
     // reach them. If one migrates into an editable section, this fails.
     expect(arah.patisserie).toBeTruthy();
     expect(arah.gallery).not.toHaveProperty("aside");
-    expect(arah.footer).not.toHaveProperty("newsletter");
+  });
+
+  /**
+   * The sign-up copy is the exception, and deliberately so: it moved OUT of the
+   * patisserie-only namespace and into the footer section when the mailing list
+   * became real, because it is copy an owner should be able to edit. So it has
+   * to survive the footer schema, unlike the extras above.
+   */
+  it("round-trips the sign-up copy through the footer schema", () => {
+    const stored = SECTION_SCHEMA.footer.parse({
+      description: arah.footer.description,
+      columns: arah.footer.columns,
+      copyright: arah.footer.copyright,
+      credit: arah.footer.credit,
+      newsletter: arah.footer.newsletter,
+    });
+    expect(stored.newsletter?.title).toBe("The Sunday list");
+    expect(stored.newsletter?.consent).toContain("Unsubscribe");
+  });
+
+  it("drops the sign-up block when its heading is cleared", () => {
+    // How an owner removes the box from their own site.
+    const stored = SECTION_SCHEMA.footer.parse({
+      description: arah.footer.description,
+      columns: arah.footer.columns,
+      copyright: arah.footer.copyright,
+      credit: arah.footer.credit,
+      newsletter: { ...arah.footer.newsletter!, title: "  " },
+    });
+    expect(stored.newsletter).toBeUndefined();
   });
 });
 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { AdminTheme } from "@/lib/admin/theme";
 
 /**
  * The chrome shared by /admin and /platform: pinned sidebar, header, content.
@@ -21,6 +22,7 @@ import { usePathname } from "next/navigation";
 export function DashboardShell({
   brandLabel,
   brandHref,
+  theme,
   nav,
   navFooter,
   headerLeft,
@@ -30,6 +32,12 @@ export function DashboardShell({
 }: {
   brandLabel: string;
   brandHref: string;
+  /**
+   * The tenant's colours, from `lib/admin/theme.ts`. Omitted by the agency
+   * portal, which keeps the platform's own palette — that surface belongs to
+   * Aliamz, not to whichever client happens to be on screen.
+   */
+  theme?: AdminTheme;
   /** The <Link> list. Server-rendered. */
   nav: React.ReactNode;
   /** Pinned to the bottom of the sidebar (alerts, sound, escape hatches). */
@@ -84,12 +92,20 @@ export function DashboardShell({
   }, [open]);
 
   return (
-    <div className="flex min-h-screen bg-black text-white">
+    <div
+      // The theme lands on the shell rather than on <html>: the tenant's
+      // colours belong to their back office, not to the document, and a login
+      // page or an error boundary rendered outside this tree must keep the
+      // platform's own palette.
+      style={theme?.style}
+      data-admin-theme={theme ? (theme.dark ? "dark" : "light") : "dark"}
+      className="flex min-h-screen bg-admin text-admin-fg"
+    >
       {/* Backdrop. Mobile only, and only while open — `lg:hidden` alone would
           leave it catching clicks on desktop if the state were ever true. */}
       {open && (
         <div
-          className="fixed inset-0 z-40 bg-black/70 lg:hidden"
+          className="fixed inset-0 z-40 bg-admin/70 lg:hidden"
           onClick={() => setOpen(false)}
           aria-hidden="true"
         />
@@ -105,14 +121,14 @@ export function DashboardShell({
       */}
       <aside
         id="dashboard-nav"
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] shrink-0 flex-col gap-6 overflow-y-auto overscroll-contain border-r border-dark-border bg-black p-6 transition-transform duration-200 motion-reduce:transition-none lg:sticky lg:inset-auto lg:top-0 lg:z-auto lg:h-screen lg:w-60 lg:max-w-none lg:translate-x-0 lg:self-start lg:transition-none ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] shrink-0 flex-col gap-6 overflow-y-auto overscroll-contain border-r border-admin-line bg-admin p-6 transition-transform duration-200 motion-reduce:transition-none lg:sticky lg:inset-auto lg:top-0 lg:z-auto lg:h-screen lg:w-60 lg:max-w-none lg:translate-x-0 lg:self-start lg:transition-none ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex items-center justify-between gap-3">
           <Link
             href={brandHref}
-            className="font-heading text-lg tracking-[2px] text-gold"
+            className="font-admin-heading text-lg tracking-[2px] text-admin-accent"
           >
             {brandLabel}
           </Link>
@@ -121,7 +137,7 @@ export function DashboardShell({
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="-mr-2 flex h-9 w-9 items-center justify-center text-xl text-gray transition-colors hover:text-gold lg:hidden"
+            className="-mr-2 flex h-9 w-9 items-center justify-center text-xl text-admin-muted transition-colors hover:text-admin-accent lg:hidden"
             aria-label="Close navigation"
           >
             ×
@@ -146,11 +162,11 @@ export function DashboardShell({
       <div className="flex min-w-0 flex-1 flex-col">
         {banner}
 
-        <header className="flex items-center gap-3 border-b border-dark-border px-4 py-3 sm:px-6 lg:px-8 lg:py-4">
+        <header className="flex items-center gap-3 border-b border-admin-line px-4 py-3 sm:px-6 lg:px-8 lg:py-4">
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="-ml-2 flex h-10 w-10 shrink-0 items-center justify-center text-gray-light transition-colors hover:text-gold lg:hidden"
+            className="-ml-2 flex h-10 w-10 shrink-0 items-center justify-center text-admin-fg/80 transition-colors hover:text-admin-accent lg:hidden"
             aria-label="Open navigation"
             aria-expanded={open}
             aria-controls="dashboard-nav"
@@ -199,7 +215,7 @@ export function NavLink({
   return (
     <Link
       href={href}
-      className={`py-2.5 text-gray-light transition-colors hover:text-gold lg:py-1 ${className}`}
+      className={`py-2.5 text-admin-fg/80 transition-colors hover:text-admin-accent lg:py-1 ${className}`}
     >
       {children}
     </Link>

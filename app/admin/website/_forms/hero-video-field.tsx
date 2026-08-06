@@ -83,10 +83,10 @@ export function HeroVideoField({
   };
 
   return (
-    <div className="grid gap-3 border border-dark-border p-4">
+    <div className="grid gap-3 border border-admin-line p-4">
       <div>
-        <p className="text-sm text-white">Hero scroll-scrub</p>
-        <p className="mt-1 text-xs leading-relaxed text-gray">
+        <p className="text-sm text-admin-fg">Hero scroll-scrub</p>
+        <p className="mt-1 text-xs leading-relaxed text-admin-muted">
           Scrolling the hero plays the cut. Use the template&apos;s built-in
           frame sequence, or supply your own video.
         </p>
@@ -108,9 +108,9 @@ export function HeroVideoField({
               onChange={() =>
                 form.setValue("heroMedia", value, { shouldDirty: true })
               }
-              className="accent-gold"
+              className="accent-admin-accent"
             />
-            <span className={media === value ? "text-white" : "text-gray"}>
+            <span className={media === value ? "text-admin-fg" : "text-admin-muted"}>
               {label}
             </span>
           </label>
@@ -118,11 +118,11 @@ export function HeroVideoField({
       </fieldset>
 
       {media === "video" && (
-        <div className="grid gap-3 border-t border-dark-border pt-3">
+        <div className="grid gap-3 border-t border-admin-line pt-3">
           <div className="grid gap-1.5">
             <label
               htmlFor="heroVideoUrl"
-              className="text-[0.7rem] uppercase tracking-[2px] text-gray"
+              className="text-[0.7rem] uppercase tracking-[2px] text-admin-muted"
             >
               Video URL
             </label>
@@ -131,9 +131,9 @@ export function HeroVideoField({
               type="url"
               placeholder="https://…/clip.mp4"
               {...form.register("heroVideoUrl")}
-              className="w-full border border-dark-border bg-charcoal px-3 py-2 text-sm text-white focus-visible:border-gold focus-visible:outline-none"
+              className="w-full border border-admin-line bg-admin-field px-3 py-2 text-sm text-admin-fg focus-visible:border-admin-accent focus-visible:outline-none"
             />
-            <p className="text-xs text-gray">
+            <p className="text-xs text-admin-muted">
               Paste an MP4/WebM link, or upload a file below. Leave blank to use
               the template&apos;s video.
             </p>
@@ -152,12 +152,12 @@ export function HeroVideoField({
                 accept={ACCEPTED_VIDEO_TYPES.join(",")}
                 onChange={(e) => onPick(e.target.files?.[0])}
                 disabled={busy}
-                className="text-xs text-gray file:mr-3 file:border file:border-dark-border file:bg-dark file:px-3 file:py-1.5 file:text-xs file:uppercase file:tracking-[2px] file:text-gold hover:file:border-gold"
+                className="text-xs text-admin-muted file:mr-3 file:border file:border-admin-line file:bg-admin-panel file:px-3 file:py-1.5 file:text-xs file:uppercase file:tracking-[2px] file:text-admin-accent hover:file:border-admin-accent"
               />
-              {busy && <span className="text-xs text-gray">Uploading…</span>}
+              {busy && <span className="text-xs text-admin-muted">Uploading…</span>}
             </div>
           ) : (
-            <p className="text-xs text-gray">
+            <p className="text-xs text-admin-muted">
               Finish creating your business profile to upload a file. You can
               still paste a URL above.
             </p>
@@ -170,7 +170,7 @@ export function HeroVideoField({
               playsInline
               controls
               preload="metadata"
-              className="max-h-40 w-full max-w-sm border border-dark-border bg-black"
+              className="max-h-40 w-full max-w-sm border border-admin-line bg-admin"
             />
           )}
 

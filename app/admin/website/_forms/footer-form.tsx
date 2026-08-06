@@ -21,8 +21,17 @@ import {
  */
 export function FooterForm({
   defaultValues,
+  newsletterEnabled,
 }: {
   defaultValues: FooterFormValues;
+  /**
+   * Whether this tenant's sending domain is verified.
+   *
+   * The copy is only editable when the box will actually appear. Offering the
+   * fields to a tenant with no newsletter would be asking them to write for a
+   * form nobody will ever see, and inviting the question "why isn't it there?"
+   */
+  newsletterEnabled: boolean;
 }) {
   const form = useForm<FooterFormValues>({
     resolver: zodResolver(footerSchema),
@@ -60,6 +69,54 @@ export function FooterForm({
         </AddButton>
       </div>
 
+      {newsletterEnabled && (
+        <div className="grid gap-3">
+          <SubHeading>Mailing list sign-up</SubHeading>
+          <p className="text-xs leading-relaxed text-admin-muted">
+            The block in your footer where visitors join your list. Clearing the
+            heading removes it from your site.
+          </p>
+          <TextField
+            form={form}
+            name="newsletter.title"
+            label="Heading — clear it to remove the block"
+            placeholder="The Sunday list"
+          />
+          <TextAreaField
+            form={form}
+            name="newsletter.text"
+            label="Description"
+            placeholder="One email a week: what is coming out of the oven, and what is nearly gone."
+          />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <TextField
+              form={form}
+              name="newsletter.placeholder"
+              label="Field placeholder"
+              placeholder="you@example.com"
+            />
+            <TextField
+              form={form}
+              name="newsletter.buttonLabel"
+              label="Button label"
+              placeholder="Join"
+            />
+          </div>
+          <TextField
+            form={form}
+            name="newsletter.consent"
+            label="Consent line"
+            placeholder="We'll email you when there's something new. Unsubscribe any time."
+          />
+          <p className="text-xs leading-relaxed text-admin-muted">
+            The consent line is shown beside the field and saved with every
+            person who signs up, so their record says exactly what they agreed
+            to. Changing it later does not rewrite what earlier subscribers were
+            shown.
+          </p>
+        </div>
+      )}
+
       <SubmitBar pending={pending} result={result} />
     </form>
   );
@@ -78,7 +135,7 @@ function FooterColumnLinks({
   });
 
   return (
-    <div className="grid gap-2 border-l border-dark-border pl-3">
+    <div className="grid gap-2 border-l border-admin-line pl-3">
       {links.fields.map((field, j) => (
         <div key={field.id} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
           <TextField
@@ -94,7 +151,7 @@ function FooterColumnLinks({
           <button
             type="button"
             onClick={() => links.remove(j)}
-            className="self-end pb-2 text-xs text-gray transition-colors hover:text-destructive"
+            className="self-end pb-2 text-xs text-admin-muted transition-colors hover:text-destructive"
           >
             Remove
           </button>

@@ -94,3 +94,32 @@ export function themePalette(
 
 /** Exported for the test that proves every registered template has a palette. */
 export const PALETTE_KEYS = Object.keys(PALETTES);
+
+/**
+ * The display face a theme uses for headings, as the CSS variable that
+ * next/font defines in app/layout.tsx.
+ *
+ * Kept OUT of `ThemePalette` deliberately: that type is documented as literal
+ * values for renderers with no CSS engine, and a `var(…)` reference would be
+ * meaningless to Satori. This is the opposite — it only means anything TO a
+ * browser — so it is a separate lookup that happens to be keyed the same way.
+ *
+ * Used by the client back office, which follows the tenant's theme. Falls back
+ * to the platform's own heading face for any pair without one.
+ */
+const HEADING_FONTS: Record<string, string> = {
+  "barber-luxury:default": "var(--font-bebas)",
+  "patisserie-boutique:default": "var(--font-playfair)",
+};
+
+export const DEFAULT_HEADING_FONT = "var(--font-bebas)";
+
+export function themeHeadingFont(
+  templateCode: string | null | undefined,
+  themeCode: string | null | undefined,
+): string {
+  return (
+    HEADING_FONTS[`${templateCode ?? ""}:${themeCode ?? ""}`] ??
+    DEFAULT_HEADING_FONT
+  );
+}

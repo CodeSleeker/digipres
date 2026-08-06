@@ -11,10 +11,10 @@ export default async function OnboardingPage() {
   return (
     <div className="grid gap-6">
       <div>
-        <h1 className="font-heading text-2xl tracking-[2px]">
+        <h1 className="font-admin-heading text-2xl tracking-[2px]">
           Google Business Profile Setup
         </h1>
-        <p className="mt-1 max-w-2xl text-sm text-gray">
+        <p className="mt-1 max-w-2xl text-sm text-admin-muted">
           A guided checklist to get your business ready on Google. Your progress
           saves as you go and every step stays editable.
         </p>

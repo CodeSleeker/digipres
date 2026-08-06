@@ -450,6 +450,19 @@ export const arah: BusinessProfile = {
     credit: "",
     // Derived from the tenant's own social columns at render time.
     socials: [],
+    /**
+     * The sign-up box. Rendered only once the platform has verified this
+     * tenant's sending domain — `buildFooter` drops it otherwise, so an
+     * un-configured shop shows the static note beside it instead.
+     */
+    newsletter: {
+      title: "The Sunday list",
+      text: "One email a week: what is coming out of the oven, and what is nearly gone.",
+      placeholder: "you@example.com",
+      buttonLabel: "Join",
+      consent:
+        "We'll email you when there's something new. Unsubscribe any time — every email has a link.",
+    },
   },
   floatingCta: { label: "Order now", href: "#contact" },
   patisserie: {

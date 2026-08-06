@@ -56,10 +56,10 @@ export function ContactDetailsForm({ defaults }: { defaults: Defaults }) {
     <form action={action} className="grid max-w-2xl gap-10">
       <section className="grid gap-4">
         <div>
-          <h2 className="font-heading text-lg tracking-[2px] text-white">
+          <h2 className="font-admin-heading text-lg tracking-[2px] text-admin-fg">
             Public contact details
           </h2>
-          <p className="mt-1 text-xs leading-relaxed text-gray">
+          <p className="mt-1 text-xs leading-relaxed text-admin-muted">
             Shown on your website and given to search engines. Customers see
             these.
           </p>
@@ -102,7 +102,7 @@ export function ContactDetailsForm({ defaults }: { defaults: Defaults }) {
             placeholder="Unit / building / street"
             className={`${fieldClass} min-h-20 resize-y`}
           />
-          <span className="text-[0.65rem] text-gray">
+          <span className="text-[0.65rem] text-admin-muted">
             Just the street part — the city and province go below.
           </span>
           {state.fieldErrors?.address?.[0] && (
@@ -154,10 +154,10 @@ export function ContactDetailsForm({ defaults }: { defaults: Defaults }) {
 
       <section className="grid gap-4">
         <div>
-          <h2 className="font-heading text-lg tracking-[2px] text-white">
+          <h2 className="font-admin-heading text-lg tracking-[2px] text-admin-fg">
             Where we send booking alerts
           </h2>
-          <p className="mt-1 text-xs leading-relaxed text-gray">
+          <p className="mt-1 text-xs leading-relaxed text-admin-muted">
             When a customer books on your website we text and email you right
             away. Leave these empty to use your public phone and email above.
             Fill them in if bookings should go somewhere else — a mobile that
@@ -200,10 +200,10 @@ export function ContactDetailsForm({ defaults }: { defaults: Defaults }) {
 
       <section className="grid gap-4">
         <div>
-          <h2 className="font-heading text-lg tracking-[2px] text-white">
+          <h2 className="font-admin-heading text-lg tracking-[2px] text-admin-fg">
             Text your customers
           </h2>
-          <p className="mt-1 text-xs leading-relaxed text-gray">
+          <p className="mt-1 text-xs leading-relaxed text-admin-muted">
             Two messages: one when they submit a booking (“we have your
             request”) and one when you confirm it. Each is charged per text, and
             the number sent depends on how busy your website is — switch this
@@ -218,23 +218,23 @@ export function ContactDetailsForm({ defaults }: { defaults: Defaults }) {
           name="notifyCustomerSms"
           value={textCustomers ? "true" : "false"}
         />
-        <label className="flex items-start gap-2 text-sm text-gray-light">
+        <label className="flex items-start gap-2 text-sm text-admin-fg/80">
           <input
             type="checkbox"
             checked={textCustomers}
             onChange={(event) => setTextCustomers(event.target.checked)}
-            className="mt-0.5 accent-gold"
+            className="mt-0.5 accent-admin-accent"
           />
           Text customers about their bookings
         </label>
       </section>
 
-      <div className="flex flex-wrap items-center gap-4 border-t border-dark-border pt-5">
+      <div className="flex flex-wrap items-center gap-4 border-t border-admin-line pt-5">
         <Button
           type="submit"
           disabled={pending}
           aria-busy={pending}
-          className="rounded-none bg-gold font-heading tracking-[2px] text-black hover:bg-gold-light"
+          className="rounded-none bg-admin-accent font-admin-heading tracking-[2px] text-admin-on-accent hover:bg-admin-accent-hover"
         >
           {pending ? (
             <span className="inline-flex items-center gap-2">
@@ -257,7 +257,7 @@ export function ContactDetailsForm({ defaults }: { defaults: Defaults }) {
 }
 
 const labelClass =
-  "text-[0.7rem] font-normal uppercase tracking-[1.5px] text-gray";
+  "text-[0.7rem] font-normal uppercase tracking-[1.5px] text-admin-muted";
 
 function TextRow({
   name,
@@ -289,7 +289,7 @@ function TextRow({
         placeholder={placeholder}
         className={fieldClass}
       />
-      {hint && <span className="text-[0.65rem] text-gray">{hint}</span>}
+      {hint && <span className="text-[0.65rem] text-admin-muted">{hint}</span>}
       {error && (
         <p role="alert" className="text-xs text-destructive">
           {error}

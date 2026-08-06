@@ -265,6 +265,24 @@ export interface FooterColumn {
 }
 
 /**
+ * The mailing-list sign-up block in the footer.
+ *
+ * Editable copy, but the block only RENDERS for a tenant whose sending domain
+ * has been verified — a form that collects addresses nobody can mail is worse
+ * than no form. The gate lives at the render site, not here.
+ *
+ * `consent` is the sentence shown beside the field and stored verbatim with
+ * whoever signs up, so the record says what they were actually shown.
+ */
+export interface FooterNewsletter {
+  title: string;
+  text: string;
+  placeholder: string;
+  buttonLabel: string;
+  consent: string;
+}
+
+/**
  * One question and its answer.
  *
  * Plain strings, not rich text: the same values are rendered on the page AND
@@ -410,6 +428,8 @@ export interface BusinessProfile {
     copyright: string;
     credit: string;
     socials: SocialLink[];
+    /** Absent, or the tenant hasn't been cleared to send — either way, no box. */
+    newsletter?: FooterNewsletter;
   };
   floatingCta: CtaButton;
   /** Present only on the patisserie template. See `PatisserieSections`. */

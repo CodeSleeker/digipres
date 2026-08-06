@@ -16,14 +16,14 @@ export default async function SettingsPage() {
   return (
     <div className="grid gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-heading text-2xl tracking-[2px]">
+        <h1 className="font-admin-heading text-2xl tracking-[2px]">
           Contact details
         </h1>
         <a
           href="/"
           target="_blank"
           rel="noreferrer"
-          className="text-xs text-gray transition-colors hover:text-gold"
+          className="text-xs text-admin-muted transition-colors hover:text-admin-accent"
         >
           View live ↗
         </a>
@@ -46,7 +46,7 @@ export default async function SettingsPage() {
           }}
         />
       ) : (
-        <p className="text-sm text-gray">
+        <p className="text-sm text-admin-muted">
           Create your business profile first — contact details attach to it.
         </p>
       )}

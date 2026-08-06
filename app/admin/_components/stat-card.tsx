@@ -34,14 +34,14 @@ export function StatCard({
         <span
           className={`flex h-10 w-10 items-center justify-center rounded-lg ${
             muted
-              ? "bg-dark-border text-gray"
-              : "bg-gold/10 text-gold"
+              ? "bg-admin-line text-admin-muted"
+              : "bg-admin-accent/10 text-admin-accent"
           }`}
         >
           {icon}
         </span>
         {href && !muted && (
-          <span className="text-gray transition-colors group-hover:text-gold">
+          <span className="text-admin-muted transition-colors group-hover:text-admin-accent">
             <ArrowIcon />
           </span>
         )}
@@ -49,37 +49,37 @@ export function StatCard({
 
       <div className="mt-auto">
         <div
-          className={`font-heading text-3xl leading-none tracking-[1px] ${
-            muted ? "text-gray" : "text-white"
+          className={`font-admin-heading text-3xl leading-none tracking-[1px] ${
+            muted ? "text-admin-muted" : "text-admin-fg"
           }`}
         >
           {value}
         </div>
-        <div className="mt-2 text-[0.7rem] uppercase tracking-[1.5px] text-gray-light">
+        <div className="mt-2 text-[0.7rem] uppercase tracking-[1.5px] text-admin-fg/80">
           {label}
         </div>
       </div>
 
       {typeof progress === "number" && (
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-dark-border">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-admin-line">
           <div
-            className="h-full rounded-full bg-gold transition-all duration-500"
+            className="h-full rounded-full bg-admin-accent transition-all duration-500"
             style={{ width: `${Math.max(0, Math.min(100, progress))}%` }}
           />
         </div>
       )}
 
-      {hint && <p className="text-xs text-gray">{hint}</p>}
+      {hint && <p className="text-xs text-admin-muted">{hint}</p>}
     </div>
   );
 
-  const shell = "border border-dark-border bg-dark p-5";
+  const shell = "border border-admin-line bg-admin-panel p-5";
 
   if (href) {
     return (
       <Link
         href={href}
-        className={`group block ${shell} transition-colors hover:border-gold`}
+        className={`group block ${shell} transition-colors hover:border-admin-accent`}
       >
         {body}
       </Link>

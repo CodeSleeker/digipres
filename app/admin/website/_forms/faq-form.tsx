@@ -40,13 +40,13 @@ export function FaqForm({ defaultValues }: { defaultValues: FaqFormValues }) {
 
       <div className="grid gap-3">
         <SubHeading>Questions</SubHeading>
-        <p className="text-xs leading-relaxed text-gray">
+        <p className="text-xs leading-relaxed text-admin-muted">
           Answer what customers actually ask before booking — parking, walk-ins,
           payment, how long a service takes, what to bring. Write each answer so
           it makes sense on its own: search engines and AI assistants quote
           these directly, without the question around them.
         </p>
-        <p className="text-xs leading-relaxed text-gray">
+        <p className="text-xs leading-relaxed text-admin-muted">
           Leave this empty and the FAQ section is hidden from your website.
         </p>
         {items.fields.map((field, i) => (

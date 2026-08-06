@@ -29,7 +29,7 @@ export function DeleteCustomerButton({
           router.refresh();
         });
       }}
-      className="text-xs text-gray transition-colors hover:text-destructive disabled:opacity-50"
+      className="text-xs text-admin-muted transition-colors hover:text-destructive disabled:opacity-50"
     >
       {pending ? "Deleting…" : "Delete"}
     </button>

@@ -48,7 +48,7 @@ export function GalleryForm({
 
       <div className="grid gap-3">
         <SubHeading>Gallery items</SubHeading>
-        <p className="text-xs leading-relaxed text-gray">
+        <p className="text-xs leading-relaxed text-admin-muted">
           &ldquo;Describe the photo&rdquo; is read aloud to visitors using a
           screen reader and is what image search indexes. Say what is actually
           in the shot, not what the piece is called — the title is already on

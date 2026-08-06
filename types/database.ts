@@ -50,6 +50,8 @@ export type JobStatusEnum = "success" | "failed";
 export type LeadKindEnum = "consultation" | "contact";
 export type LeadStatusEnum = "new" | "contacted" | "closed" | "spam";
 
+export type SubscriberStatusEnum = "pending" | "subscribed" | "unsubscribed";
+
 export type SubscriptionStatusEnum =
   "trialing" | "active" | "past_due" | "canceled";
 
@@ -80,6 +82,10 @@ export interface Database {
           notify_phone: string | null;
           notify_customer_sms: boolean;
           sms_sender_id: string | null;
+          newsletter_from_email: string | null;
+          newsletter_from_name: string | null;
+          newsletter_verified: boolean;
+          newsletter_verified_at: string | null;
           cover_image_url: string | null;
           category: BusinessCategoryEnum;
           owner_name: string | null;
@@ -128,6 +134,10 @@ export interface Database {
           notify_phone?: string | null;
           notify_customer_sms?: boolean;
           sms_sender_id?: string | null;
+          newsletter_from_email?: string | null;
+          newsletter_from_name?: string | null;
+          newsletter_verified?: boolean;
+          newsletter_verified_at?: string | null;
           cover_image_url?: string | null;
           category?: BusinessCategoryEnum;
           owner_name?: string | null;
@@ -176,6 +186,10 @@ export interface Database {
           notify_phone?: string | null;
           notify_customer_sms?: boolean;
           sms_sender_id?: string | null;
+          newsletter_from_email?: string | null;
+          newsletter_from_name?: string | null;
+          newsletter_verified?: boolean;
+          newsletter_verified_at?: string | null;
           cover_image_url?: string | null;
           category?: BusinessCategoryEnum;
           owner_name?: string | null;
@@ -654,6 +668,123 @@ export interface Database {
         };
         Relationships: [];
       };
+      subscribers: {
+        Row: {
+          id: string;
+          business_id: string;
+          email: string;
+          status: SubscriberStatusEnum;
+          confirm_token: string | null;
+          unsubscribe_token: string;
+          consent_text: string | null;
+          confirmed_at: string | null;
+          unsubscribed_at: string | null;
+          source: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          business_id: string;
+          email: string;
+          status?: SubscriberStatusEnum;
+          confirm_token?: string | null;
+          unsubscribe_token?: string;
+          consent_text?: string | null;
+          confirmed_at?: string | null;
+          unsubscribed_at?: string | null;
+          source?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          business_id?: string;
+          email?: string;
+          status?: SubscriberStatusEnum;
+          confirm_token?: string | null;
+          unsubscribe_token?: string;
+          consent_text?: string | null;
+          confirmed_at?: string | null;
+          unsubscribed_at?: string | null;
+          source?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      creations: {
+        Row: {
+          id: string;
+          business_id: string;
+          name: string;
+          description: string | null;
+          image_url: string | null;
+          price: string | null;
+          published_at: string;
+          created_at: string;
+          updated_at: string;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          business_id: string;
+          name: string;
+          description?: string | null;
+          image_url?: string | null;
+          price?: string | null;
+          published_at?: string;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          business_id?: string;
+          name?: string;
+          description?: string | null;
+          image_url?: string | null;
+          price?: string | null;
+          published_at?: string;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Relationships: [];
+      };
+      subscriber_digests: {
+        Row: {
+          id: string;
+          business_id: string;
+          covered_from: string;
+          covered_to: string;
+          creation_count: number;
+          sent_count: number;
+          failed_count: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          business_id: string;
+          covered_from: string;
+          covered_to: string;
+          creation_count?: number;
+          sent_count?: number;
+          failed_count?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          business_id?: string;
+          covered_from?: string;
+          covered_to?: string;
+          creation_count?: number;
+          sent_count?: number;
+          failed_count?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -690,6 +821,7 @@ export interface Database {
       business_status: BusinessStatusEnum;
       job_status: JobStatusEnum;
       subscription_status: SubscriptionStatusEnum;
+      subscriber_status: SubscriberStatusEnum;
     };
     CompositeTypes: Record<string, never>;
   };

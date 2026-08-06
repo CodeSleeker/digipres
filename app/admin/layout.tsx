@@ -7,6 +7,7 @@ import {
 import { SuspendedNotice } from "./_components/suspended-notice";
 import { logout } from "@/lib/auth/actions";
 import { templateSections } from "@/templates/registry";
+import { adminTheme } from "@/lib/admin/theme";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { ImpersonationBanner } from "./_components/impersonation-banner";
 import { getEntitlement } from "@/features/billing/queries";
@@ -60,6 +61,10 @@ export default async function AdminLayout({
     <DashboardShell
       brandLabel="DASHBOARD"
       brandHref="/admin"
+      // The client's own colours. Resolved from the same template + theme their
+      // website renders with, so a pastry studio's back office is paper and
+      // mint rather than the barber's gold on black.
+      theme={adminTheme(business?.templateCode, business?.themeCode)}
       banner={
         isImpersonating && business ? (
           <ImpersonationBanner businessName={business.name} />
@@ -90,10 +95,16 @@ export default async function AdminLayout({
           {features.reviews && (
             <NavLink href="/admin/reviews">Review Automation</NavLink>
           )}
+          {/* Shown only to a tenant whose newsletter is actually set up —
+              otherwise it is a section that can do nothing, and its first
+              screen would have to explain why. */}
+          {business?.newsletterVerified && (
+            <NavLink href="/admin/creations">New Creations</NavLink>
+          )}
           {features.ai_messages && (
             <NavLink href="/admin/ai-messages">AI Messages</NavLink>
           )}
-          <div className="mb-1 mt-4 text-[0.65rem] uppercase tracking-[2px] text-gray">
+          <div className="mb-1 mt-4 text-[0.65rem] uppercase tracking-[2px] text-admin-muted">
             Website
           </div>
           {/* Branding sits above the sections because it isn't one: it's on the
@@ -125,7 +136,7 @@ export default async function AdminLayout({
             href="/"
             target="_blank"
             rel="noreferrer"
-            className="text-xs text-gray transition-colors hover:text-gold"
+            className="text-xs text-admin-muted transition-colors hover:text-admin-accent"
           >
             View live site ↗
           </a>
@@ -134,18 +145,18 @@ export default async function AdminLayout({
       headerLeft={
         business ? (
           <>
-            <span className="truncate text-sm text-white">
+            <span className="truncate text-sm text-admin-fg">
               {business.name}
-              <span className="ml-2 text-xs text-gray">/{business.slug}</span>
+              <span className="ml-2 text-xs text-admin-muted">/{business.slug}</span>
             </span>
-            <span className="truncate text-[0.7rem] text-gray">
+            <span className="truncate text-[0.7rem] text-admin-muted">
               {user.email}
             </span>
           </>
         ) : (
           <>
-            <span className="text-sm text-gray">No business yet</span>
-            <span className="truncate text-[0.7rem] text-gray">
+            <span className="text-sm text-admin-muted">No business yet</span>
+            <span className="truncate text-[0.7rem] text-admin-muted">
               {user.email}
             </span>
           </>
@@ -155,7 +166,7 @@ export default async function AdminLayout({
         <form action={logout}>
           <SubmitButton
             pendingLabel="SIGNING OUT…"
-            className="inline-flex h-8 items-center rounded-none border border-dark-border px-3 text-xs tracking-[2px] text-white transition-colors hover:border-gold hover:text-gold sm:px-4"
+            className="inline-flex h-8 items-center rounded-none border border-admin-line px-3 text-xs tracking-[2px] text-admin-fg transition-colors hover:border-admin-accent hover:text-admin-accent sm:px-4"
           >
             {/* The word is redundant next to the icon-free header on a phone,
                 but "OUT" alone reads as a truncation bug — so keep it whole and

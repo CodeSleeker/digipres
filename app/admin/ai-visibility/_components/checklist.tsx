@@ -16,7 +16,7 @@ export function Checklist({ checks }: { checks: VisibilityCheck[] }) {
     <div className="grid gap-6">
       {byCategory.map(({ cat, items }) => (
         <section key={cat}>
-          <h3 className="mb-3 text-[0.7rem] uppercase tracking-[2px] text-gray">
+          <h3 className="mb-3 text-[0.7rem] uppercase tracking-[2px] text-admin-muted">
             {CATEGORY_LABEL[cat]}
           </h3>
           <ul className="grid gap-3">
@@ -33,7 +33,7 @@ export function Checklist({ checks }: { checks: VisibilityCheck[] }) {
 function CheckRow({ check }: { check: VisibilityCheck }) {
   const meta = STATUS_META[check.status];
   return (
-    <li className="border border-dark-border bg-dark p-4">
+    <li className="border border-admin-line bg-admin-panel p-4">
       <div className="flex items-start gap-3">
         <span
           className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full"
@@ -42,7 +42,7 @@ function CheckRow({ check }: { check: VisibilityCheck }) {
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3">
-            <h4 className="font-heading text-base tracking-[1px]">
+            <h4 className="font-admin-heading text-base tracking-[1px]">
               {check.label}
             </h4>
             <span
@@ -51,9 +51,9 @@ function CheckRow({ check }: { check: VisibilityCheck }) {
               {meta.label}
             </span>
           </div>
-          <p className="mt-1 text-sm text-gray-light">{check.finding}</p>
-          <p className="mt-2 flex gap-2 text-sm text-gray">
-            <span className="shrink-0 text-gold">→</span>
+          <p className="mt-1 text-sm text-admin-fg/80">{check.finding}</p>
+          <p className="mt-2 flex gap-2 text-sm text-admin-muted">
+            <span className="shrink-0 text-admin-accent">→</span>
             <span>{check.recommendation}</span>
           </p>
         </div>

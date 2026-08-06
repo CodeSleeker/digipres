@@ -29,8 +29,8 @@ export function BillingPanel({
   return (
     <section className="grid gap-4">
       <div>
-        <h2 className="font-heading text-lg tracking-[2px]">Plan & features</h2>
-        <p className="mt-1 text-sm text-gray">
+        <h2 className="font-admin-heading text-lg tracking-[2px]">Plan & features</h2>
+        <p className="mt-1 text-sm text-admin-muted">
           {entitlement.subscription
             ? `Subscription status: ${entitlement.subscription.status}${
                 entitlement.entitled ? "" : " — falling back to the default plan"
@@ -41,17 +41,17 @@ export function BillingPanel({
 
       <form
         action={setBusinessPlan}
-        className="flex flex-wrap items-end gap-3 border border-dark-border bg-dark p-5"
+        className="flex flex-wrap items-end gap-3 border border-admin-line bg-admin-panel p-5"
       >
         <input type="hidden" name="businessId" value={businessId} />
         <label className="grid gap-1.5">
-          <span className="text-[0.65rem] uppercase tracking-[1.5px] text-gray">
+          <span className="text-[0.65rem] uppercase tracking-[1.5px] text-admin-muted">
             Plan
           </span>
           <select
             name="planId"
             defaultValue={currentPlanId}
-            className="h-auto rounded-none border border-dark-border bg-charcoal px-3 py-2 text-sm text-white outline-none focus:border-gold"
+            className="h-auto rounded-none border border-admin-line bg-admin-field px-3 py-2 text-sm text-admin-fg outline-none focus:border-admin-accent"
           >
             {plans.map((p) => (
               <option key={p.id} value={p.id}>
@@ -64,7 +64,7 @@ export function BillingPanel({
         </label>
         <SubmitButton
           pendingLabel="Saving…"
-          className="border border-gold px-4 py-2 text-xs uppercase tracking-[2px] text-gold transition-colors hover:bg-gold hover:text-black"
+          className="border border-admin-accent px-4 py-2 text-xs uppercase tracking-[2px] text-admin-accent transition-colors hover:bg-admin-accent hover:text-admin-on-accent"
         >
           Set plan
         </SubmitButton>
@@ -80,15 +80,15 @@ export function BillingPanel({
           return (
             <li
               key={key}
-              className="flex flex-wrap items-center gap-3 border border-dark-border bg-dark px-4 py-3"
+              className="flex flex-wrap items-center gap-3 border border-admin-line bg-admin-panel px-4 py-3"
             >
               <span
-                className={`h-2.5 w-2.5 shrink-0 rounded-full ${effective ? "bg-[#6cbf84]" : "bg-dark-border"}`}
+                className={`h-2.5 w-2.5 shrink-0 rounded-full ${effective ? "bg-[#6cbf84]" : "bg-admin-line"}`}
                 aria-hidden="true"
               />
               <div className="min-w-0">
-                <p className="text-sm text-white">{FEATURES[key].label}</p>
-                <p className="text-xs text-gray">{FEATURES[key].description}</p>
+                <p className="text-sm text-admin-fg">{FEATURES[key].label}</p>
+                <p className="text-xs text-admin-muted">{FEATURES[key].description}</p>
               </div>
 
               <form
@@ -97,7 +97,7 @@ export function BillingPanel({
               >
                 <input type="hidden" name="businessId" value={businessId} />
                 <input type="hidden" name="featureKey" value={key} />
-                <span className="text-[0.6rem] uppercase tracking-[1px] text-gray">
+                <span className="text-[0.6rem] uppercase tracking-[1px] text-admin-muted">
                   via {source}
                 </span>
                 <select
@@ -109,7 +109,7 @@ export function BillingPanel({
                         : "off"
                       : "inherit"
                   }
-                  className="h-auto rounded-none border border-dark-border bg-charcoal px-2 py-1 text-xs text-white outline-none focus:border-gold"
+                  className="h-auto rounded-none border border-admin-line bg-admin-field px-2 py-1 text-xs text-admin-fg outline-none focus:border-admin-accent"
                 >
                   <option value="inherit">Follow plan</option>
                   <option value="on">Force on</option>
@@ -117,7 +117,7 @@ export function BillingPanel({
                 </select>
                 <SubmitButton
                   pendingLabel="Applying…"
-                  className="text-xs uppercase tracking-[1px] text-gray transition-colors hover:text-gold"
+                  className="text-xs uppercase tracking-[1px] text-admin-muted transition-colors hover:text-admin-accent"
                 >
                   Apply
                 </SubmitButton>

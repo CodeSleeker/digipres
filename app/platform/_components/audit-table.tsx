@@ -41,16 +41,16 @@ const NOTABLE = new Set([
 export function AuditTable({ rows }: { rows: AuditEntry[] }) {
   if (rows.length === 0) {
     return (
-      <p className="border border-dark-border p-6 text-sm text-gray">
+      <p className="border border-admin-line p-6 text-sm text-admin-muted">
         No staff activity recorded.
       </p>
     );
   }
 
   return (
-    <div className="min-w-0 overflow-x-auto border border-dark-border">
+    <div className="min-w-0 overflow-x-auto border border-admin-line">
       <table className="w-full min-w-[52rem] text-left text-sm">
-        <thead className="border-b border-dark-border text-[0.7rem] uppercase tracking-[1px] text-gray">
+        <thead className="border-b border-admin-line text-[0.7rem] uppercase tracking-[1px] text-admin-muted">
           <tr>
             <th className="p-3 font-normal">When</th>
             <th className="p-3 font-normal">Action</th>
@@ -61,32 +61,32 @@ export function AuditTable({ rows }: { rows: AuditEntry[] }) {
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.id} className="border-b border-dark-border/50">
-              <td className="whitespace-nowrap p-3 text-gray-light">
+            <tr key={row.id} className="border-b border-admin-line/50">
+              <td className="whitespace-nowrap p-3 text-admin-fg/80">
                 {new Date(row.createdAt).toLocaleString()}
               </td>
               <td
-                className={`p-3 ${NOTABLE.has(row.action) ? "text-gold" : "text-white"}`}
+                className={`p-3 ${NOTABLE.has(row.action) ? "text-admin-accent" : "text-admin-fg"}`}
               >
                 {LABEL[row.action] ?? row.action}
                 {detailOf(row) && (
-                  <span className="ml-2 text-xs text-gray">
+                  <span className="ml-2 text-xs text-admin-muted">
                     {detailOf(row)}
                   </span>
                 )}
               </td>
-              <td className="p-3 text-gray-light">
+              <td className="p-3 text-admin-fg/80">
                 {row.entity ?? "—"}
                 {row.entityId && (
-                  <span className="ml-1 text-xs text-gray">
+                  <span className="ml-1 text-xs text-admin-muted">
                     {row.entityId.slice(0, 8)}
                   </span>
                 )}
               </td>
-              <td className="p-3 text-gray-light">
+              <td className="p-3 text-admin-fg/80">
                 {row.actorUserId?.slice(0, 8) ?? "system"}
               </td>
-              <td className="p-3 text-gray">{row.ip ?? "—"}</td>
+              <td className="p-3 text-admin-muted">{row.ip ?? "—"}</td>
             </tr>
           ))}
         </tbody>

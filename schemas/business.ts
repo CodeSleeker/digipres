@@ -134,6 +134,33 @@ const optionalEmail = z.preprocess(
  * Blank clears the column (null), which is a meaningful state: "no explicit
  * sender, use the provider default where one exists".
  */
+/**
+ * The address a tenant's weekly digest is sent from.
+ *
+ * Lower-cased and format-checked to match the database constraint, so a value
+ * that would be rejected by the column is rejected here with a message someone
+ * can act on. Blank clears it — and clearing it turns the whole feature off,
+ * which is the intended way to switch a newsletter back off.
+ *
+ * NOT validated for deliverability, which no regex can do. Whether the domain
+ * is actually authorised to send is settled by DNS and recorded separately in
+ * `newsletterVerified`.
+ */
+export const newsletterSenderSchema = z.preprocess(
+  emptyToNull,
+  z
+    .string()
+    .trim()
+    .toLowerCase()
+    .max(254)
+    .regex(
+      /^[^@\s]+@[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$/,
+      "Enter a full address on the client's own domain, e.g. news@theirbakery.ph.",
+    )
+    .nullable()
+    .optional(),
+);
+
 export const smsSenderIdSchema = z.preprocess(
   emptyToNull,
   z
@@ -179,6 +206,21 @@ export const createBusinessSchema = z.object({
   notifyPhone: optionalPhone,
   notifyCustomerSms: checkboxBoolean,
   smsSenderId: smsSenderIdSchema,
+  /**
+   * The digest sender, on a domain the tenant controls.
+   *
+   * Platform-side, exactly like `smsSenderId` and for the same reason: it is an
+   * arrangement with DNS and a mail provider, not a preference. A field the
+   * client could edit would look configurable and mostly break their sending.
+   */
+  newsletterFromEmail: newsletterSenderSchema,
+  newsletterFromName: optionalShortText,
+  /**
+   * Absent from any owner-facing form on purpose. It appears here only so the
+   * platform action can pass it; the database refuses an owner session that
+   * tries, so this is the convenience, not the control.
+   */
+  newsletterVerified: checkboxBoolean.optional(),
   /** Street line only; the components below carry the rest. */
   address: optionalText,
   addressLocality: optionalShortText,

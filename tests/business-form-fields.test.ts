@@ -33,6 +33,22 @@ const PLATFORM_ONLY = new Map([
     "Registered with the SMS carrier per business and set at /platform/businesses/<id>. " +
       "An owner changing it would silently start getting their texts rejected.",
   ],
+  [
+    "newsletterFromEmail",
+    "The domain a tenant's digest is sent from. Requires SPF/DKIM records the platform " +
+      "verifies, so an owner-editable field would look configurable while sending their " +
+      "mail to spam. Set at /platform/businesses/<id>.",
+  ],
+  [
+    "newsletterFromName",
+    "Travels with the sender address above, and is meaningless without it.",
+  ],
+  [
+    "newsletterVerified",
+    "Authorises mail to be sent AS that domain. Self-verification would let anyone send " +
+      "as a domain they merely typed in — refused by the database too (migration 0033), " +
+      "so this list is the convenience and not the control.",
+  ],
 ]);
 
 describe("business form allow-list", () => {

@@ -314,6 +314,18 @@ function buildFooter(base: BusinessProfile, business: Business) {
     copyright: f?.copyright ?? base.footer.copyright,
     credit: f?.credit ?? base.footer.credit,
     socials: deriveFooterSocials(business),
+    /*
+     * The sign-up block, and the gate on it.
+     *
+     * Copy comes from the tenant or the template default, but it is dropped
+     * entirely unless the platform has verified their sending domain. That is
+     * what stops a site collecting addresses nobody is able to mail — the box
+     * would work, the confirmation would never arrive, and the visitor would be
+     * left believing they had subscribed.
+     */
+    newsletter: business.newsletterVerified
+      ? (f?.newsletter ?? base.footer.newsletter)
+      : undefined,
   };
 }
 

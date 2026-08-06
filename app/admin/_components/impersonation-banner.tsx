@@ -8,15 +8,15 @@ import { SubmitButton } from "@/components/ui/submit-button";
  */
 export function ImpersonationBanner({ businessName }: { businessName: string }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gold/40 bg-gold/10 px-8 py-2.5">
-      <p className="text-xs text-gold">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-admin-accent/40 bg-admin-accent/10 px-8 py-2.5">
+      <p className="text-xs text-admin-accent">
         Acting as <span className="font-semibold">{businessName}</span> — changes
         you make are recorded against your account.
       </p>
       <form action={stopImpersonation}>
         <SubmitButton
           pendingLabel="Exiting…"
-          className="text-xs uppercase tracking-[1.5px] text-gold underline-offset-4 transition-colors hover:underline"
+          className="text-xs uppercase tracking-[1.5px] text-admin-accent underline-offset-4 transition-colors hover:underline"
         >
           Exit
         </SubmitButton>

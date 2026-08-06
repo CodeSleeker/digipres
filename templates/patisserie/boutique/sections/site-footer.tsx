@@ -3,6 +3,7 @@ import { Logo } from "../components/logo";
 import { LinkUnderline } from "../components/buttons";
 import { externalLinkProps } from "../components/section-head";
 import { Heart, SocialIcon } from "../components/icons";
+import { NewsletterSignup } from "./newsletter-signup";
 
 export function SiteFooter({ business }: { business: BusinessProfile }) {
   const { footer, patisserie } = business;
@@ -41,26 +42,37 @@ export function SiteFooter({ business }: { business: BusinessProfile }) {
           ))}
 
           {/*
-           * The mockup's fourth column is a newsletter sign-up. There is no
-           * subscriber endpoint on the platform, and a box that swallows an
-           * address and says "you're on the list" would be a lie told to every
-           * visitor who used it. The copy stays; the input is a link to the one
-           * form that reaches the shop, until a subscribers feature exists.
+           * The mockup's fourth column, in one of two states.
+           *
+           * The real sign-up when this tenant's sending domain is verified —
+           * `buildFooter` drops `newsletter` entirely otherwise, so a shop that
+           * cannot send never renders a box that would collect addresses and
+           * then go silent.
+           *
+           * Without one, the static note: the same copy, pointing at the form
+           * that does reach the shop.
            */}
-          {note && (
-            <div>
-              <h2 className="mb-[1.15rem] text-[0.72rem] font-bold uppercase tracking-[0.16em] text-[rgba(255,253,248,0.5)]">
-                {note.title}
-              </h2>
-              <p className="mb-4 text-[0.875rem]">{note.text}</p>
-              <LinkUnderline
-                href={note.cta.href}
-                className="text-paper"
-                {...externalLinkProps(note.cta.href)}
-              >
-                {note.cta.label}
-              </LinkUnderline>
-            </div>
+          {footer.newsletter ? (
+            <NewsletterSignup
+              business={business}
+              newsletter={footer.newsletter}
+            />
+          ) : (
+            note && (
+              <div>
+                <h2 className="mb-[1.15rem] text-[0.72rem] font-bold uppercase tracking-[0.16em] text-[rgba(255,253,248,0.5)]">
+                  {note.title}
+                </h2>
+                <p className="mb-4 text-[0.875rem]">{note.text}</p>
+                <LinkUnderline
+                  href={note.cta.href}
+                  className="text-paper"
+                  {...externalLinkProps(note.cta.href)}
+                >
+                  {note.cta.label}
+                </LinkUnderline>
+              </div>
+            )
           )}
         </div>
 

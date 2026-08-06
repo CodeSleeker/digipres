@@ -86,7 +86,7 @@ export function BrandingForm({
       <section className="grid gap-4">
         <div>
           <SubHeading>Logo mark</SubHeading>
-          <p className="mt-1 text-xs leading-relaxed text-gray">
+          <p className="mt-1 text-xs leading-relaxed text-admin-muted">
             The symbol shown in your site header, beside your name. Leave it
             empty to use the gold initial mark instead. A transparent PNG works
             best — your header is dark, so a logo saved on a white background
@@ -105,7 +105,7 @@ export function BrandingForm({
       <section className="grid gap-4">
         <div>
           <SubHeading>Name image</SubHeading>
-          <p className="mt-1 text-xs leading-relaxed text-gray">
+          <p className="mt-1 text-xs leading-relaxed text-admin-muted">
             Optional. Upload your business name as an image when it&apos;s set
             in a specific typeface — we&apos;ll show it instead of the text
             version. If your logo is a single piece with the name already in it,
@@ -125,7 +125,7 @@ export function BrandingForm({
       <section className="grid gap-4">
         <div>
           <SubHeading>Browser tab icon</SubHeading>
-          <p className="mt-1 text-xs leading-relaxed text-gray">
+          <p className="mt-1 text-xs leading-relaxed text-admin-muted">
             The small icon in the browser tab. Leave it empty and we use your
             logo; with no logo either, we generate a tile from your initial.
             Square images work best — a wide logo gets squashed at 16 pixels.
@@ -138,7 +138,7 @@ export function BrandingForm({
           businessId={businessId}
         />
         {!faviconUrl && !logoUrl && (
-          <div className="flex items-center gap-3 text-xs text-gray">
+          <div className="flex items-center gap-3 text-xs text-admin-muted">
             <span>Currently generated:</span>
             {/* The generated tile is our own SVG endpoint, not a tenant upload,
                 so a plain <img> at a fixed size is all it needs. */}
@@ -155,7 +155,7 @@ export function BrandingForm({
       <section className="grid gap-4">
         <div>
           <SubHeading>Wordmark text</SubHeading>
-          <p className="mt-1 text-xs leading-relaxed text-gray">
+          <p className="mt-1 text-xs leading-relaxed text-admin-muted">
             The two-tone business name beside your logo, used when no name image
             is uploaded above. Leave the first field empty to build it from your
             business name automatically
@@ -163,7 +163,7 @@ export function BrandingForm({
               <>
                 {" "}
                 — currently{" "}
-                <span className="text-gold">
+                <span className="text-admin-accent">
                   {derived.namePrimary} {derived.nameAccent}
                 </span>
               </>
@@ -191,12 +191,12 @@ export function BrandingForm({
         />
       </section>
 
-      <div className="flex flex-wrap items-center gap-4 border-t border-dark-border pt-5">
+      <div className="flex flex-wrap items-center gap-4 border-t border-admin-line pt-5">
         <Button
           type="submit"
           disabled={pending}
           aria-busy={pending}
-          className="rounded-none bg-gold font-heading tracking-[2px] text-black hover:bg-gold-light"
+          className="rounded-none bg-admin-accent font-admin-heading tracking-[2px] text-admin-on-accent hover:bg-admin-accent-hover"
         >
           {pending ? (
             <span className="inline-flex items-center gap-2">

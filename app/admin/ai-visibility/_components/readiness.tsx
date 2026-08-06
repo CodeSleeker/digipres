@@ -12,7 +12,7 @@ const STATUS_META: Record<
   pass: { label: "Pass", dot: "#6cbf84", text: "text-[#6cbf84]" },
   warn: { label: "Improve", dot: "#d8b26a", text: "text-[#d8b26a]" },
   fail: { label: "Action", dot: "#c1666b", text: "text-[#c1666b]" },
-  info: { label: "Review", dot: "#888888", text: "text-gray" },
+  info: { label: "Review", dot: "#888888", text: "text-admin-muted" },
 };
 
 /** The headline AI Readiness Score: a ring, grade, and status tallies. */
@@ -22,7 +22,7 @@ export function ReadinessScore({ report }: { report: VisibilityReport }) {
   const dash = `${score} ${100 - score}`;
 
   return (
-    <div className="grid gap-6 border border-dark-border bg-dark p-6 sm:grid-cols-[auto_1fr] sm:items-center">
+    <div className="grid gap-6 border border-admin-line bg-admin-panel p-6 sm:grid-cols-[auto_1fr] sm:items-center">
       <div className="relative mx-auto h-40 w-40">
         <svg viewBox="0 0 42 42" className="h-full w-full" role="img">
           <circle
@@ -46,23 +46,23 @@ export function ReadinessScore({ report }: { report: VisibilityReport }) {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-heading text-4xl leading-none text-white">
+          <span className="font-admin-heading text-4xl leading-none text-admin-fg">
             {score}
           </span>
-          <span className="text-[0.6rem] uppercase tracking-[2px] text-gray">
+          <span className="text-[0.6rem] uppercase tracking-[2px] text-admin-muted">
             / 100
           </span>
         </div>
       </div>
 
       <div>
-        <p className="text-xs uppercase tracking-[2px] text-gold">
+        <p className="text-xs uppercase tracking-[2px] text-admin-accent">
           AI Readiness Score
         </p>
-        <h2 className="mt-1 font-heading text-2xl tracking-[1px]">
+        <h2 className="mt-1 font-admin-heading text-2xl tracking-[1px]">
           Grade {report.grade} · {report.gradeLabel}
         </h2>
-        <p className="mt-2 max-w-xl text-sm text-gray">
+        <p className="mt-2 max-w-xl text-sm text-admin-muted">
           A weighted view of how machine-readable and discoverable this site is
           for search engines and AI assistants. These are optimization
           recommendations — not a guarantee of any AI or search ranking.
@@ -105,8 +105,8 @@ function Tally({
         className="h-2.5 w-2.5 rounded-full"
         style={{ background: color }}
       />
-      <span className="text-white">{n}</span>
-      <span className="text-gray">{label}</span>
+      <span className="text-admin-fg">{n}</span>
+      <span className="text-admin-muted">{label}</span>
     </span>
   );
 }

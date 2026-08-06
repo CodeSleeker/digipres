@@ -35,14 +35,14 @@ export default async function CustomersPage({
     <div className="grid gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-heading text-2xl tracking-[2px]">Customers</h1>
-          <p className="mt-1 text-sm text-gray">
+          <h1 className="font-admin-heading text-2xl tracking-[2px]">Customers</h1>
+          <p className="mt-1 text-sm text-admin-muted">
             {total} {total === 1 ? "customer" : "customers"}
           </p>
         </div>
         <Link
           href="/admin/customers/new"
-          className="rounded-none bg-gold px-4 py-2 font-heading text-sm tracking-[2px] text-black transition-colors hover:bg-gold-light"
+          className="rounded-none bg-admin-accent px-4 py-2 font-admin-heading text-sm tracking-[2px] text-admin-on-accent transition-colors hover:bg-admin-accent-hover"
         >
           + ADD CUSTOMER
         </Link>
@@ -51,23 +51,23 @@ export default async function CustomersPage({
       {/* Search + filters (GET → URL). Submitting resets to page 1. */}
       <form
         method="get"
-        className="flex flex-wrap items-end gap-3 border border-dark-border bg-dark p-4"
+        className="flex flex-wrap items-end gap-3 border border-admin-line bg-admin-panel p-4"
       >
-        <label className="flex flex-col gap-1 text-[0.7rem] uppercase tracking-[1.5px] text-gray">
+        <label className="flex flex-col gap-1 text-[0.7rem] uppercase tracking-[1.5px] text-admin-muted">
           Search
           <input
             name="q"
             defaultValue={query.q ?? ""}
             placeholder="Name, mobile, email"
-            className="h-9 w-56 rounded-none border border-dark-border bg-charcoal px-3 text-sm text-white outline-none focus:border-gold"
+            className="h-9 w-56 rounded-none border border-admin-line bg-admin-field px-3 text-sm text-admin-fg outline-none focus:border-admin-accent"
           />
         </label>
-        <label className="flex flex-col gap-1 text-[0.7rem] uppercase tracking-[1.5px] text-gray">
+        <label className="flex flex-col gap-1 text-[0.7rem] uppercase tracking-[1.5px] text-admin-muted">
           Review
           <select
             name="review"
             defaultValue={query.reviewStatus ?? ""}
-            className="h-9 rounded-none border border-dark-border bg-charcoal px-3 text-sm text-white outline-none focus:border-gold"
+            className="h-9 rounded-none border border-admin-line bg-admin-field px-3 text-sm text-admin-fg outline-none focus:border-admin-accent"
           >
             <option value="">All</option>
             {REVIEW_STATUSES.map((s) => (
@@ -77,12 +77,12 @@ export default async function CustomersPage({
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-[0.7rem] uppercase tracking-[1.5px] text-gray">
+        <label className="flex flex-col gap-1 text-[0.7rem] uppercase tracking-[1.5px] text-admin-muted">
           SMS
           <select
             name="sms"
             defaultValue={query.smsStatus ?? ""}
-            className="h-9 rounded-none border border-dark-border bg-charcoal px-3 text-sm text-white outline-none focus:border-gold"
+            className="h-9 rounded-none border border-admin-line bg-admin-field px-3 text-sm text-admin-fg outline-none focus:border-admin-accent"
           >
             <option value="">All</option>
             {SMS_STATUSES.map((s) => (
@@ -94,23 +94,23 @@ export default async function CustomersPage({
         </label>
         <SubmitButton
           pendingLabel="Applying…"
-          className="inline-flex h-9 items-center rounded-none border border-dark-border px-4 text-sm text-white transition-colors hover:border-gold hover:text-gold"
+          className="inline-flex h-9 items-center rounded-none border border-admin-line px-4 text-sm text-admin-fg transition-colors hover:border-admin-accent hover:text-admin-accent"
         >
           Apply
         </SubmitButton>
         <Link
           href="/admin/customers"
-          className="h-9 rounded-none px-3 text-sm leading-9 text-gray transition-colors hover:text-gold"
+          className="h-9 rounded-none px-3 text-sm leading-9 text-admin-muted transition-colors hover:text-admin-accent"
         >
           Clear
         </Link>
       </form>
 
       {/* Table */}
-      <div className="min-w-0 overflow-x-auto border border-dark-border">
+      <div className="min-w-0 overflow-x-auto border border-admin-line">
         <table className="w-full min-w-[820px] border-collapse text-sm">
           <thead>
-            <tr className="border-b border-dark-border text-left text-[0.65rem] uppercase tracking-[1.5px] text-gray">
+            <tr className="border-b border-admin-line text-left text-[0.65rem] uppercase tracking-[1.5px] text-admin-muted">
               <th className="p-3 font-normal">Name</th>
               <th className="p-3 font-normal">Mobile</th>
               <th className="p-3 font-normal">Last visit</th>
@@ -124,7 +124,7 @@ export default async function CustomersPage({
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={8} className="p-8 text-center text-gray">
+                <td colSpan={8} className="p-8 text-center text-admin-muted">
                   No customers found.
                 </td>
               </tr>
@@ -132,12 +132,12 @@ export default async function CustomersPage({
             {rows.map((c) => (
               <tr
                 key={c.id}
-                className="border-b border-dark-border/60 text-gray-light last:border-0"
+                className="border-b border-admin-line/60 text-admin-fg/80 last:border-0"
               >
                 <td className="p-3">
-                  <div className="text-white">{c.name}</div>
+                  <div className="text-admin-fg">{c.name}</div>
                   {c.email && (
-                    <div className="text-xs text-gray">{c.email}</div>
+                    <div className="text-xs text-admin-muted">{c.email}</div>
                   )}
                 </td>
                 <td className="p-3">{c.mobile ?? "—"}</td>
@@ -158,7 +158,7 @@ export default async function CustomersPage({
                   <div className="flex justify-end gap-3">
                     <Link
                       href={`/admin/customers/${c.id}/edit`}
-                      className="text-xs text-gray transition-colors hover:text-gold"
+                      className="text-xs text-admin-muted transition-colors hover:text-admin-accent"
                     >
                       Edit
                     </Link>
@@ -172,7 +172,7 @@ export default async function CustomersPage({
       </div>
 
       {/* Pagination */}
-      <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-gray">
+      <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-admin-muted">
         <span>
           {total === 0
             ? "No results"
@@ -214,17 +214,17 @@ function StatusBadge({
 
   const tone: Record<string, string> = {
     received: "border-green-500/40 text-green-400",
-    requested: "border-gold/40 text-gold",
-    pending: "border-dark-border text-gray",
+    requested: "border-admin-accent/40 text-admin-accent",
+    pending: "border-admin-line text-admin-muted",
     sent: "border-green-500/40 text-green-400",
-    not_sent: "border-dark-border text-gray",
+    not_sent: "border-admin-line text-admin-muted",
     failed: "border-red-500/40 text-red-400",
     opted_out: "border-red-500/40 text-red-400",
   };
 
   return (
     <span
-      className={`inline-block whitespace-nowrap rounded border px-2 py-0.5 text-[0.7rem] ${tone[value] ?? "border-dark-border text-gray"}`}
+      className={`inline-block whitespace-nowrap rounded border px-2 py-0.5 text-[0.7rem] ${tone[value] ?? "border-admin-line text-admin-muted"}`}
     >
       {label}
     </span>
@@ -243,7 +243,7 @@ function PageLink({
   children: React.ReactNode;
 }) {
   if (disabled) {
-    return <span className="px-3 py-1 text-dark-border">{children}</span>;
+    return <span className="px-3 py-1 text-admin-line">{children}</span>;
   }
   const params = new URLSearchParams();
   if (query.q) params.set("q", query.q);
@@ -253,7 +253,7 @@ function PageLink({
   return (
     <Link
       href={`/admin/customers?${params.toString()}`}
-      className="rounded-none border border-dark-border px-3 py-1 text-white transition-colors hover:border-gold hover:text-gold"
+      className="rounded-none border border-admin-line px-3 py-1 text-admin-fg transition-colors hover:border-admin-accent hover:text-admin-accent"
     >
       {children}
     </Link>

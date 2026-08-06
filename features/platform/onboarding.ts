@@ -44,6 +44,8 @@ export async function onboardBusiness(
     slug: formData.get("slug"),
     templateCode: formData.get("templateCode"),
     themeCode: formData.get("themeCode"),
+    newsletterFromEmail: formData.get("newsletterFromEmail"),
+    newsletterFromName: formData.get("newsletterFromName"),
   });
   if (!parsed.success) {
     const fieldErrors: Record<string, string[]> = {};
@@ -92,6 +94,11 @@ export async function onboardBusiness(
         slug,
         template_code: input.templateCode,
         theme_code: input.themeCode,
+        // Recorded now, trusted later: `newsletter_verified` stays false until
+        // someone checks the DNS, so capturing the address here cannot switch
+        // sending on by itself.
+        newsletter_from_email: input.newsletterFromEmail ?? null,
+        newsletter_from_name: input.newsletterFromName ?? null,
         status: "draft",
       })
       .select("id,slug")

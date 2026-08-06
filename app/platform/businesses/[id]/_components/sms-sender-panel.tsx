@@ -19,9 +19,9 @@ export function SmsSenderPanel({ business }: { business: Business }) {
   const effective = current ? normalizeSenderId(current) : null;
 
   return (
-    <section className="border border-dark-border bg-dark p-6">
-      <h2 className="font-heading text-lg tracking-[2px]">SMS sender ID</h2>
-      <p className="mt-1 max-w-2xl text-xs leading-relaxed text-gray">
+    <section className="border border-admin-line bg-admin-panel p-6">
+      <h2 className="font-admin-heading text-lg tracking-[2px]">SMS sender ID</h2>
+      <p className="mt-1 max-w-2xl text-xs leading-relaxed text-admin-muted">
         The name customers see instead of a phone number on this client&apos;s
         texts. Maximum 11 characters, letters, numbers and spaces only — that is
         a GSM limit, not ours.
@@ -34,7 +34,7 @@ export function SmsSenderPanel({ business }: { business: Business }) {
         <input type="hidden" name="businessId" value={business.id} />
 
         <label className="flex w-full flex-col gap-1.5 sm:w-auto">
-          <span className="text-[0.7rem] uppercase tracking-[1.5px] text-gray">
+          <span className="text-[0.7rem] uppercase tracking-[1.5px] text-admin-muted">
             Sender ID
           </span>
           <input
@@ -43,13 +43,13 @@ export function SmsSenderPanel({ business }: { business: Business }) {
             maxLength={11}
             placeholder="e.g. RoniesBarb"
             autoComplete="off"
-            className="w-full border border-dark-border bg-black px-3 py-2 font-mono text-sm text-white placeholder:text-gray focus-visible:border-gold focus-visible:outline-none sm:min-w-[16rem]"
+            className="w-full border border-admin-line bg-admin px-3 py-2 font-mono text-sm text-admin-fg placeholder:text-admin-muted focus-visible:border-admin-accent focus-visible:outline-none sm:min-w-[16rem]"
           />
         </label>
 
         <SubmitButton
           pendingLabel="Saving…"
-          className="border border-gold px-4 py-2 text-xs uppercase tracking-[2px] text-gold transition-colors hover:bg-gold hover:text-black"
+          className="border border-admin-accent px-4 py-2 text-xs uppercase tracking-[2px] text-admin-accent transition-colors hover:bg-admin-accent hover:text-admin-on-accent"
         >
           Save sender ID
         </SubmitButton>
@@ -62,11 +62,11 @@ export function SmsSenderPanel({ business }: { business: Business }) {
         </p>
       )}
 
-      <div className="mt-4 border-t border-dark-border pt-4 text-xs leading-relaxed text-gray">
+      <div className="mt-4 border-t border-admin-line pt-4 text-xs leading-relaxed text-admin-muted">
         {current ? (
           <p>
             Texts for this client send as{" "}
-            <span className="font-mono text-gray-light">
+            <span className="font-mono text-admin-fg/80">
               {effective ?? current}
             </span>
             . It must be registered with your SMS provider first, or the carrier

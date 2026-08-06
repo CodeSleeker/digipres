@@ -1,4 +1,5 @@
 import type {
+  FooterNewsletter,
   Hero,
   About,
   SectionHeading,
@@ -97,6 +98,8 @@ export interface FooterContent {
   columns: FooterColumn[];
   copyright: string;
   credit: string;
+  /** Sign-up copy. Stored, but only rendered for a verified sender. */
+  newsletter?: FooterNewsletter;
 }
 
 /**

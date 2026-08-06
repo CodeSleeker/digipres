@@ -14,7 +14,7 @@ import {
 } from "@/features/ai-messages/actions";
 
 const fieldClass =
-  "h-auto w-full rounded-none border border-dark-border bg-charcoal px-3 py-2 text-sm text-white outline-none transition-colors focus:border-gold";
+  "h-auto w-full rounded-none border border-admin-line bg-admin-field px-3 py-2 text-sm text-admin-fg outline-none transition-colors focus:border-admin-accent";
 
 const PROVIDER_LABEL: Record<string, string> = {
   openai: "OpenAI",
@@ -125,7 +125,7 @@ export function SmsGenerator({
         <Button
           type="submit"
           disabled={pending}
-          className="mt-1 rounded-none bg-gold font-heading tracking-[2px] text-black hover:bg-gold-light"
+          className="mt-1 rounded-none bg-admin-accent font-admin-heading tracking-[2px] text-admin-on-accent hover:bg-admin-accent-hover"
         >
           {pending ? "GENERATING…" : "GENERATE"}
         </Button>
@@ -136,13 +136,13 @@ export function SmsGenerator({
 
       <div className="grid content-start gap-3">
         {!result && (
-          <p className="text-sm text-gray">
+          <p className="text-sm text-admin-muted">
             Fill in the details and generate natural, on-brand SMS variations.
           </p>
         )}
         {result?.variations && result.variations.length > 0 && (
           <>
-            <p className="text-xs text-gray">
+            <p className="text-xs text-admin-muted">
               {result.usedFallback
                 ? "Filled with built-in templates (no AI provider configured or reachable)."
                 : `Generated with ${PROVIDER_LABEL[result.provider ?? ""] ?? result.provider}.`}
@@ -150,21 +150,21 @@ export function SmsGenerator({
             {result.variations.map((v, i) => (
               <div
                 key={i}
-                className="border border-dark-border bg-dark p-4"
+                className="border border-admin-line bg-admin-panel p-4"
               >
-                <p className="text-sm leading-relaxed text-gray-light">
+                <p className="text-sm leading-relaxed text-admin-fg/80">
                   {v.text}
                 </p>
                 <div className="mt-3 flex items-center justify-between">
                   <span
-                    className={`text-xs ${v.length > SMS_MAX_CHARS ? "text-destructive" : "text-gray"}`}
+                    className={`text-xs ${v.length > SMS_MAX_CHARS ? "text-destructive" : "text-admin-muted"}`}
                   >
                     {v.length}/{SMS_MAX_CHARS}
                   </span>
                   <button
                     type="button"
                     onClick={() => copy(v.text, i)}
-                    className="text-xs text-gray transition-colors hover:text-gold"
+                    className="text-xs text-admin-muted transition-colors hover:text-admin-accent"
                   >
                     {copied === i ? "Copied" : "Copy"}
                   </button>
@@ -187,7 +187,7 @@ function Field({
 }) {
   return (
     <label className="grid gap-1.5">
-      <span className="text-[0.7rem] uppercase tracking-[1.5px] text-gray">
+      <span className="text-[0.7rem] uppercase tracking-[1.5px] text-admin-muted">
         {label}
       </span>
       {children}

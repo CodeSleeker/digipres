@@ -46,7 +46,7 @@ export function TestimonialsForm({
 
       <div className="grid gap-3">
         <SubHeading>Testimonials</SubHeading>
-        <p className="text-xs leading-relaxed text-gray">
+        <p className="text-xs leading-relaxed text-admin-muted">
           Use real feedback from your own clients — these appear publicly with
           their name and a star rating.
         </p>

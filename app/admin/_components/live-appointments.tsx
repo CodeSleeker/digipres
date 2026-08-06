@@ -146,7 +146,7 @@ export function LiveAppointments({ businessId }: { businessId: string }) {
       {/* Always rendered. The owner can see at a glance whether the dashboard
           will tell them about a booking — and if this line is missing entirely,
           the component never mounted. */}
-      <span className="text-[0.65rem] text-gray">{STATUS_LABEL[status]}</span>
+      <span className="text-[0.65rem] text-admin-muted">{STATUS_LABEL[status]}</span>
 
       {unseen > 0 && (
         <div
@@ -154,7 +154,7 @@ export function LiveAppointments({ businessId }: { businessId: string }) {
           // interrupt a screen-reader user mid-sentence for a routine event.
           role="status"
           aria-live="polite"
-          className="fixed bottom-6 right-6 z-50 flex max-w-sm items-center gap-4 border border-gold/40 bg-charcoal px-4 py-3 text-sm text-white shadow-[0_8px_30px_rgba(0,0,0,0.6)]"
+          className="fixed bottom-6 right-6 z-50 flex max-w-sm items-center gap-4 border border-admin-accent/40 bg-admin-field px-4 py-3 text-sm text-admin-fg shadow-[0_8px_30px_rgba(0,0,0,0.6)]"
         >
           <span>
             {unseen === 1
@@ -172,7 +172,7 @@ export function LiveAppointments({ businessId }: { businessId: string }) {
               // the owner just asked it to.
               router.refresh();
             }}
-            className="whitespace-nowrap text-xs uppercase tracking-[2px] text-gold hover:underline"
+            className="whitespace-nowrap text-xs uppercase tracking-[2px] text-admin-accent hover:underline"
           >
             Show
           </button>
@@ -183,7 +183,7 @@ export function LiveAppointments({ businessId }: { businessId: string }) {
             // reminder that the toast was only the announcement.
             onClick={() => setDismissed(count)}
             aria-label="Dismiss"
-            className="text-xs uppercase tracking-[2px] text-gray transition-colors hover:text-gold"
+            className="text-xs uppercase tracking-[2px] text-admin-muted transition-colors hover:text-admin-accent"
           >
             ✕
           </button>

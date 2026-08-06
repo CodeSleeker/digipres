@@ -12,14 +12,14 @@ export default async function OnboardBusinessPage() {
       <div>
         <Link
           href="/platform/businesses"
-          className="text-xs text-gray transition-colors hover:text-gold"
+          className="text-xs text-admin-muted transition-colors hover:text-admin-accent"
         >
           ← All businesses
         </Link>
-        <h1 className="mt-2 font-heading text-2xl tracking-[2px]">
+        <h1 className="mt-2 font-admin-heading text-2xl tracking-[2px]">
           Onboard a business
         </h1>
-        <p className="mt-1 max-w-2xl text-sm text-gray">
+        <p className="mt-1 max-w-2xl text-sm text-admin-muted">
           Creates the business, assigns a template and theme, and emails the
           owner an invitation to set their password. The business starts as a
           draft until they complete setup.

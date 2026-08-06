@@ -4,8 +4,8 @@ import {
 } from "@/types/appointment";
 
 const TONE: Record<AppointmentStatus, string> = {
-  scheduled: "border-dark-border text-gray-light",
-  confirmed: "border-gold/40 text-gold",
+  scheduled: "border-admin-line text-admin-fg/80",
+  confirmed: "border-admin-accent/40 text-admin-accent",
   completed: "border-green-500/40 text-green-400",
   cancelled: "border-red-500/40 text-red-400",
   no_show: "border-red-500/40 text-red-400",

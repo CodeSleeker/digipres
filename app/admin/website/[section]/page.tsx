@@ -57,14 +57,14 @@ export default async function SectionPage({
   return (
     <div className="grid gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-heading text-2xl capitalize tracking-[2px]">
+        <h1 className="font-admin-heading text-2xl capitalize tracking-[2px]">
           {active} Section
         </h1>
         <a
           href="/"
           target="_blank"
           rel="noreferrer"
-          className="text-xs text-gray transition-colors hover:text-gold"
+          className="text-xs text-admin-muted transition-colors hover:text-admin-accent"
         >
           View live ↗
         </a>
@@ -75,6 +75,7 @@ export default async function SectionPage({
         content,
         templateFields(business?.templateCode),
         business?.id ?? null,
+        Boolean(business?.newsletterVerified),
         {
           facebookUrl: business?.facebookUrl ?? "",
           instagramUrl: business?.instagramUrl ?? "",
@@ -92,6 +93,8 @@ function renderForm(
   /** Which optional inputs this tenant's template asks for. */
   fields: TemplateFields,
   businessId: string | null,
+  /** Whether this tenant may collect addresses at all. */
+  newsletterEnabled: boolean,
   socialDefaults: {
     facebookUrl: string;
     instagramUrl: string;
@@ -202,8 +205,10 @@ function renderForm(
                 columns: base.footer.columns,
                 copyright: base.footer.copyright,
                 credit: base.footer.credit,
+                newsletter: base.footer.newsletter,
               }
             }
+            newsletterEnabled={newsletterEnabled}
           />
           {/* Social links live on the business record, not in footer_content —
               the contact card and JSON-LD `sameAs` read the same values. */}
