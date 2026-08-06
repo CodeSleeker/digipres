@@ -18,6 +18,16 @@ export const SUBSCRIBER_DIGEST_JOB = "subscriber-digest";
  * service-role because it works across all tenants — the owner policies would
  * narrow it to nothing.
  *
+ * SCHEDULE: `0 0 * * 0` in vercel.json — Sunday 00:00 UTC, which is Sunday 8am
+ * in the Philippines. The hour is chosen for PH rather than derived per tenant
+ * because `businesses` has no timezone column (the booking schema notes the
+ * same gap). A tenant in another timezone gets a send at the wrong local hour
+ * until that column exists.
+ *
+ * The note lives HERE and not beside the schedule because vercel.json is
+ * schema-validated and rejects any property it does not define — including a
+ * comment. Vercel fails the deploy outright, which is how this was learnt.
+ *
  * SKIPS QUIETLY. A business with no new creations since its last digest is
  * passed over without sending and without recording a run, so its window stays
  * open and this week's bake is still news whenever it is written up. A weekly
