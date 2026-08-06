@@ -32,6 +32,42 @@ export interface ThemeOption {
   name: string;
 }
 
+/**
+ * The optional per-section fields a template actually renders.
+ *
+ * Section shapes are shared, but templates use different parts of them: the
+ * barber's service cards lead with a glyph, the patisserie's lead with a
+ * photograph. Both are `Service`, and both are legitimate.
+ *
+ * The CMS derives its inputs from this, and it is a CORRECTNESS mechanism, not
+ * a tidiness one. `buildBusinessProfile` replaces an edited section wholesale
+ * with what was stored, so a field the form doesn't render is dropped on save —
+ * an owner would blank half their page by opening a form and pressing save. So
+ * the rule is: every optional field a template READS must be declared here, and
+ * the form renders exactly the declared set (passing the rest through
+ * untouched).
+ *
+ * Everything defaults to false, so a new template opts in to what it needs.
+ */
+export interface TemplateFields {
+  /** Scroll-scrubbed hero driven by a frame sequence or a video. */
+  heroScrub?: boolean;
+  /** A still hero photograph, with its status pill, proof strip and slot card. */
+  heroPhoto?: boolean;
+  /** The figures row in the hero. */
+  heroStats?: boolean;
+  /** A glyph on each service/product card. */
+  itemIcons?: boolean;
+  /** A photograph, badge and qualifier line on each service/product card. */
+  itemPhotos?: boolean;
+  /** The checklist under the story. */
+  aboutFeatures?: boolean;
+  /** Extra paragraphs, a figures row and a sign-off under the story. */
+  aboutEditorial?: boolean;
+  /** A link set opposite a section heading ("See the full menu →"). */
+  headingLinks?: boolean;
+}
+
 export interface TemplateOption {
   code: string;
   name: string;
@@ -45,6 +81,8 @@ export interface TemplateOption {
    * the section route — a tenant can't edit content their site never shows.
    */
   sections: WebsiteSection[];
+  /** Which optional fields of those sections the template renders. */
+  fields: TemplateFields;
 }
 
 export const TEMPLATES: TemplateOption[] = [
@@ -67,6 +105,42 @@ export const TEMPLATES: TemplateOption[] = [
       "contact",
       "footer",
     ],
+    fields: {
+      heroScrub: true,
+      heroStats: true,
+      itemIcons: true,
+      aboutFeatures: true,
+    },
+  },
+  {
+    code: "patisserie-boutique",
+    name: "Patisserie — Boutique",
+    // The `business_category` value, which is not the folder name: the approved
+    // source lives under templates/patisserie/ because that is what the design
+    // is called, while the category is the broader trade a tenant picks during
+    // onboarding.
+    industry: "bakery",
+    description:
+      "Light, editorial single page: hero, menu, best sellers, custom cakes, gallery, story, contact.",
+    themes: [{ code: "default", name: "Paper & Mint" }],
+    /** No team section — a patisserie has no barbers. */
+    sections: [
+      "hero",
+      "about",
+      "services",
+      "products",
+      "gallery",
+      "testimonials",
+      "faq",
+      "contact",
+      "footer",
+    ],
+    fields: {
+      heroPhoto: true,
+      itemPhotos: true,
+      aboutEditorial: true,
+      headingLinks: true,
+    },
   },
 ];
 
@@ -93,6 +167,22 @@ export function templateSections(
   return template?.sections ?? WEBSITE_SECTIONS;
 }
 
+/**
+ * The optional fields a business's template renders.
+ *
+ * Resolves the same way as `templateSections` — an unknown code falls back to
+ * the default template, so the CMS always offers the inputs of the site that is
+ * actually being rendered. An empty set is the safe answer of last resort: the
+ * forms then show only the fields every template has.
+ */
+export function templateFields(
+  code: string | null | undefined,
+): TemplateFields {
+  const template =
+    findTemplate(code ?? "") ?? findTemplate(DEFAULT_TEMPLATE_CODE);
+  return template?.fields ?? {};
+}
+
 /** A resolved template: the component to render and its default content. */
 export interface TemplateDefinition {
   code: string;
@@ -112,6 +202,17 @@ export async function loadTemplate(
   code: string | null | undefined,
 ): Promise<TemplateDefinition> {
   switch (code) {
+    case "patisserie-boutique": {
+      const [{ BoutiquePatisserieTemplate }, { arah }] = await Promise.all([
+        import("./patisserie/boutique"),
+        import("@/lib/businesses/arah"),
+      ]);
+      return {
+        code: "patisserie-boutique",
+        Component: BoutiquePatisserieTemplate,
+        defaultProfile: arah,
+      };
+    }
     case "barber-luxury":
     default: {
       const [{ LuxuryBarberTemplate }, { ronies }] = await Promise.all([

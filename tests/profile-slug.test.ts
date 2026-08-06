@@ -61,16 +61,28 @@ describe("profile slug", () => {
     expect(profile.slug).toBe("new-name");
   });
 
-  it("holds for every registered template's default profile", async () => {
-    // The trap is structural, not specific to barber/luxury: any template whose
-    // default is a real client's profile carries a real slug into the spread.
-    for (const { code } of TEMPLATES) {
-      const template = await loadTemplate(code);
-      const profile = buildBusinessProfile(
-        template.defaultProfile,
-        business({ slug: "tenant-slug" }),
-      );
-      expect(profile.slug, `template ${code}`).toBe("tenant-slug");
-    }
-  });
+  /*
+   * The timeout is generous because `loadTemplate` dynamically imports a whole
+   * template — every section, hook and component — and the cost grows with each
+   * one added to the registry. Under a parallel run that transform work is
+   * contended, and the default 5s starts failing on the work rather than on the
+   * assertion.
+   */
+  it(
+    "holds for every registered template's default profile",
+    async () => {
+      // The trap is structural, not specific to barber/luxury: any template
+      // whose default is a real client's profile carries a real slug into the
+      // spread.
+      for (const { code } of TEMPLATES) {
+        const template = await loadTemplate(code);
+        const profile = buildBusinessProfile(
+          template.defaultProfile,
+          business({ slug: "tenant-slug" }),
+        );
+        expect(profile.slug, `template ${code}`).toBe("tenant-slug");
+      }
+    },
+    30_000,
+  );
 });

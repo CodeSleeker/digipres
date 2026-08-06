@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
-import { Bebas_Neue, Inter, Playfair_Display } from "next/font/google";
+import { Bebas_Neue, Inter, Manrope, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
 /**
- * Fonts ported from the mockup's Google Fonts link:
- * Bebas Neue (headings), Playfair Display (display/italic), Inter (body).
+ * Fonts ported from the mockups' Google Fonts links.
+ *
+ * Barber / luxury:    Bebas Neue (headings), Playfair Display, Inter (body).
+ * Patisserie / boutique: Playfair Display (headings), Manrope (body).
+ *
+ * Loaded here rather than per template because next/font must run at the module
+ * top level of a server file; a template can't self-host its own. Playfair is
+ * shared by both, so the cost of the second template is Manrope alone — and a
+ * face nobody's page references is never requested by the browser.
+ *
  * Each is exposed as a CSS variable consumed by the @theme tokens in globals.css.
  */
 const bebasNeue = Bebas_Neue({
@@ -24,6 +32,13 @@ const playfairDisplay = Playfair_Display({
 
 const inter = Inter({
   variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+});
+
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
@@ -66,7 +81,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bebasNeue.variable} ${playfairDisplay.variable} ${inter.variable} antialiased`}
+      className={`${bebasNeue.variable} ${playfairDisplay.variable} ${inter.variable} ${manrope.variable} antialiased`}
     >
       <body>{children}</body>
     </html>

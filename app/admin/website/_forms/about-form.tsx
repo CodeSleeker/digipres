@@ -1,10 +1,12 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray, type UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { aboutSchema, type AboutFormValues } from "@/schemas/website-content";
 import { saveAbout } from "@/features/website-cms/actions";
+import type { TemplateFields } from "@/templates/registry";
 import {
+  AddButton,
   RepeatableRow,
   StringListField,
   SubHeading,
@@ -17,9 +19,11 @@ import { ImageField } from "./image-field";
 
 export function AboutForm({
   defaultValues,
+  fields,
   businessId,
 }: {
   defaultValues: AboutFormValues;
+  fields: TemplateFields;
   businessId: string | null;
 }) {
   const form = useForm<AboutFormValues>({
@@ -31,7 +35,19 @@ export function AboutForm({
   return (
     <form onSubmit={form.handleSubmit(submit)} className="grid max-w-2xl gap-6">
       <TextField form={form} name="label" label="Eyebrow label" />
-      <TextAreaField form={form} name="text" label="Body text" />
+      <TextAreaField
+        form={form}
+        name="text"
+        label={fields.aboutEditorial ? "Opening paragraph" : "Body text"}
+      />
+      {fields.aboutEditorial && (
+        <StringListField
+          form={form}
+          name="paragraphs"
+          label="Further paragraphs"
+          hint="One paragraph per row. Blank rows are dropped."
+        />
+      )}
       <ImageField
         form={form}
         name="image"
@@ -55,12 +71,16 @@ export function AboutForm({
         label="Title lines"
         hint="One line per row."
       />
-      <StringListField
-        form={form}
-        name="features"
-        label="Features"
-        hint="One feature per row."
-      />
+      {fields.aboutFeatures && (
+        <StringListField
+          form={form}
+          name="features"
+          label="Features"
+          hint="One feature per row."
+        />
+      )}
+
+      {fields.aboutEditorial && <EditorialFields form={form} />}
 
       <div className="grid gap-3">
         <SubHeading>Button</SubHeading>
@@ -72,5 +92,69 @@ export function AboutForm({
 
       <SubmitBar pending={pending} result={result} />
     </form>
+  );
+}
+
+/**
+ * The figures row and the sign-off.
+ *
+ * A separate component so that `useFieldArray` runs only when the section is
+ * actually offered. A hook cannot be conditional, and calling it in the parent
+ * would INITIALISE `stats` to an empty array for every template — writing a
+ * field the template never declared back into its content on the next save.
+ * Small, but it is precisely what the `fields` mechanism exists to prevent.
+ */
+function EditorialFields({ form }: { form: UseFormReturn<AboutFormValues> }) {
+  const stats = useFieldArray({ control: form.control, name: "stats" });
+
+  return (
+    <>
+      <div className="grid gap-3">
+        <SubHeading>Figures</SubHeading>
+        {stats.fields.map((field, i) => (
+          <RepeatableRow
+            key={field.id}
+            title={`Figure ${i + 1}`}
+            onRemove={() => stats.remove(i)}
+          >
+            <div className="grid gap-3 sm:grid-cols-2">
+              <TextField
+                form={form}
+                name={`stats.${i}.value`}
+                label="Value"
+                placeholder="3,400+"
+              />
+              <TextField
+                form={form}
+                name={`stats.${i}.label`}
+                label="Label"
+                placeholder="Cakes delivered"
+              />
+            </div>
+          </RepeatableRow>
+        ))}
+        <AddButton onClick={() => stats.append({ value: "", label: "" })}>
+          Add figure
+        </AddButton>
+      </div>
+
+      <div className="grid gap-3">
+        <SubHeading>Sign-off</SubHeading>
+        <RepeatableRow title="Signature">
+          <TextField
+            form={form}
+            name="signature.name"
+            label="Name — leave blank to hide the sign-off"
+            placeholder="Arah"
+          />
+          <TextField
+            form={form}
+            name="signature.role"
+            label="Role"
+            placeholder="Founder and head pastry chef"
+          />
+        </RepeatableRow>
+      </div>
+    </>
   );
 }

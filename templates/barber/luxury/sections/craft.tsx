@@ -77,7 +77,13 @@ const LABEL_POSITION: Record<CraftLabelPosition, string> = {
 export function Craft({ business }: { business: BusinessProfile }) {
   const { craft } = business;
   const sectionRef = useRef<HTMLElement>(null);
+  // Called unconditionally — a hook cannot sit behind the early return below.
+  // It no-ops when the ref never attaches.
   useCraftScroll(sectionRef);
+
+  // `craft` is optional on the profile: it is the one section no other industry
+  // template has. A profile without it renders nothing rather than crashing.
+  if (!craft) return null;
 
   return (
     <section

@@ -1,12 +1,16 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import {
   onboardBusiness,
   type OnboardState,
 } from "@/features/platform/onboarding";
-import { TEMPLATES, DEFAULT_TEMPLATE_CODE } from "@/templates/registry";
+import {
+  TEMPLATES,
+  DEFAULT_TEMPLATE_CODE,
+  findTemplate,
+} from "@/templates/registry";
 import { Button } from "@/components/ui/button";
 
 const fieldClass =
@@ -17,6 +21,16 @@ export function OnboardForm() {
     onboardBusiness,
     {},
   );
+
+  /**
+   * A theme code only means something inside its template — "default" is gold
+   * on black under the barber and paper on mint under the patisserie. So the
+   * theme list follows the chosen template rather than being the union of every
+   * template's themes, which offered two identically-valued options with
+   * different names and left the operator picking between them for no effect.
+   */
+  const [templateCode, setTemplateCode] = useState(DEFAULT_TEMPLATE_CODE);
+  const themes = findTemplate(templateCode)?.themes ?? [];
 
   if (state.success) {
     return (
@@ -76,7 +90,8 @@ export function OnboardForm() {
       <Field label="Template" error={state.fieldErrors?.templateCode}>
         <select
           name="templateCode"
-          defaultValue={DEFAULT_TEMPLATE_CODE}
+          value={templateCode}
+          onChange={(e) => setTemplateCode(e.target.value)}
           className={fieldClass}
         >
           {TEMPLATES.map((t) => (
@@ -85,11 +100,22 @@ export function OnboardForm() {
             </option>
           ))}
         </select>
+        <p className="mt-1 text-xs text-gray">
+          {findTemplate(templateCode)?.description}
+        </p>
       </Field>
 
       <Field label="Theme" error={state.fieldErrors?.themeCode}>
-        <select name="themeCode" defaultValue="default" className={fieldClass}>
-          {TEMPLATES.flatMap((t) => t.themes).map((theme) => (
+        {/* Keyed on the template so the browser re-evaluates `defaultValue`
+            when the list changes — otherwise switching template leaves the
+            previous template's selection in place. */}
+        <select
+          key={templateCode}
+          name="themeCode"
+          defaultValue={themes[0]?.code}
+          className={fieldClass}
+        >
+          {themes.map((theme) => (
             <option key={theme.code} value={theme.code}>
               {theme.name}
             </option>

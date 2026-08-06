@@ -75,6 +75,54 @@
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   THEME TOKENS — Patisserie / "Boutique" template
+   Ported 1:1 from templates/patisserie/html/index.html (:root)
+
+   Names are prefixed where a barber token already owns the obvious
+   one: `--color-white` is #f5f5f5 here, and shadcn owns `--color-card`
+   and `--color-accent`, so this palette uses `snow` and `warm`.
+
+   The three accents are LIGHT. As text on paper they measure 1.7–2.3:1,
+   so they are only ever fills, rules and dots with ink on top. The
+   `-deep` variants (4.5–5.2:1) exist for the few marks that must sit on
+   paper unaided.
+═══════════════════════════════════════════════════════════════ */
+@theme {
+  --color-paper: #fffdf8;
+  --color-snow: #ffffff;
+  --color-beige: #f6efe6;
+  --color-beige-deep: #ede3d6;
+
+  --color-ink: #2f2a26;
+  --color-ink-70: #5c554e; /* 7.2:1 on paper */
+  --color-ink-45: #736a62; /* 5.0:1 on paper */
+
+  --color-mint: #82d5c5;
+  --color-mint-deep: #237c6c; /* 4.95:1 on paper */
+  --color-mint-wash: #ecf8f5;
+  --color-pink: #f48ab8;
+  --color-pink-deep: #c2306f; /* 5.23:1 on paper */
+  --color-pink-wash: #fdf0f6;
+  --color-warm: #f29b38;
+  --color-warm-deep: #a96412; /* 4.57:1 on paper */
+  --color-warm-wash: #fdf2e4;
+
+  --font-pastry: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+
+  --animate-pastry-pulse: pastry-pulse 2.6s cubic-bezier(0.22, 0.61, 0.36, 1)
+    infinite;
+
+  @keyframes pastry-pulse {
+    70% {
+      box-shadow: 0 0 0 9px rgba(35, 124, 108, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(35, 124, 108, 0);
+    }
+  }
+}
+
 /* Non-utility custom properties (used via arbitrary values, e.g. py-[var(--section-pad)]) */
 :root {
   --section-pad: clamp(4rem, 8vw, 8rem);
@@ -236,5 +284,128 @@
   .animate-float,
   .animate-float-cta {
     animation: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE CHROME — Patisserie / "Boutique"
+
+   The base layer above paints the document black: it was written when
+   the barber template was the only one, and every rule there is right
+   FOR THAT TEMPLATE. Rather than lift those rules out of `base` — which
+   would mean re-testing a finished, approved site — the light template
+   announces itself with a class on its own root and the few
+   document-level declarations follow it.
+
+   `:has()` is what makes that possible: it lets a descendant restyle
+   `html`/`body`, which nothing else in CSS can do. Baseline in every
+   evergreen browser since 2023; where it is missing the page still
+   renders, just on the dark ground, which is why the template root
+   below repeats its own background.
+═══════════════════════════════════════════════════════════════ */
+html:has(.tpl-patisserie),
+body:has(.tpl-patisserie) {
+  background: var(--color-paper);
+  color: var(--color-ink-70);
+  scroll-padding-top: calc(76px + 24px);
+}
+
+/* The barber grain is a neutral speckle for a dark ground. On paper it
+   reads as dirt; `multiply` at a third of the strength reads as tooth. */
+body:has(.tpl-patisserie)::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  mix-blend-mode: multiply;
+}
+
+.tpl-patisserie {
+  /* Read through arbitrary values: w-[var(--pastry-shell)] etc. */
+  --pastry-shell: min(1240px, 100% - 3rem);
+  --pastry-nav-h: 76px;
+  --pastry-section: clamp(4.75rem, 3rem + 8vw, 8.5rem);
+  --pastry-line: rgba(47, 42, 38, 0.1);
+  --pastry-line-soft: rgba(47, 42, 38, 0.06);
+  --pastry-sh-sm: 0 1px 2px rgba(47, 42, 38, 0.04),
+    0 4px 14px -8px rgba(47, 42, 38, 0.12);
+  --pastry-sh-md: 0 2px 6px rgba(47, 42, 38, 0.04),
+    0 20px 44px -22px rgba(47, 42, 38, 0.22);
+  --pastry-sh-lg: 0 4px 10px rgba(47, 42, 38, 0.04),
+    0 42px 80px -34px rgba(47, 42, 38, 0.3);
+
+  background: var(--color-paper);
+  color: var(--color-ink-70);
+  font-family: var(--font-pastry);
+  font-size: clamp(0.975rem, 0.94rem + 0.17vw, 1.0625rem);
+  line-height: 1.72;
+  letter-spacing: 0.002em;
+}
+
+@media (max-width: 640px) {
+  .tpl-patisserie {
+    --pastry-shell: min(1240px, 100% - 2rem);
+    --pastry-nav-h: 66px;
+  }
+}
+
+.tpl-patisserie ::selection {
+  background: var(--color-mint);
+  color: var(--color-ink);
+}
+
+.tpl-patisserie :focus-visible {
+  outline: 2px solid var(--color-mint-deep);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@utility pastry-shell {
+  width: var(--pastry-shell);
+  margin-inline: auto;
+}
+
+/* Reveal, patisserie flavour: a shorter lift, a longer curve, and a
+   per-element stagger read from an inline `--i` (mockup parity). The
+   observer that adds `is-visible` is shared with the barber template. */
+.tpl-patisserie .reveal {
+  transform: translateY(26px);
+  transition:
+    opacity 0.95s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.95s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--i, 0) * 85ms);
+}
+.tpl-patisserie .reveal:not(.is-visible).reveal-from-left {
+  transform: translateX(-30px);
+}
+.tpl-patisserie .reveal:not(.is-visible).reveal-from-right {
+  transform: translateX(30px);
+}
+.tpl-patisserie .reveal:not(.is-visible).reveal-scale {
+  transform: scale(0.965);
+}
+/* Once revealed, drop the stagger so hover transitions on the same
+   element respond immediately instead of waiting out the delay. */
+.tpl-patisserie .reveal.is-visible {
+  transform: none;
+  transition-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tpl-patisserie .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Nothing adds `is-visible` without script, and `.reveal` starts at zero
+   opacity — so a reader with JS off or still loading would be shown a blank
+   page, not a plain one. Opt out of the gate entirely when there is no
+   scripting. The template also ships a <noscript> copy of this rule for
+   browsers predating the media feature; the two must stay in agreement. */
+@media (scripting: none) {
+  .tpl-patisserie .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }

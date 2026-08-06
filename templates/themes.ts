@@ -50,9 +50,30 @@ const GOLD_ON_BLACK: ThemePalette = {
   border: "#2a2a2a",
 };
 
+/**
+ * Paper and mint — the patisserie/boutique theme.
+ *
+ * `accent` is the DEEP mint rather than the logo's soft mint: on the card the
+ * accent is a rule and an initial drawn on near-white, and the full-strength
+ * hue measures under 2:1 there. Same reasoning as the template's own tokens.
+ *
+ * Values are from the `@theme` block in app/globals.css:
+ *   paper #fffdf8 · beige #f6efe6 · ink #2f2a26 · ink-45 #736a62
+ *   mint-deep #237c6c
+ */
+const PAPER_AND_MINT: ThemePalette = {
+  background: "#fffdf8",
+  foreground: "#2f2a26",
+  muted: "#736a62",
+  accent: "#237c6c",
+  surface: "#f6efe6",
+  border: "#ede3d6",
+};
+
 /** `${templateCode}:${themeCode}` → palette. */
 const PALETTES: Record<string, ThemePalette> = {
   "barber-luxury:default": GOLD_ON_BLACK,
+  "patisserie-boutique:default": PAPER_AND_MINT,
 };
 
 /**

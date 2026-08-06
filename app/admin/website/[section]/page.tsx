@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { resolveDevBusiness } from "@/lib/businesses";
 import { getMyWebsite } from "@/features/website-cms/actions";
 import {
   WEBSITE_SECTIONS,
@@ -7,7 +6,12 @@ import {
   type WebsiteSection,
 } from "@/types/website-content";
 import type { BusinessProfile } from "@/types/business";
-import { templateSections } from "@/templates/registry";
+import {
+  loadTemplate,
+  templateFields,
+  templateSections,
+  type TemplateFields,
+} from "@/templates/registry";
 import { toBarberEntry } from "@/lib/website/build-profile";
 import { TestimonialsForm } from "../_forms/testimonials-form";
 import { HeroForm } from "../_forms/hero-form";
@@ -35,13 +39,20 @@ export default async function SectionPage({
   if (!WEBSITE_SECTIONS.includes(section as WebsiteSection)) notFound();
   const active = section as WebsiteSection;
 
-  const base = resolveDevBusiness();
   const business = await getMyWebsite();
   const content = business?.content ?? null;
 
   // A section this tenant's template doesn't render isn't editable — no form,
   // no route. The save action refuses it too; this is the visible half.
   if (!templateSections(business?.templateCode).includes(active)) notFound();
+
+  // The prefill for an un-customized section is THIS TENANT'S TEMPLATE default,
+  // resolved the same way the public page resolves it. It used to be whatever
+  // DEV_BUSINESS_SLUG pointed at, which was indistinguishable from correct
+  // while one template existed and silently wrong the moment a second did — a
+  // patisserie owner would have opened their gallery form prefilled with a
+  // barber's photographs, and saved them.
+  const { defaultProfile: base } = await loadTemplate(business?.templateCode);
 
   return (
     <div className="grid gap-6">
@@ -58,11 +69,18 @@ export default async function SectionPage({
           View live ↗
         </a>
       </div>
-      {renderForm(active, base, content, business?.id ?? null, {
-        facebookUrl: business?.facebookUrl ?? "",
-        instagramUrl: business?.instagramUrl ?? "",
-        tiktokUrl: business?.tiktokUrl ?? "",
-      })}
+      {renderForm(
+        active,
+        base,
+        content,
+        templateFields(business?.templateCode),
+        business?.id ?? null,
+        {
+          facebookUrl: business?.facebookUrl ?? "",
+          instagramUrl: business?.instagramUrl ?? "",
+          tiktokUrl: business?.tiktokUrl ?? "",
+        },
+      )}
     </div>
   );
 }
@@ -71,6 +89,8 @@ function renderForm(
   section: WebsiteSection,
   base: BusinessProfile,
   content: WebsiteContent | null,
+  /** Which optional inputs this tenant's template asks for. */
+  fields: TemplateFields,
   businessId: string | null,
   socialDefaults: {
     facebookUrl: string;
@@ -83,6 +103,7 @@ function renderForm(
       return (
         <HeroForm
           defaultValues={content?.hero ?? base.hero}
+          fields={fields}
           businessId={businessId}
         />
       );
@@ -90,12 +111,17 @@ function renderForm(
       return (
         <AboutForm
           defaultValues={content?.about ?? base.about}
+          fields={fields}
           businessId={businessId}
         />
       );
     case "services":
       return (
-        <ServicesForm defaultValues={content?.services ?? base.services} />
+        <ServicesForm
+          defaultValues={content?.services ?? base.services}
+          fields={fields}
+          businessId={businessId}
+        />
       );
     case "barbers":
       // The template default carries rendered SocialLinks; the form edits bare
@@ -115,12 +141,17 @@ function renderForm(
       return (
         <GalleryForm
           defaultValues={content?.gallery ?? base.gallery}
+          fields={fields}
           businessId={businessId}
         />
       );
     case "products":
       return (
-        <ProductsForm defaultValues={content?.products ?? base.products} />
+        <ProductsForm
+          defaultValues={content?.products ?? base.products}
+          fields={fields}
+          businessId={businessId}
+        />
       );
     case "testimonials":
       // `initials` is derived, so the template default is narrowed rather than

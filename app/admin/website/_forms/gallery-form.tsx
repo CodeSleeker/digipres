@@ -7,6 +7,7 @@ import {
   type GalleryFormValues,
 } from "@/schemas/website-content";
 import { saveGallery } from "@/features/website-cms/actions";
+import type { TemplateFields } from "@/templates/registry";
 import {
   AddButton,
   CheckField,
@@ -16,13 +17,16 @@ import {
   TextField,
   useCmsSubmit,
 } from "./form-kit";
+import { HeadingLinkFields } from "./heading-link-fields";
 import { ImageField } from "./image-field";
 
 export function GalleryForm({
   defaultValues,
+  fields,
   businessId,
 }: {
   defaultValues: GalleryFormValues;
+  fields: TemplateFields;
   businessId: string | null;
 }) {
   const form = useForm<GalleryFormValues>({
@@ -39,6 +43,7 @@ export function GalleryForm({
         <TextField form={form} name="heading.label" label="Eyebrow label" />
         <TextField form={form} name="heading.title" label="Title" />
         <TextField form={form} name="heading.subtitle" label="Subtitle" />
+        {fields.headingLinks && <HeadingLinkFields form={form} />}
       </div>
 
       <div className="grid gap-3">
@@ -60,6 +65,13 @@ export function GalleryForm({
               name={`items.${i}.image`}
               label="Photo"
               businessId={businessId}
+              // A masonry lays out from the real proportions, so they are
+              // measured here rather than asked for — nobody should be typing
+              // pixel dimensions into a CMS.
+              measureInto={{
+                width: `items.${i}.width`,
+                height: `items.${i}.height`,
+              }}
             />
             <div className="grid gap-3 sm:grid-cols-2">
               <TextField form={form} name={`items.${i}.title`} label="Title" />

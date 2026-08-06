@@ -9,6 +9,7 @@ import {
   type OnboardingStepId,
 } from "@/types/onboarding";
 import type { BusinessCategory, DayHours } from "@/types/business-entity";
+import { BUSINESS_CATEGORIES } from "@/schemas/business";
 import { SavedNotice } from "@/components/ui/saved-notice";
 import { Spinner } from "@/components/ui/submit-button";
 import { stepSchemas } from "@/schemas/onboarding";
@@ -24,20 +25,12 @@ import {
   fieldClass,
 } from "@/app/admin/website/_forms/form-kit";
 
-const CATEGORIES: BusinessCategory[] = [
-  "barber",
-  "salon",
-  "spa",
-  "clinic",
-  "dental",
-  "construction",
-  "restaurant",
-  "cafe",
-  "retail",
-  "automotive",
-  "fitness",
-  "other",
-];
+/**
+ * One list, defined next to the validator that enforces it (schemas/business).
+ * A second copy here is how a category ends up offered in the form and rejected
+ * on save.
+ */
+const CATEGORIES: readonly BusinessCategory[] = BUSINESS_CATEGORIES;
 
 const DAY_NAMES = [
   "Sunday",

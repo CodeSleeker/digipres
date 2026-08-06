@@ -52,6 +52,36 @@ export interface CtaButton {
  */
 export type HeroMedia = "frames" | "video";
 
+/**
+ * A tinted accent. The palette carries three; which one a card wears is a
+ * PRESENTATION choice, so templates derive it from position rather than storing
+ * it — a stored tone would be silently dropped the first time the CMS saved the
+ * section, and nothing would tell you.
+ */
+export type AccentTone = "mint" | "warm" | "pink";
+
+/** Social proof beneath the hero CTAs: faces, stars, and a sentence. */
+export interface HeroProof {
+  /** Customer avatars. Decorative — the sentence beside them carries the claim. */
+  avatars: string[];
+  /** Stars to draw, 1–5. */
+  rating: number;
+  /** The part of the sentence set in ink, e.g. "4.9 average". */
+  highlight: string;
+  /** The rest of it, e.g. "from 380 reviews across Google and Facebook." */
+  text: string;
+}
+
+/** The floating availability card over the hero photograph. */
+export interface HeroCard {
+  image: string;
+  title: string;
+  subtitle: string;
+  /** 0–100. Fills the track; clamped by the template. */
+  progress: number;
+  note: string;
+}
+
 export interface Hero {
   overline: string;
   titleLines: HeroTitleLine[];
@@ -66,6 +96,17 @@ export interface Hero {
    * Absent falls back to the template's own video.
    */
   heroVideoUrl?: string;
+  /**
+   * A still photograph beside the copy. Used by templates whose hero is a
+   * picture rather than a scroll-scrub; the scrub templates ignore it.
+   */
+  image?: string;
+  /** What the photo shows. Blank keeps it decorative. */
+  imageAlt?: string;
+  /** Small status pill over the photograph, e.g. "Taking orders this week". */
+  badge?: string;
+  proof?: HeroProof;
+  card?: HeroCard;
 }
 
 export interface Service {
@@ -75,6 +116,17 @@ export interface Service {
   price: string;
   /** Unit suffix, e.g. "/ session" or "/ package". */
   unit: string;
+  /**
+   * A photograph of the item. Templates that lead with a glyph (the barber's
+   * icon tiles) ignore it; templates that lead with a picture — a menu, a
+   * dessert case — need it and fall back to the tinted frame when it's absent.
+   */
+  image?: string;
+  imageAlt?: string;
+  /** Small pill above the title, e.g. "Signature". */
+  tag?: string;
+  /** Line opposite the price, e.g. "Serves 12–14". */
+  meta?: string;
 }
 
 export type CraftLabelPosition = "top" | "left" | "right" | "bottom";
@@ -113,6 +165,15 @@ export interface About {
   imageAlt?: string;
   badgeValue: string;
   badgeLabel: string;
+  /**
+   * Further paragraphs after `text`, for templates whose about section is
+   * editorial rather than a single block. Empty/absent renders `text` alone.
+   */
+  paragraphs?: string[];
+  /** A figures row beneath the copy. */
+  stats?: HeroStat[];
+  /** The owner's sign-off under the story. */
+  signature?: { name: string; role: string };
 }
 
 export interface Barber {
@@ -140,6 +201,19 @@ export interface GalleryItem {
   alt?: string;
   /** Spans two columns in the desktop grid (mockup `.span-2`). */
   wide?: boolean;
+  /**
+   * The photograph's intrinsic pixel size, measured when it was added.
+   *
+   * Only a masonry needs it, and it needs it badly: uneven column heights are
+   * the entire form, and without the real proportions a template has to invent
+   * them and crop every picture to fit. Optional because it is measured, not
+   * typed — an image that fails to load leaves both undefined, and a layout
+   * that depends on them must degrade rather than break.
+   *
+   * Always set as a pair. One without the other describes nothing.
+   */
+  width?: number;
+  height?: number;
 }
 
 export interface Product {
@@ -149,6 +223,11 @@ export interface Product {
   price: string;
   /** Optional corner ribbon, e.g. "BEST SELLER", "NEW". */
   tag?: string;
+  /** See `Service.image` — same reason, same fallback. */
+  image?: string;
+  imageAlt?: string;
+  /** Short qualifier under the name, e.g. "Box of 6". */
+  meta?: string;
 }
 
 export interface Testimonial {
@@ -202,6 +281,53 @@ export interface SectionHeading {
   label: string;
   title: string;
   subtitle?: string;
+  /**
+   * A link set opposite the heading ("See the full menu →"). Presentation-only;
+   * templates that centre their headings ignore it.
+   */
+  link?: CtaButton;
+}
+
+/**
+ * ─── Patisserie-only sections ────────────────────────────────────────────────
+ *
+ * Content that exists on ONE template and has no counterpart anywhere else.
+ *
+ * Held in their own namespace rather than folded into the shared sections for a
+ * concrete reason: `buildBusinessProfile` replaces an edited section WHOLESALE
+ * with what the CMS stored, so any field the CMS form doesn't render is dropped
+ * the first time an owner saves that section. Parking these here keeps them out
+ * of that path entirely — they come from the template default until the CMS
+ * grows forms that know about them.
+ */
+export interface CakeStep {
+  title: string;
+  description: string;
+}
+
+export interface CustomCakes {
+  label: string;
+  titleLines: string[];
+  intro: string;
+  steps: CakeStep[];
+  /** Collage: [0] is the large frame, [1] the inset. */
+  images: { src: string; alt: string }[];
+  /** Corner pill on the collage, e.g. "Booked 2–4 weeks ahead". */
+  tag: string;
+  /** Choices offered by the enquiry starter. */
+  occasionOptions: BookingOption[];
+  submitLabel: string;
+  note: string;
+}
+
+export interface PatisserieSections {
+  customCakes: CustomCakes;
+  /** The "still deciding?" panel beside the questions. */
+  faqAside: { title: string; text: string; cta: CtaButton };
+  /** Lead-time line under the best-sellers rail. */
+  railNote: string;
+  /** The footer's fourth column. */
+  footerNote: { title: string; text: string; cta: CtaButton };
 }
 
 export interface BusinessProfile {
@@ -239,7 +365,12 @@ export interface BusinessProfile {
     heading: SectionHeading;
     items: Service[];
   };
-  craft: Craft;
+  /**
+   * The barber template's process strip. Optional because it is the one section
+   * with no analogue on any other industry — a patisserie has no "craft" panel,
+   * and inventing empty content for it would be a lie the CMS could later show.
+   */
+  craft?: Craft;
   about: About;
   barbers: {
     heading: SectionHeading;
@@ -281,4 +412,6 @@ export interface BusinessProfile {
     socials: SocialLink[];
   };
   floatingCta: CtaButton;
+  /** Present only on the patisserie template. See `PatisserieSections`. */
+  patisserie?: PatisserieSections;
 }

@@ -33,6 +33,7 @@ export function ImageField<T extends FieldValues>({
   name,
   label,
   businessId,
+  measureInto,
 }: {
   form: UseFormReturn<T>;
   name: Path<T>;
@@ -40,12 +41,54 @@ export function ImageField<T extends FieldValues>({
   /** Null before onboarding creates the business — the object key needs the id,
    *  so only the URL input is offered until then. */
   businessId: string | null;
+  /**
+   * Where to record the picture's intrinsic size, for layouts that need the
+   * real proportions (a masonry). Omitted everywhere else — a fixed-ratio card
+   * crops to its frame regardless, so measuring would store a number nothing
+   * reads.
+   */
+  measureInto?: { width: Path<T>; height: Path<T> };
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const current = form.watch(name) as string | undefined;
+
+  /**
+   * Record the picture's natural size, if we were asked to and if it loads.
+   *
+   * Measured from the URL the site will actually serve rather than from the
+   * local File, so a pasted link is handled by exactly the same path as an
+   * upload — and so a CDN that resizes on delivery is measured as delivered.
+   *
+   * A failure is silent and clears the pair: the owner did nothing wrong, and a
+   * template that wanted the numbers falls back to a fixed ratio. Leaving stale
+   * dimensions from a previous image would be the actual bug.
+   */
+  const measure = (url: string) => {
+    if (!measureInto) return;
+
+    const set = (width?: number, height?: number) => {
+      form.setValue(measureInto.width, width as PathValue<T, Path<T>>, {
+        shouldDirty: true,
+      });
+      form.setValue(measureInto.height, height as PathValue<T, Path<T>>, {
+        shouldDirty: true,
+      });
+    };
+
+    if (!url.trim()) {
+      set(undefined, undefined);
+      return;
+    }
+
+    const probe = new window.Image();
+    probe.onload = () =>
+      set(probe.naturalWidth || undefined, probe.naturalHeight || undefined);
+    probe.onerror = () => set(undefined, undefined);
+    probe.src = url;
+  };
 
   const onPick = async (file: File | undefined) => {
     if (!file || !businessId) return;
@@ -79,6 +122,7 @@ export function ImageField<T extends FieldValues>({
         shouldDirty: true,
         shouldValidate: true,
       });
+      measure(data.publicUrl);
     } catch {
       setError("Upload failed. Please try again.");
     } finally {
@@ -95,7 +139,11 @@ export function ImageField<T extends FieldValues>({
           id={name}
           placeholder="https://… or upload below"
           className={fieldClass}
-          {...form.register(name)}
+          {...form.register(name, {
+            // On blur, not on every keystroke: a half-typed URL is a request
+            // the browser would make and fail, once per character.
+            onBlur: (e) => measure(e.target.value),
+          })}
         />
       </Field>
 

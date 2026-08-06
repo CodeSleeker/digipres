@@ -24,6 +24,7 @@ export type BusinessCategoryEnum =
   | "construction"
   | "restaurant"
   | "cafe"
+  | "bakery"
   | "retail"
   | "automotive"
   | "fitness"

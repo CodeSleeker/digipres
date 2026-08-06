@@ -158,6 +158,62 @@ export function StringListField<T extends FieldValues>({
   );
 }
 
+export function NumberField<T extends FieldValues>({
+  form,
+  name,
+  label,
+  min,
+  max,
+  hint,
+}: {
+  form: UseFormReturn<T>;
+  name: Path<T>;
+  label: string;
+  min?: number;
+  max?: number;
+  hint?: string;
+}) {
+  return (
+    <Field label={label} error={fieldError(form, name)} htmlFor={name}>
+      <Input
+        id={name}
+        type="number"
+        min={min}
+        max={max}
+        className={fieldClass}
+        // `valueAsNumber` so the schema receives a real number. Without it the
+        // input hands over a string and a `z.number()` rejects every save with
+        // a message about a type the owner never chose.
+        {...form.register(name, { valueAsNumber: true })}
+      />
+      {hint && <span className="text-[0.65rem] text-gray">{hint}</span>}
+    </Field>
+  );
+}
+
+/**
+ * ─── A NOTE ON HIDDEN FIELDS ─────────────────────────────────────────────────
+ *
+ * Each form renders the inputs THIS tenant's template uses (templates/registry
+ * → `fields`), so a barber never sees a "serving size" and a patisserie never
+ * sees an icon glyph. Values behind an input that isn't rendered are NOT lost:
+ * react-hook-form keeps `defaultValues` for fields that were never registered
+ * and includes them in the submitted object (`shouldUnregister` defaults to
+ * false). That is what lets a section be edited through a partial form and
+ * still round-trip whole — including through a later change of template.
+ *
+ * The consequence to remember: never construct a form's `defaultValues` from a
+ * subset of the stored section. Pass the whole thing, always. And never set
+ * `shouldUnregister: true` on a CMS form — tests/cms-form-roundtrip.test.tsx
+ * fails immediately if you do, which is the point of it.
+ *
+ * A hook is not a rendered input, though. `useFieldArray` INITIALISES its field
+ * whether or not anything is shown, so a conditional array section belongs in
+ * its own component (see about-form's EditorialFields) rather than behind a
+ * `{flag && …}` in the parent — otherwise every template writes back an empty
+ * array for a section it does not have.
+ */
+
 export function CheckField<T extends FieldValues>({
   form,
   name,

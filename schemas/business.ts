@@ -1,12 +1,27 @@
 import { z } from "zod";
 import { SLUG_PATTERN } from "@/lib/slug";
+import type { BusinessCategoryEnum } from "@/types/database";
 
 /**
  * Zod validation for the Business entity. The service and server actions parse
  * all input through these before it reaches the database.
  */
 
-const BUSINESS_CATEGORIES = [
+/**
+ * The industries a business can be, IN THE ORDER PICKERS SHOW THEM — the
+ * onboarding wizard renders this list directly rather than keeping its own
+ * copy, which is how "cafe" and "bakery" would otherwise end up disagreeing
+ * between the form and the validator.
+ *
+ * `satisfies` ties it to the database enum: a value the column would reject
+ * fails to compile here. The reverse — a member of the enum MISSING from this
+ * list — is caught by tests/business-categories.test.ts, since a type cannot
+ * check an array for completeness.
+ *
+ * To add one: `alter type public.business_category add value '<name>'` in a
+ * migration, then extend BusinessCategoryEnum, this list, and CATEGORY_TYPE.
+ */
+export const BUSINESS_CATEGORIES = [
   "barber",
   "salon",
   "spa",
@@ -15,11 +30,12 @@ const BUSINESS_CATEGORIES = [
   "construction",
   "restaurant",
   "cafe",
+  "bakery",
   "retail",
   "automotive",
   "fitness",
   "other",
-] as const;
+] as const satisfies readonly BusinessCategoryEnum[];
 
 /**
  * A blank field is an instruction — "remove this" — not an omission.

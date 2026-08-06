@@ -56,8 +56,15 @@ const DAY_NAMES = [
   "Saturday",
 ];
 
-/** Map our category to the most specific schema.org LocalBusiness subtype. */
-const CATEGORY_TYPE: Record<BusinessCategory, string> = {
+/**
+ * Map our category to the most specific schema.org LocalBusiness subtype.
+ *
+ * `Record<BusinessCategory, …>` is doing real work: it makes the compiler
+ * refuse a new category that nobody gave a type to, which would otherwise
+ * publish silently as a generic LocalBusiness. Exported so a test can use its
+ * keys as the authoritative full set.
+ */
+export const CATEGORY_TYPE: Record<BusinessCategory, string> = {
   barber: "HairSalon",
   salon: "HairSalon",
   spa: "DaySpa",
@@ -66,6 +73,10 @@ const CATEGORY_TYPE: Record<BusinessCategory, string> = {
   construction: "GeneralContractor",
   restaurant: "Restaurant",
   cafe: "CafeOrCoffeeShop",
+  // A real schema.org type, and the one Google's own examples use for this
+  // trade — distinct from CafeOrCoffeeShop, which claims a place to sit and
+  // drink coffee.
+  bakery: "Bakery",
   retail: "Store",
   automotive: "AutomotiveBusiness",
   fitness: "HealthClub",

@@ -91,7 +91,7 @@ export async function generateMetadata(): Promise<Metadata> {
     };
   }
 
-  const business = await loadBusinessProfile();
+  const { profile: business } = await loadBusinessProfile();
   const { title, description } = business.seo;
   return {
     title,
@@ -121,7 +121,11 @@ export default async function Page({
   }
 
   // Dev preview: CMS saves call revalidatePath("/"), so edits appear here.
-  const business = await loadBusinessProfile();
-  const { Component } = await loadTemplate(null);
-  return <Component business={business} />;
+  //
+  // The template comes from the resolved tenant, not from `null` — with more
+  // than one template registered, defaulting here would render whichever
+  // business DEV_BUSINESS_SLUG points at through the wrong markup.
+  const { profile, templateCode } = await loadBusinessProfile();
+  const { Component } = await loadTemplate(templateCode);
+  return <Component business={profile} />;
 }
