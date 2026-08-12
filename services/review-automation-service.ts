@@ -262,19 +262,22 @@ function renderBody(
     ? ` after your ${clipForSms(appointment.service, 24)}`
     : "";
 
-  // ASCII punctuation only, and names clipped: three of these go out per
-  // completed appointment, so a second segment here is charged three times.
+  // These carry an emoji, which forces the whole body to UCS-2 (67 chars per
+  // concatenated segment instead of 153), so each of the three runs to 2-4
+  // segments rather than one. That is a deliberate copy choice — warmth over
+  // per-send cost — but it means an appointment costs ~10 segments, not 3.
+  // Names stay clipped so a long tenant name can't add yet another one.
   // (The review link is kept — unlike the owner alert, acting on it IS the
   // point of the message, and there is no other channel carrying it.)
   switch (step) {
     case "thank_you":
-      return `Hi ${name}, thank you for choosing ${shop}${service}! We hope to see you again soon.`;
+      return `Hi ${name}! Thanks for choosing ${shop}${service}. Hope you had a great experience with us. See you again soon! 😊`;
     case "review_request":
-      return `Hi ${name}, we'd love your feedback on ${shop}.${
-        link ? ` Leave a quick review: ${link}` : ""
+      return `Hi ${name}! Hope you enjoyed your visit to ${shop}. If you have a moment, we'd really appreciate a quick review. Your feedback can help others feel confident choosing us too. 😊${
+        link ? ` ${link}` : ""
       }`;
     case "reminder":
-      return `Hi ${name}, just a gentle reminder - a quick review of ${shop} would mean a lot!${
+      return `Hi ${name}! Just a quick follow-up 😊 If you haven't had a chance to leave a review, we'd really appreciate it. Your experience could help someone else who's thinking of visiting ${shop}.${
         link ? ` ${link}` : ""
       }`;
   }
