@@ -104,7 +104,7 @@ export function DomainsManager({
         <form action={addAction} className="mt-4 flex flex-wrap gap-3">
           <input
             name="hostname"
-            placeholder="roniesbarber.com"
+            placeholder="yourbusiness.com"
             required
             className={`${fieldClass} max-w-xs flex-1`}
           />

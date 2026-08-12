@@ -208,6 +208,7 @@ function renderForm(
     case "contact":
       return (
         <ContactForm
+          fields={fields}
           defaultValues={
             content?.contact ?? {
               label: base.contact.label,

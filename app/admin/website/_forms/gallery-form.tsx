@@ -75,17 +75,22 @@ export function GalleryForm({
             />
             <div className="grid gap-3 sm:grid-cols-2">
               <TextField form={form} name={`items.${i}.title`} label="Title" />
-              <TextField
-                form={form}
-                name={`items.${i}.by`}
-                label="Credit (e.g. By Ronie)"
-              />
+              {/* Only one template prints a credit under the photograph. The
+                  input used to be shown to all of them, naming a real client
+                  as the example. */}
+              {fields.galleryCredit && (
+                <TextField
+                  form={form}
+                  name={`items.${i}.by`}
+                  label="Credit (e.g. By Marco)"
+                />
+              )}
             </div>
             <TextField
               form={form}
               name={`items.${i}.caption`}
               label="Caption (optional)"
-              placeholder="Happy client — fresh skin fade"
+              placeholder="A quiet corner of the room, late afternoon"
             />
             <TextField
               form={form}

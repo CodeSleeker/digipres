@@ -56,6 +56,10 @@ describe("patisserie/boutique registration", () => {
       aboutCta: true,
       aboutEditorial: true,
       headingLinks: true,
+      // An enquiry form, but no staff to route to — so `bookingOptions` and
+      // NOT `staffOptions`. The form used to offer both to every tenant, which
+      // is how a pastry kitchen came to be asked for its barbers.
+      bookingOptions: true,
     });
   });
 

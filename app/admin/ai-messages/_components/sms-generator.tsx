@@ -66,7 +66,7 @@ export function SmsGenerator({
           <input
             name="businessType"
             defaultValue={defaults.businessType}
-            placeholder="Barber shop, clinic…"
+            placeholder="Barber shop, bakery, retreat…"
             className={fieldClass}
           />
         </Field>

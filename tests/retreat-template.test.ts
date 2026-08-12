@@ -49,6 +49,10 @@ describe("retreat/lodge registration", () => {
   it("declares the optional fields it renders", () => {
     // The CMS builds its inputs from this. A field the template reads but does
     // not declare is a field the form won't render — and a save then drops it.
+    //
+    // Neither booking flag: this design's Location section has no enquiry form
+    // at all, so an owner is never asked for dropdown options their site has
+    // nowhere to show.
     expect(template!.fields).toEqual({ heroBackdrop: true });
   });
 
@@ -186,6 +190,27 @@ describe("retreat/lodge registration", () => {
         expect(profile!.hero.badge, `${code} hero badge`).toBeFalsy();
         expect(profile!.hero.proof, `${code} hero proof`).toBeFalsy();
         expect(profile!.hero.card, `${code} hero card`).toBeFalsy();
+      }
+      /*
+       * The enquiry dropdowns.
+       *
+       * This is the one the CMS actually leaked: every tenant was shown a
+       * "Barber options" list, including two templates whose sites have no
+       * booking form to put it in. Options typed there were stored and shown to
+       * nobody.
+       */
+      if (!declared.bookingOptions) {
+        expect(profile!.contact.serviceOptions, `${code} service options`)
+          .toEqual([]);
+      }
+      if (!declared.staffOptions) {
+        expect(profile!.contact.barberOptions, `${code} staff options`)
+          .toEqual([]);
+      }
+      if (!declared.galleryCredit) {
+        for (const item of profile!.gallery.items) {
+          expect(item.by, `${code} gallery credit`).toBeFalsy();
+        }
       }
     }
   });

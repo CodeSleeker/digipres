@@ -87,11 +87,14 @@ export function BrandingForm({
         <div>
           <SubHeading>Logo mark</SubHeading>
           <p className="mt-1 text-xs leading-relaxed text-admin-muted">
+            {/* Was "the gold initial mark" on "a dark header" — both true of
+                the barber template only. The advice that matters is the same
+                for every theme: a transparent background can't clash with one. */}
             The symbol shown in your site header, beside your name. Leave it
-            empty to use the gold initial mark instead. A transparent PNG works
-            best — your header is dark, so a logo saved on a white background
-            shows as a white box. Around 176&nbsp;&times;&nbsp;176 pixels is
-            plenty.
+            empty and your template falls back to its own initial mark. A
+            transparent PNG works best — saved on a solid background it shows as
+            a coloured box against your header. Around
+            176&nbsp;&times;&nbsp;176 pixels is plenty.
           </p>
         </div>
         <ImageField
@@ -171,23 +174,35 @@ export function BrandingForm({
             .
           </p>
         </div>
+        {/*
+         * Labels describe the ROLE of each word, not how it is painted.
+         *
+         * They used to read "(white)" and "(gold)", which is the barber theme —
+         * the patisserie sets its accent in mint and pink, and the retreat
+         * letterspaces one colour across both. An owner reading "gold" on an
+         * ivory site is being told something untrue about their own page.
+         *
+         * The fallback placeholders are neutral for the same reason the name
+         * field's is: `derived` normally supplies the tenant's own words, and
+         * when it can't, another client's name is the wrong thing to suggest.
+         */}
         <TextField
           form={form}
           name="namePrimary"
-          label="Primary word (white)"
-          placeholder={derived?.namePrimary ?? "RONIE'S"}
+          label="Primary word"
+          placeholder={derived?.namePrimary ?? "FIRST WORD"}
         />
         <TextField
           form={form}
           name="nameAccent"
-          label="Accent word (gold)"
-          placeholder={derived?.nameAccent ?? "BARBER"}
+          label="Accent word — your template styles this one differently"
+          placeholder={derived?.nameAccent ?? "SECOND WORD"}
         />
         <TextField
           form={form}
           name="initial"
           label="Initial for the mark"
-          placeholder={derived?.initial ?? "R"}
+          placeholder={derived?.initial ?? "A"}
         />
       </section>
 

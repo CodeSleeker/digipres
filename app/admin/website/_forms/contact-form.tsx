@@ -7,6 +7,7 @@ import {
   type ContactFormValues,
 } from "@/schemas/website-content";
 import { saveContact } from "@/features/website-cms/actions";
+import type { TemplateFields } from "@/templates/registry";
 import {
   AddButton,
   RepeatableRow,
@@ -26,8 +27,10 @@ import {
  */
 export function ContactForm({
   defaultValues,
+  fields,
 }: {
   defaultValues: ContactFormValues;
+  fields: TemplateFields;
 }) {
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
@@ -54,45 +57,56 @@ export function ContactForm({
         hint="One line per row."
       />
 
-      <div className="grid gap-3">
-        <SubHeading>Service options (booking dropdown)</SubHeading>
-        {serviceOptions.fields.map((field, i) => (
-          <RepeatableRow
-            key={field.id}
-            title={`Option ${i + 1}`}
-            onRemove={() => serviceOptions.remove(i)}
-          >
-            <TextField
-              form={form}
-              name={`serviceOptions.${i}.label`}
-              label="Label"
-            />
-          </RepeatableRow>
-        ))}
-        <AddButton onClick={() => serviceOptions.append({ label: "" })}>
-          Add service option
-        </AddButton>
-      </div>
+      {/* Both dropdowns belong to an enquiry form. A template that has no such
+          form renders neither, and is offered neither — otherwise an owner
+          fills in choices that are stored and never shown to anybody. */}
+      {fields.bookingOptions && (
+        <div className="grid gap-3">
+          <SubHeading>Enquiry options (&ldquo;what is this about?&rdquo;)</SubHeading>
+          {serviceOptions.fields.map((field, i) => (
+            <RepeatableRow
+              key={field.id}
+              title={`Option ${i + 1}`}
+              onRemove={() => serviceOptions.remove(i)}
+            >
+              <TextField
+                form={form}
+                name={`serviceOptions.${i}.label`}
+                label="Label"
+              />
+            </RepeatableRow>
+          ))}
+          <AddButton onClick={() => serviceOptions.append({ label: "" })}>
+            Add option
+          </AddButton>
+        </div>
+      )}
 
-      <div className="grid gap-3">
-        <SubHeading>Barber options (booking dropdown)</SubHeading>
-        {barberOptions.fields.map((field, i) => (
-          <RepeatableRow
-            key={field.id}
-            title={`Option ${i + 1}`}
-            onRemove={() => barberOptions.remove(i)}
-          >
-            <TextField
-              form={form}
-              name={`barberOptions.${i}.label`}
-              label="Label"
-            />
-          </RepeatableRow>
-        ))}
-        <AddButton onClick={() => barberOptions.append({ label: "" })}>
-          Add barber option
-        </AddButton>
-      </div>
+      {fields.staffOptions && (
+        <div className="grid gap-3">
+          {/* "Team member", not "barber": the same dropdown routes to a stylist,
+              a therapist or a technician on the next template to want it. The
+              stored key stays `barberOptions` — renaming it is a migration, and
+              the label is what an owner actually reads. */}
+          <SubHeading>Team members (&ldquo;who with?&rdquo;)</SubHeading>
+          {barberOptions.fields.map((field, i) => (
+            <RepeatableRow
+              key={field.id}
+              title={`Option ${i + 1}`}
+              onRemove={() => barberOptions.remove(i)}
+            >
+              <TextField
+                form={form}
+                name={`barberOptions.${i}.label`}
+                label="Label"
+              />
+            </RepeatableRow>
+          ))}
+          <AddButton onClick={() => barberOptions.append({ label: "" })}>
+            Add team member
+          </AddButton>
+        </div>
+      )}
 
       <SubmitBar pending={pending} result={result} />
     </form>

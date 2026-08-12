@@ -71,7 +71,7 @@ export function AboutForm({
         form={form}
         name="imageAlt"
         label="Describe the image (optional)"
-        placeholder="The shop floor with three barber chairs and a client mid-cut"
+        placeholder="The main room, with light coming through the front windows"
       />
       {fields.aboutBadge && (
         <div className="grid gap-3 sm:grid-cols-2">

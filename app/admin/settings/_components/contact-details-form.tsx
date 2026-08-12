@@ -65,11 +65,14 @@ export function ContactDetailsForm({ defaults }: { defaults: Defaults }) {
           </p>
         </div>
 
+        {/* The placeholder names no business and no trade on purpose: this
+            field belongs to whoever is reading it, and another shop's name
+            sitting in their own name field reads as a mistake. */}
         <TextRow
           name="name"
           label="Business name"
           type="text"
-          placeholder="Ronie's Barber"
+          placeholder="The name customers know you by"
           defaultValue={defaults.name}
           error={state.fieldErrors?.name?.[0]}
           hint="Shown in your site header, page title and search results."

@@ -86,6 +86,21 @@ export interface TemplateFields {
   aboutEditorial?: boolean;
   /** A link set opposite a section heading ("See the full menu →"). */
   headingLinks?: boolean;
+  /** A credit line on each gallery photograph ("By Ronie"). */
+  galleryCredit?: boolean;
+  /**
+   * The enquiry form's "what is this about?" dropdown.
+   *
+   * A template with no booking form at all renders neither this nor
+   * `staffOptions`, and must be offered neither — options an owner types into a
+   * form their site doesn't have are collected and never shown.
+   */
+  bookingOptions?: boolean;
+  /**
+   * The enquiry form's "who with?" dropdown — the per-person routing a shop
+   * with named staff needs and a single property does not.
+   */
+  staffOptions?: boolean;
 }
 
 export interface TemplateOption {
@@ -133,6 +148,9 @@ export const TEMPLATES: TemplateOption[] = [
       aboutFeatures: true,
       aboutCta: true,
       aboutBadge: true,
+      bookingOptions: true,
+      staffOptions: true,
+      galleryCredit: true,
     },
   },
   {
@@ -175,6 +193,8 @@ export const TEMPLATES: TemplateOption[] = [
        */
       aboutCta: true,
       headingLinks: true,
+      /* An enquiry form, but no staff to route to — the kitchen is one person. */
+      bookingOptions: true,
     },
   },
   {
