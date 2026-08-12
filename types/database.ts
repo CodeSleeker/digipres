@@ -28,6 +28,7 @@ export type BusinessCategoryEnum =
   | "retail"
   | "automotive"
   | "fitness"
+  | "lodging"
   | "other";
 
 export type CustomerReviewStatusEnum = "pending" | "requested" | "received";
@@ -100,6 +101,7 @@ export interface Database {
           services_content: Json | null;
           barbers_content: Json | null;
           gallery_content: Json | null;
+          journal_content: Json | null;
           products_content: Json | null;
           testimonials_content: Json | null;
           faq_content: Json | null;
@@ -152,6 +154,7 @@ export interface Database {
           services_content?: Json | null;
           barbers_content?: Json | null;
           gallery_content?: Json | null;
+          journal_content?: Json | null;
           products_content?: Json | null;
           testimonials_content?: Json | null;
           faq_content?: Json | null;
@@ -204,6 +207,7 @@ export interface Database {
           services_content?: Json | null;
           barbers_content?: Json | null;
           gallery_content?: Json | null;
+          journal_content?: Json | null;
           products_content?: Json | null;
           testimonials_content?: Json | null;
           faq_content?: Json | null;

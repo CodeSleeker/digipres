@@ -47,6 +47,13 @@ describe("patisserie/boutique registration", () => {
     expect(template!.fields).toEqual({
       heroPhoto: true,
       itemPhotos: true,
+      // Added when the rules became per-template: these three used to be
+      // unconditional, so declaring them here is what KEEPS this template's
+      // validation exactly as it was. `aboutCta` is declared but not rendered
+      // — see the note beside it in the registry.
+      itemPricing: true,
+      aboutBadge: true,
+      aboutCta: true,
       aboutEditorial: true,
       headingLinks: true,
     });

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { WebsiteSection } from "@/types/website-content";
+import type { TemplateFields } from "@/templates/registry";
 import { isSafeImageUrl } from "@/lib/security/css";
 import { isSafeVideoUrl } from "@/lib/security/media";
 
@@ -8,6 +9,39 @@ import { isSafeVideoUrl } from "@/lib/security/media";
  * shape (types/website-content.ts) and is re-run on the server for every save —
  * client validation is never trusted.
  */
+
+/**
+ * The parts of a section a template may not have at all.
+ *
+ * Most divergence between templates is handled by `TemplateFields` alone: the
+ * field is optional in the schema, and a template that doesn't render it simply
+ * never shows the input. These three are different, because they were REQUIRED
+ * when only two templates existed and both had them — a price on every service
+ * card, a button and a figure badge under the story.
+ *
+ * A retreat has none of the three: its stay cards carry a title and a sentence,
+ * and its story is a photograph and two paragraphs. Leaving the rules as they
+ * were would have meant seeding invented prices to get past validation, which
+ * would then be shown to an owner as though they had typed them.
+ *
+ * So the requirement follows the declaration: a template that renders the field
+ * still has it enforced, and one that doesn't may leave it blank. Type-only
+ * import, so the registry never reaches the client bundle through this file.
+ */
+export type SectionRules = Pick<
+  TemplateFields,
+  "itemPricing" | "aboutCta" | "aboutBadge"
+>;
+
+/**
+ * Every rule on — what the schemas meant before they were parameterised, and
+ * what the bare `aboutSchema` / `servicesSchema` exports still mean.
+ */
+const STRICT: SectionRules = {
+  itemPricing: true,
+  aboutCta: true,
+  aboutBadge: true,
+};
 
 const text = z.string().trim();
 const requiredText = (msg: string) => z.string().trim().min(1, msg);
@@ -254,18 +288,34 @@ export const heroSchema = z.object({
   ),
 });
 
+/**
+ * A button whose template has no place to put it: still stored, still typed the
+ * same, but no longer demanded. Kept as a plain object rather than an
+ * `optionalBlock` so `About.cta` stays a required key on the profile.
+ */
+const blankableCtaSchema = z.object({
+  label: text.max(80),
+  href: text.max(2048),
+  arrow: z.boolean().optional(),
+});
+
 // ── About ────────────────────────────────────────────────────────────────────
-export const aboutSchema = z.object({
+export const aboutSchemaFor = (rules: SectionRules) =>
+  z.object({
   label: requiredText("Eyebrow label is required."),
   titleLines: requiredStringList("Add at least one title line."),
   text: requiredText("Body text is required."),
   features: optionalStringList(12),
-  cta: ctaSchema,
+  cta: rules.aboutCta ? ctaSchema : blankableCtaSchema,
   image: imageRef,
   // Blank keeps the photo decorative (alt=""), which is the right default here.
   imageAlt: altText,
-  badgeValue: requiredText("Badge value is required."),
-  badgeLabel: requiredText("Badge label is required."),
+  badgeValue: rules.aboutBadge
+    ? requiredText("Badge value is required.")
+    : text.max(40),
+  badgeLabel: rules.aboutBadge
+    ? requiredText("Badge label is required.")
+    : text.max(60),
 
   // ── Editorial stories ──────────────────────────────────────────────────────
   /** Further paragraphs after the body text. */
@@ -282,10 +332,13 @@ export const aboutSchema = z.object({
     .optional(),
   /** The owner's sign-off. Blank `name` removes it. */
   signature: optionalBlock({ name: text.max(60), role: text.max(120) }, "name"),
-});
+  });
+
+export const aboutSchema = aboutSchemaFor(STRICT);
 
 // ── Services ─────────────────────────────────────────────────────────────────
-export const servicesSchema = z.object({
+export const servicesSchemaFor = (rules: SectionRules) =>
+  z.object({
   heading: headingSchema,
   items: z
     .array(
@@ -299,7 +352,13 @@ export const servicesSchema = z.object({
         icon: text.max(20),
         title: requiredText("Title is required."),
         description: requiredText("Description is required."),
-        price: requiredText("Price is required."),
+        /**
+         * Required only where the card has somewhere to print it. A retreat's
+         * stay cards are a title and a sentence — see `SectionRules`.
+         */
+        price: rules.itemPricing
+          ? requiredText("Price is required.")
+          : text.max(40),
         unit: text.max(40),
         // Photograph-led cards.
         image: optionalImageRef,
@@ -311,7 +370,9 @@ export const servicesSchema = z.object({
       }),
     )
     .min(1, "Add at least one service."),
-});
+  });
+
+export const servicesSchema = servicesSchemaFor(STRICT);
 
 // ── Barbers (the team) ───────────────────────────────────────────────────────
 export const barbersSchema = z.object({
@@ -458,6 +519,87 @@ export const gallerySchema = z.object({
     .min(1, "Add at least one gallery item."),
 });
 
+// ── Journal ──────────────────────────────────────────────────────────────────
+/**
+ * An ISO calendar date, and a real one.
+ *
+ * The regex alone accepts 2026-02-31, so the value is round-tripped through
+ * `Date`: an entry dated to a day that never happened would sort into the wrong
+ * place and print as "Invalid Date" on a live site. `T00:00:00Z` pins the parse
+ * to UTC so the check can't disagree with itself between a server in one zone
+ * and a browser in another.
+ */
+const isoDate = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Use a date in the form 2026-08-12.")
+  .refine((value) => {
+    const parsed = new Date(`${value}T00:00:00Z`);
+    return (
+      !Number.isNaN(parsed.getTime()) &&
+      parsed.toISOString().slice(0, 10) === value
+    );
+  }, "That date doesn't exist.");
+
+export const journalSchema = z.object({
+  heading: headingSchema,
+  items: z
+    .array(
+      z.object({
+        date: isoDate,
+        title: requiredText("Title is required.").max(160),
+        text: requiredText("Write something for this entry.").max(2000),
+        images: z
+          .array(
+            z
+              .object({
+                // `src`, matching the other nested media objects on the profile
+                // (`customCakes.images`) rather than the top-level sections'
+                // `image` — "image.image" reads as a mistake.
+                src: imageRef,
+                alt: altText,
+                // Printed under the photograph. Blank becomes undefined so the
+                // template renders no empty line.
+                caption: text
+                  .max(160)
+                  .transform((value) => (value === "" ? undefined : value))
+                  .optional(),
+              })
+              /*
+               * Refused: a caption reproduced as the alt text.
+               *
+               * Same defect the gallery guards against. The caption is already
+               * printed under the picture, so repeating it as the alt makes a
+               * screen reader announce the same words twice and describes
+               * nothing — while letting the field be "filled in".
+               */
+              .refine(
+                (item) =>
+                  !item.alt ||
+                  !item.caption ||
+                  item.alt.trim().toLowerCase() !==
+                    item.caption.trim().toLowerCase(),
+                {
+                  path: ["alt"],
+                  message:
+                    "Describe what the photo shows — repeating the caption tells a screen-reader user nothing new.",
+                },
+              ),
+          )
+          // Four is what the layout draws. Beyond that the entry stops being a
+          // note with pictures and becomes a second gallery.
+          .max(4, "Add at most 4 photographs to an entry."),
+      }),
+    )
+    /*
+     * May be EMPTY, like the FAQ and for a related reason: this is the only
+     * other section with nothing sensible to fall back to. An owner who has
+     * written nothing yet renders no section, and clearing the list is how they
+     * remove one they no longer want.
+     */
+    .max(24, "Add at most 24 entries."),
+});
+
 // ── Contact (section-specific extras only) ───────────────────────────────────
 const bookingOptionSchema = z.object({
   label: requiredText("Option label is required."),
@@ -513,13 +655,20 @@ export const footerSchema = z.object({
   ),
 });
 
-/** Section name → its schema, for the generic save action. */
+/**
+ * Section name → its schema, with every rule enforced.
+ *
+ * The right default for anything that has no template in hand. Where one IS in
+ * hand — the save action, and the forms — use `sectionSchema` instead, so a
+ * template is held to exactly the fields it renders.
+ */
 export const SECTION_SCHEMA = {
   hero: heroSchema,
   about: aboutSchema,
   services: servicesSchema,
   barbers: barbersSchema,
   gallery: gallerySchema,
+  journal: journalSchema,
   products: productsSchema,
   testimonials: testimonialsSchema,
   faq: faqSchema,
@@ -527,11 +676,34 @@ export const SECTION_SCHEMA = {
   footer: footerSchema,
 } satisfies Record<WebsiteSection, z.ZodTypeAny>;
 
+/**
+ * The schema for a section, as it applies to one template.
+ *
+ * Only `about` and `services` vary; everything else is returned unchanged. An
+ * empty `rules` object relaxes the three conditional fields, which is the safe
+ * direction — the alternative is refusing to save content a template never
+ * asked for.
+ */
+export function sectionSchema(
+  section: WebsiteSection,
+  rules: SectionRules,
+): z.ZodTypeAny {
+  switch (section) {
+    case "about":
+      return aboutSchemaFor(rules);
+    case "services":
+      return servicesSchemaFor(rules);
+    default:
+      return SECTION_SCHEMA[section];
+  }
+}
+
 export type HeroFormValues = z.infer<typeof heroSchema>;
 export type AboutFormValues = z.infer<typeof aboutSchema>;
 export type ServicesFormValues = z.infer<typeof servicesSchema>;
 export type BarbersFormValues = z.infer<typeof barbersSchema>;
 export type GalleryFormValues = z.infer<typeof gallerySchema>;
+export type JournalFormValues = z.infer<typeof journalSchema>;
 export type ProductsFormValues = z.infer<typeof productsSchema>;
 export type TestimonialsFormValues = z.infer<typeof testimonialsSchema>;
 export type FaqFormValues = z.infer<typeof faqSchema>;

@@ -1,9 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  servicesSchema,
+  servicesSchemaFor,
   type ServicesFormValues,
 } from "@/schemas/website-content";
 import { saveServices } from "@/features/website-cms/actions";
@@ -34,8 +35,12 @@ export function ServicesForm({
   fields: TemplateFields;
   businessId: string | null;
 }) {
+  // Same rules the save action will apply — a price is required only where the
+  // card has somewhere to print one. See `SectionRules`.
+  const schema = useMemo(() => servicesSchemaFor(fields), [fields]);
+
   const form = useForm<ServicesFormValues>({
-    resolver: zodResolver(servicesSchema),
+    resolver: zodResolver(schema),
     defaultValues,
   });
   const { result, pending, submit } = useCmsSubmit(saveServices);
@@ -102,18 +107,24 @@ export function ServicesForm({
               </>
             )}
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <TextField
-                form={form}
-                name={`items.${i}.price`}
-                label="Price (e.g. ₱250)"
-              />
-              <TextField
-                form={form}
-                name={`items.${i}.unit`}
-                label={fields.itemPhotos ? "Unit (e.g. whole)" : "Unit (e.g. / session)"}
-              />
-            </div>
+            {fields.itemPricing && (
+              <div className="grid gap-3 sm:grid-cols-2">
+                <TextField
+                  form={form}
+                  name={`items.${i}.price`}
+                  label="Price (e.g. ₱250)"
+                />
+                <TextField
+                  form={form}
+                  name={`items.${i}.unit`}
+                  label={
+                    fields.itemPhotos
+                      ? "Unit (e.g. whole)"
+                      : "Unit (e.g. / session)"
+                  }
+                />
+              </div>
+            )}
 
             {fields.itemPhotos && (
               <TextField

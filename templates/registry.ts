@@ -54,14 +54,34 @@ export interface TemplateFields {
   heroScrub?: boolean;
   /** A still hero photograph, with its status pill, proof strip and slot card. */
   heroPhoto?: boolean;
+  /**
+   * A full-bleed hero photograph the copy sits ON, rather than beside.
+   *
+   * The picture and its alt text only — no pill, proof strip or slot card,
+   * which is what separates this from `heroPhoto`. Declaring that one instead
+   * would offer an owner three blocks their hero has nowhere to put.
+   */
+  heroBackdrop?: boolean;
   /** The figures row in the hero. */
   heroStats?: boolean;
   /** A glyph on each service/product card. */
   itemIcons?: boolean;
   /** A photograph, badge and qualifier line on each service/product card. */
   itemPhotos?: boolean;
+  /**
+   * A price and unit on each service/product card.
+   *
+   * Unlike the flags above this one also RELAXES validation when absent: price
+   * is otherwise a required field. See `SectionRules` in
+   * schemas/website-content.ts for why.
+   */
+  itemPricing?: boolean;
   /** The checklist under the story. */
   aboutFeatures?: boolean;
+  /** The button under the story. Also relaxes validation — see `itemPricing`. */
+  aboutCta?: boolean;
+  /** The figure badge on the story photograph. Also relaxes validation. */
+  aboutBadge?: boolean;
   /** Extra paragraphs, a figures row and a sign-off under the story. */
   aboutEditorial?: boolean;
   /** A link set opposite a section heading ("See the full menu →"). */
@@ -109,7 +129,10 @@ export const TEMPLATES: TemplateOption[] = [
       heroScrub: true,
       heroStats: true,
       itemIcons: true,
+      itemPricing: true,
       aboutFeatures: true,
+      aboutCta: true,
+      aboutBadge: true,
     },
   },
   {
@@ -138,8 +161,46 @@ export const TEMPLATES: TemplateOption[] = [
     fields: {
       heroPhoto: true,
       itemPhotos: true,
+      itemPricing: true,
       aboutEditorial: true,
+      aboutBadge: true,
+      /*
+       * Declared, but NOT rendered by this template's story section.
+       *
+       * It records today's behaviour rather than endorsing it: the form has
+       * always shown these inputs and the default profile has always carried a
+       * button nothing draws. Dropping the flag is the fix — it would hide the
+       * inputs and let the stored value go blank — but that changes an approved
+       * template's content, so it belongs in its own change, not this one.
+       */
+      aboutCta: true,
       headingLinks: true,
+    },
+  },
+  {
+    code: "retreat-lodge",
+    name: "Retreat — Lodge",
+    industry: "lodging",
+    description:
+      "Ivory and forest single page for a private stay: scrubbed hero, the stay, gallery, experience, location, booking.",
+    themes: [{ code: "default", name: "Ivory & Forest" }],
+    /**
+     * No team, products, testimonials or FAQ. A private house has no staff
+     * page and no shop; its one quotation is a brand statement rather than a
+     * customer's, so it is template copy (`RetreatSections.quote`) instead of a
+     * testimonial an owner would be invited to collect more of.
+     */
+    sections: [
+      "hero",
+      "about",
+      "services",
+      "gallery",
+      "journal",
+      "contact",
+      "footer",
+    ],
+    fields: {
+      heroBackdrop: true,
     },
   },
 ];
@@ -202,6 +263,17 @@ export async function loadTemplate(
   code: string | null | undefined,
 ): Promise<TemplateDefinition> {
   switch (code) {
+    case "retreat-lodge": {
+      const [{ LodgeRetreatTemplate }, { gloria }] = await Promise.all([
+        import("./retreat/lodge"),
+        import("@/lib/businesses/gloria"),
+      ]);
+      return {
+        code: "retreat-lodge",
+        Component: LodgeRetreatTemplate,
+        defaultProfile: gloria,
+      };
+    }
     case "patisserie-boutique": {
       const [{ BoutiquePatisserieTemplate }, { arah }] = await Promise.all([
         import("./patisserie/boutique"),

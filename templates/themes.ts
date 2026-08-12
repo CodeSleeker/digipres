@@ -70,10 +70,31 @@ const PAPER_AND_MINT: ThemePalette = {
   border: "#ede3d6",
 };
 
+/**
+ * Ivory and forest — the retreat/lodge theme.
+ *
+ * `accent` is the clay brown rather than the sage: both are used as small marks
+ * in the design, but sage measures 3.4:1 on ivory against clay's 4.9:1, and on
+ * the card the accent is a hairline rule and a single initial.
+ *
+ * Values are from the `@theme` block in app/globals.css:
+ *   ivory #f5f1e8 · ivory-alt #efeadf · bark #20211e · bark-soft #5a5c55
+ *   sand #ded5c5 · clay #8a684b
+ */
+const IVORY_AND_FOREST: ThemePalette = {
+  background: "#f5f1e8",
+  foreground: "#20211e",
+  muted: "#5a5c55",
+  accent: "#8a684b",
+  surface: "#efeadf",
+  border: "#ded5c5",
+};
+
 /** `${templateCode}:${themeCode}` → palette. */
 const PALETTES: Record<string, ThemePalette> = {
   "barber-luxury:default": GOLD_ON_BLACK,
   "patisserie-boutique:default": PAPER_AND_MINT,
+  "retreat-lodge:default": IVORY_AND_FOREST,
 };
 
 /**
@@ -110,6 +131,7 @@ export const PALETTE_KEYS = Object.keys(PALETTES);
 const HEADING_FONTS: Record<string, string> = {
   "barber-luxury:default": "var(--font-bebas)",
   "patisserie-boutique:default": "var(--font-playfair)",
+  "retreat-lodge:default": "var(--font-cormorant)",
 };
 
 export const DEFAULT_HEADING_FONT = "var(--font-bebas)";

@@ -1,0 +1,31 @@
+-- ═══════════════════════════════════════════════════════════════════════════
+-- 0034_business_category_lodging.sql
+-- A category for private stays: vacation homes, lodges, guest houses.
+--
+-- Added alongside the retreat/lodge template. Until now the nearest fit was
+-- 'other', which is wrong in the one place the category actually does work: it
+-- is mapped to a schema.org subtype (lib/seo/json-ld.ts), and publishing a
+-- vacation home as a bare LocalBusiness tells search and answer engines nothing
+-- about what it is. 'LodgingBusiness' is a real schema.org type and the parent
+-- of Resort, BedAndBreakfast and VacationRental.
+--
+-- Chosen over the narrower 'VacationRental' deliberately: the same template
+-- suits a small lodge or a guest house, and a category that only describes one
+-- of them would have to be replaced the first time it did.
+--
+-- Placed after 'fitness' so the stored enum reads in the same order as the list
+-- the pickers render (BUSINESS_CATEGORIES in schemas/business.ts) — which keeps
+-- 'other' last, where it belongs. Nothing depends on `enumsortorder`; the
+-- ordering is for whoever next runs `\dT+` and compares the two.
+--
+-- NOTE ON RUNNING THIS. `alter type ... add value` cannot run inside a
+-- transaction block in PostgreSQL before 12, and even on 12+ the new value is
+-- not usable by other statements in the SAME transaction. This file therefore
+-- adds the value and nothing else — any migration that WRITES 'lodging' must be
+-- a separate file, or it will fail with "unsafe use of new value".
+-- ═══════════════════════════════════════════════════════════════════════════
+
+alter type public.business_category add value if not exists 'lodging' after 'fitness';
+
+-- No table, policy or index changes: `category` already exists and its column
+-- default ('other') is unaffected by a new member.

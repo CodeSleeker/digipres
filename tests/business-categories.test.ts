@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { BUSINESS_CATEGORIES } from "@/schemas/business";
 import { CATEGORY_TYPE } from "@/lib/seo/json-ld";
 
@@ -31,11 +32,15 @@ describe("business categories", () => {
     // Read the migrations rather than a mirror of them: the point is to catch a
     // list that has moved on without a migration, and any in-repo copy of the
     // enum would move with the list.
-    const sql = [
-      "supabase/migrations/0001_create_businesses.sql",
-      "supabase/migrations/0032_business_category_bakery.sql",
-    ]
-      .map((path) => readFileSync(path, "utf8"))
+    //
+    // EVERY migration, not a named few. The list used to be enumerated here,
+    // which meant adding a category silently required editing this test as well
+    // — a maintenance trap in the one place whose whole job is to catch the
+    // list falling out of step.
+    const dir = "supabase/migrations";
+    const sql = readdirSync(dir)
+      .filter((file) => file.endsWith(".sql"))
+      .map((file) => readFileSync(join(dir, file), "utf8"))
       .join("\n");
 
     for (const category of BUSINESS_CATEGORIES) {
@@ -52,5 +57,13 @@ describe("business categories", () => {
     // CafeOrCoffeeShop tells search engines it sells coffee to drink in.
     expect(CATEGORY_TYPE.bakery).toBe("Bakery");
     expect(CATEGORY_TYPE.bakery).not.toBe(CATEGORY_TYPE.cafe);
+  });
+
+  it("publishes a private stay as lodging, not as a bare LocalBusiness", () => {
+    // Same reasoning as the bakery: 'other' resolves to LocalBusiness, which
+    // says nothing about what the place is. LodgingBusiness is the umbrella
+    // over Resort, BedAndBreakfast and VacationRental.
+    expect(CATEGORY_TYPE.lodging).toBe("LodgingBusiness");
+    expect(CATEGORY_TYPE.lodging).not.toBe(CATEGORY_TYPE.other);
   });
 });

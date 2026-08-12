@@ -5,6 +5,7 @@ import type {
   SectionHeading,
   Service,
   GalleryItem,
+  JournalEntry,
   Product,
   BookingOption,
   FaqItem,
@@ -31,6 +32,16 @@ export interface ServicesContent {
 export interface GalleryContent {
   heading: SectionHeading;
   items: GalleryItem[];
+}
+
+/**
+ * Dated notes. Stored exactly as rendered — an entry is prose, a date and its
+ * photographs, with nothing derived, so unlike the team and testimonial
+ * sections there is no narrower stored shape to convert between.
+ */
+export interface JournalContent {
+  heading: SectionHeading;
+  items: JournalEntry[];
 }
 
 /**
@@ -116,6 +127,12 @@ export interface WebsiteContent {
   services: ServicesContent | null;
   barbers: BarbersContent | null;
   gallery: GalleryContent | null;
+  /**
+   * `null` means "no journal", not "use the template default" — same as `faq`.
+   * A journal is a running record; falling back to someone else's entries would
+   * publish another business's week as this one's.
+   */
+  journal: JournalContent | null;
   products: ProductsContent | null;
   testimonials: TestimonialsContent | null;
   /**
@@ -137,6 +154,9 @@ export const WEBSITE_SECTIONS: WebsiteSection[] = [
   "services",
   "barbers",
   "gallery",
+  // Beside the gallery: both are picture-led, and an owner adding photographs
+  // is the one most likely to be writing a note at the same time.
+  "journal",
   "products",
   "testimonials",
   // Between testimonials and contact: objections get answered immediately
@@ -153,6 +173,7 @@ export const SECTION_COLUMN: Record<WebsiteSection, string> = {
   services: "services_content",
   barbers: "barbers_content",
   gallery: "gallery_content",
+  journal: "journal_content",
   products: "products_content",
   testimonials: "testimonials_content",
   faq: "faq_content",

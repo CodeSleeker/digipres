@@ -1,17 +1,24 @@
 import type { Metadata } from "next";
-import { Bebas_Neue, Inter, Manrope, Playfair_Display } from "next/font/google";
+import {
+  Bebas_Neue,
+  Cormorant_Garamond,
+  Inter,
+  Manrope,
+  Playfair_Display,
+} from "next/font/google";
 import "./globals.css";
 
 /**
  * Fonts ported from the mockups' Google Fonts links.
  *
- * Barber / luxury:    Bebas Neue (headings), Playfair Display, Inter (body).
+ * Barber / luxury:       Bebas Neue (headings), Playfair Display, Inter (body).
  * Patisserie / boutique: Playfair Display (headings), Manrope (body).
+ * Retreat / lodge:       Cormorant Garamond (headings), Manrope (body).
  *
  * Loaded here rather than per template because next/font must run at the module
- * top level of a server file; a template can't self-host its own. Playfair is
- * shared by both, so the cost of the second template is Manrope alone — and a
- * face nobody's page references is never requested by the browser.
+ * top level of a server file; a template can't self-host its own. The faces are
+ * shared where they overlap, so each new template costs only what it adds — and
+ * a face nobody's page references is never requested by the browser.
  *
  * Each is exposed as a CSS variable consumed by the @theme tokens in globals.css.
  */
@@ -41,6 +48,19 @@ const manrope = Manrope({
   variable: "--font-manrope",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+});
+
+/**
+ * The retreat's display face. Light weights and the italic are both load
+ * bearing: the design sets its headlines at 300–400 and marks the emphasised
+ * clause in italic, so a synthesised oblique would be visible at 6rem.
+ */
+const cormorantGaramond = Cormorant_Garamond({
+  variable: "--font-cormorant",
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -81,7 +101,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bebasNeue.variable} ${playfairDisplay.variable} ${inter.variable} ${manrope.variable} antialiased`}
+      className={`${bebasNeue.variable} ${playfairDisplay.variable} ${inter.variable} ${manrope.variable} ${cormorantGaramond.variable} antialiased`}
     >
       <body>{children}</body>
     </html>

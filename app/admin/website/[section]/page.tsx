@@ -19,6 +19,7 @@ import { AboutForm } from "../_forms/about-form";
 import { ServicesForm } from "../_forms/services-form";
 import { BarbersForm } from "../_forms/barbers-form";
 import { GalleryForm } from "../_forms/gallery-form";
+import { JournalForm } from "../_forms/journal-form";
 import { ProductsForm } from "../_forms/products-form";
 import { FaqForm } from "../_forms/faq-form";
 import { ContactForm } from "../_forms/contact-form";
@@ -145,6 +146,29 @@ function renderForm(
         <GalleryForm
           defaultValues={content?.gallery ?? base.gallery}
           fields={fields}
+          businessId={businessId}
+        />
+      );
+    case "journal":
+      /*
+       * Like the FAQ, the fallback here is the template's own heading with
+       * whatever entries it ships — and unlike every other section, a tenant
+       * emptying the list is a legitimate save that hides the section.
+       *
+       * `base.journal` is optional on the profile (only some templates have
+       * one), so a template that declared the section without shipping a
+       * default would otherwise hand the form `undefined` and blank its
+       * heading inputs.
+       */
+      return (
+        <JournalForm
+          defaultValues={
+            content?.journal ??
+            base.journal ?? {
+              heading: { label: "Journal", title: "Latest from us" },
+              items: [],
+            }
+          }
           businessId={businessId}
         />
       );

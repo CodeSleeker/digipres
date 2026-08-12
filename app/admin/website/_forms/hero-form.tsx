@@ -48,7 +48,31 @@ export function HeroForm({
         <HeroVideoField form={form} businessId={businessId} />
       )}
 
-      {fields.heroPhoto && <HeroPhotoFields form={form} businessId={businessId} />}
+      {fields.heroPhoto && (
+        <HeroPhotoFields form={form} businessId={businessId} />
+      )}
+
+      {/* A full-bleed backdrop: the picture and its description, and nothing
+          else. The pill, proof strip and card above belong to a hero that sits
+          BESIDE its photograph — offering them here would collect copy this
+          design has nowhere to put. */}
+      {fields.heroBackdrop && (
+        <div className="grid gap-3">
+          <SubHeading>Background photograph</SubHeading>
+          <ImageField
+            form={form}
+            name="image"
+            label="Hero photograph — fills the screen behind the heading"
+            businessId={businessId}
+          />
+          <TextField
+            form={form}
+            name="imageAlt"
+            label="Describe the photograph"
+            placeholder="A timber and glass house glowing warmly at dusk beneath a large tree"
+          />
+        </div>
+      )}
 
       <div className="grid gap-3">
         <SubHeading>Title lines</SubHeading>

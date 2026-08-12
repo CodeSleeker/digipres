@@ -216,6 +216,39 @@ export interface GalleryItem {
   height?: number;
 }
 
+/**
+ * A photograph inside a journal entry.
+ *
+ * `caption` and `alt` are different jobs and both are worth having: the caption
+ * is printed under the picture for everyone ("The deck, first light"), while
+ * the alt describes what the picture SHOWS to a reader who can't see it. Using
+ * one for the other either leaves the photo undescribed or makes a screen
+ * reader announce the same words twice.
+ */
+export interface JournalImage {
+  src: string;
+  alt?: string;
+  caption?: string;
+}
+
+/**
+ * One dated note.
+ *
+ * The only content on the site that is about NOW rather than about what the
+ * business permanently is — the season, the last guests, a change to the house.
+ *
+ * `date` is an ISO calendar date (YYYY-MM-DD), never a timestamp: an entry is
+ * written about a day, not a moment, and storing an instant would drag a
+ * timezone into a field whose whole meaning is "this happened on the 3rd".
+ * Templates sort on it, so an owner never has to reorder rows by hand.
+ */
+export interface JournalEntry {
+  date: string;
+  title: string;
+  text: string;
+  images: JournalImage[];
+}
+
 export interface Product {
   icon: string;
   name: string;
@@ -338,6 +371,74 @@ export interface CustomCakes {
   note: string;
 }
 
+/**
+ * ─── Retreat-only sections ───────────────────────────────────────────────────
+ *
+ * Same arrangement as `PatisserieSections`, and for the same reason — see the
+ * note above it. These are the parts of the retreat design that have no
+ * counterpart on any other template: an atmospheric break, a strip about how a
+ * stay feels, a brand statement. They come from the template default until the
+ * CMS grows forms that know about them, and a section save can never reach
+ * them.
+ */
+export interface RetreatFeature {
+  title: string;
+  description: string;
+}
+
+export interface RetreatSections {
+  /**
+   * Where the property is, as printed under the hero and in the footer.
+   *
+   * Template copy today. It SHOULD derive from the tenant's address columns,
+   * which is where the same fact already lives — but the profile carries the
+   * address only as pre-formatted `contact.details` lines, and recognising the
+   * location card by its title is the kind of coupling that breaks silently.
+   * Deriving it properly means giving the profile the address itself.
+   */
+  place: { locality: string; country: string };
+  /**
+   * The line under the story photograph ("The house, Dahilayan").
+   *
+   * A caption, not alt text: it names the picture for everyone, where
+   * `about.imageAlt` describes it for a reader who can't see it. The two say
+   * different things and both are rendered.
+   */
+  introCaption: string;
+  /** The wide photograph under the stay heading. */
+  stayImage: { src: string; alt: string };
+  /** The full-bleed parallax break between the stay and the gallery. */
+  imageBreak: {
+    titleLines: string[];
+    note: string;
+    image: string;
+    imageAlt: string;
+  };
+  /** The dark strip: three numbered notes on what a stay is like. */
+  experience: {
+    label: string;
+    titleLines: string[];
+    items: RetreatFeature[];
+  };
+  /** The photograph, map panel and directions link beside the location copy. */
+  location: {
+    image: string;
+    imageAlt: string;
+    /** Caption on the map panel, which stands in until an embed is added. */
+    mapLabel: string;
+    /** Rendered only for a real link — see the note in the Location section. */
+    mapCta: CtaButton;
+  };
+  /** The brand statement between the location and the booking CTA. */
+  quote: { text: string; attribution: string };
+  /**
+   * The photograph behind the booking CTA. A src alone, with no alt: it is
+   * dimmed to 40% under a near-opaque gradient and carries nothing the heading
+   * beside it doesn't already say, so it is decorative and stays that way.
+   */
+  bookingImage: string;
+}
+
 export interface PatisserieSections {
   customCakes: CustomCakes;
   /** The "still deciding?" panel beside the questions. */
@@ -398,6 +499,17 @@ export interface BusinessProfile {
     heading: SectionHeading;
     items: GalleryItem[];
   };
+  /**
+   * Dated notes from the owner. Optional on the profile, because it arrived
+   * after two templates already existed and neither renders it — the same
+   * reason `craft` is optional. A template that doesn't declare the section
+   * never receives it, and one that does renders nothing while `items` is
+   * empty.
+   */
+  journal?: {
+    heading: SectionHeading;
+    items: JournalEntry[];
+  };
   products: {
     heading: SectionHeading;
     items: Product[];
@@ -434,4 +546,6 @@ export interface BusinessProfile {
   floatingCta: CtaButton;
   /** Present only on the patisserie template. See `PatisserieSections`. */
   patisserie?: PatisserieSections;
+  /** Present only on the retreat template. See `RetreatSections`. */
+  retreat?: RetreatSections;
 }

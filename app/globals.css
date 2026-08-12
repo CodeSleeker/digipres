@@ -123,6 +123,56 @@
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   THEME TOKENS — Retreat / "Lodge" template
+   Ported 1:1 from templates/retreat/html/index.html (:root)
+
+   Renamed where an earlier template already owns the obvious token:
+   the barber's `--color-charcoal` is #141414, so this palette's near
+   black (#20211E, warmer and lighter) is `bark`, and its brown accent
+   is `clay` — `--color-accent` belongs to shadcn.
+
+   The palette is a LIGHT one with two dark grounds (bark and forest).
+   `sage` and `clay` are the only two hues; both are used as small marks
+   and rules on ivory, where they measure 4.6:1 and 4.9:1 — they are
+   never the colour of a paragraph.
+═══════════════════════════════════════════════════════════════ */
+@theme {
+  --color-ivory: #f5f1e8;
+  --color-ivory-alt: #efeadf;
+  --color-sand: #ded5c5;
+  --color-bark: #20211e;
+  --color-bark-soft: #5a5c55; /* 6.4:1 on ivory */
+  --color-forest: #344338;
+  --color-sage: #798273; /* 3.4:1 — rules, dots and small caps only */
+  --color-clay: #8a684b; /* 4.9:1 on ivory */
+
+  --font-lodge: var(--font-cormorant), Georgia, "Times New Roman", serif;
+  --font-lodge-sans: var(--font-manrope), -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Helvetica, Arial, sans-serif;
+
+  --animate-lodge-cue: lodge-cue 2.6s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+  --animate-lodge-zoom: lodge-zoom 18s cubic-bezier(0.22, 0.61, 0.36, 1)
+    forwards;
+
+  @keyframes lodge-cue {
+    0% {
+      transform: scaleY(0.25);
+    }
+    45% {
+      transform: scaleY(1);
+    }
+    100% {
+      transform: scaleY(0.25);
+    }
+  }
+  @keyframes lodge-zoom {
+    to {
+      transform: scale(1);
+    }
+  }
+}
+
 /* Non-utility custom properties (used via arbitrary values, e.g. py-[var(--section-pad)]) */
 :root {
   --section-pad: clamp(4rem, 8vw, 8rem);
@@ -474,5 +524,234 @@ body:has(.tpl-patisserie)::after {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE CHROME — Retreat / "Lodge"
+
+   Same arrangement as the patisserie block above, and for the same
+   reason: the `base` layer paints the document for the dark barber
+   template, so a light template restyles `html`/`body` through
+   `:has()` on its own root class. See the long note there.
+═══════════════════════════════════════════════════════════════ */
+html:has(.tpl-retreat),
+body:has(.tpl-retreat) {
+  background: var(--color-ivory);
+  color: var(--color-bark-soft);
+  /*
+   * Measured against the STUCK header (78px), not the resting one: an in-page
+   * jump only ever happens from a scrolled position, which is the state the
+   * header is in by then. Plus a little air, so the heading isn't flush against
+   * it on arrival.
+   */
+  scroll-padding-top: 94px;
+}
+
+/* No grain in this design. The barber's overlay is a fixed layer over the
+   whole document, so it has to be switched off here rather than merely
+   not asked for. */
+body:has(.tpl-retreat)::after {
+  display: none;
+}
+
+.tpl-retreat {
+  /* Read through arbitrary values: px-[var(--lodge-gutter)] etc. */
+  --lodge-shell: 1360px;
+  --lodge-gutter: clamp(1.4rem, 5vw, 4.5rem);
+  --lodge-section: clamp(5.5rem, 11vw, 10rem);
+  --lodge-section-lg: clamp(7rem, 14vw, 13rem);
+  --lodge-rule: rgba(32, 33, 30, 0.14);
+  --lodge-rule-invert: rgba(245, 241, 232, 0.18);
+  --lodge-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  /*
+   * The resting header's height: 1.45rem of padding either side of a 46px
+   * control. It shrinks to 78px once stuck, but 92px is the figure anything
+   * sitting UNDER the header has to clear, because that is its height at the
+   * top of the page — which is exactly where the hero is.
+   */
+  --lodge-nav-h: 92px;
+  /*
+   * What the image curtain wipes away to.
+   *
+   * The curtain is an opaque panel over the photograph that retracts as it
+   * reveals, so it has to match the ground BEHIND it or the wipe ends on a
+   * seam. Sections on a dark ground override this one property (see
+   * `lodge-on-dark`) rather than restating the rule.
+   */
+  --lodge-curtain: var(--color-ivory);
+
+  background: var(--color-ivory);
+  color: var(--color-bark-soft);
+  font-family: var(--font-lodge-sans);
+  font-size: clamp(0.95rem, 1.05vw, 1.045rem);
+  font-weight: 400;
+  line-height: 1.78;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.tpl-retreat ::selection {
+  background: var(--color-forest);
+  color: var(--color-ivory);
+}
+
+.tpl-retreat :focus-visible {
+  outline: 2px solid var(--color-clay);
+  outline-offset: 4px;
+  border-radius: 1px;
+}
+
+@utility lodge-shell {
+  width: 100%;
+  max-width: var(--lodge-shell);
+  margin-inline: auto;
+  padding-inline: var(--lodge-gutter);
+}
+
+/** A dark-ground section: the curtain wipes to bark instead of ivory. */
+@utility lodge-on-dark {
+  --lodge-curtain: var(--color-bark);
+}
+
+/**
+ * Type set directly on a photograph.
+ *
+ * Two shadows doing two jobs. The tight 1px layer is the one that does the
+ * work: it separates the letterforms from whatever is immediately behind them,
+ * which a wide blur cannot do — spread over 40px it darkens the whole area
+ * evenly, including the strokes, so contrast barely moves. The soft layer is
+ * the mockup's own glow, kept because it is what stops the type looking pasted
+ * on.
+ *
+ * A scrim still comes first. This is what carries the worst case: a bright
+ * patch of sky exactly behind one word.
+ */
+@utility lodge-on-photo {
+  text-shadow:
+    0 1px 2px rgba(32, 33, 30, 0.55),
+    0 2px 18px rgba(32, 33, 30, 0.4);
+}
+
+/*
+ * The hero's scroll runway (mockup `.hero-scroll` / `.is-scrub`).
+ *
+ * The stage is a tall block; the hero inside it is pinned with NATIVE sticky
+ * positioning, so the page keeps scrolling normally and script only reads the
+ * position — nothing is hijacked, and a reader who scrolls fast never outruns
+ * it.
+ *
+ * `data-scrub` is set by the hook after it has measured, because the runway
+ * only exists on a wide viewport where motion is welcome. Without it the hero
+ * is an ordinary full-height section, which is exactly the mobile design.
+ *
+ * Written here rather than as utilities because the stage height and the
+ * sticky child are one mechanism: a runway with nothing pinned in it is just
+ * empty space, and pinning with no runway never moves.
+ */
+.tpl-retreat [data-scrub="on"] > .lodge-hero {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  min-height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The runway is inline height from the hook, so it has to be overridden. */
+  .tpl-retreat [data-scrub] {
+    height: auto !important;
+  }
+  .tpl-retreat [data-scrub] > .lodge-hero {
+    position: relative;
+    height: auto;
+  }
+}
+
+/* Reveal, retreat flavour: a 26px lift over a long 900ms curve, staggered
+   per element from an inline `--i` (the mockup's data-delay steps, which are
+   .11s apart). The observer that adds `is-visible` is shared with the other
+   templates. */
+.tpl-retreat .reveal {
+  transform: translate3d(0, 26px, 0);
+  transition:
+    opacity 900ms var(--lodge-ease),
+    transform 900ms var(--lodge-ease);
+  transition-delay: calc(var(--i, 0) * 110ms);
+}
+.tpl-retreat .reveal.is-visible {
+  transform: none;
+  /* Dropped once shown, so a hover transition on the same element responds
+     immediately instead of waiting out the entrance delay. */
+  transition-delay: 0s;
+}
+
+/*
+ * The image curtain (mockup `.reveal-img`).
+ *
+ * A panel over the photograph that retracts upward, with the picture itself
+ * settling from a slight overscale behind it. Written here rather than as
+ * utilities because the `::after` panel, its transform-origin and the paired
+ * image scale are one effect — splitting them across three call sites is how
+ * they end up disagreeing.
+ */
+.tpl-retreat .reveal-img {
+  position: relative;
+  overflow: hidden;
+}
+.tpl-retreat .reveal-img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--lodge-curtain);
+  transform-origin: bottom;
+  transition: transform 1.1s var(--lodge-ease);
+  pointer-events: none;
+}
+.tpl-retreat .reveal-img.is-visible::after {
+  transform: scaleY(0);
+}
+.tpl-retreat .reveal-img img {
+  transform: scale(1.09);
+  transition: transform 1.6s var(--lodge-ease);
+}
+.tpl-retreat .reveal-img.is-visible img {
+  transform: scale(1);
+}
+/* The frame's own hover zoom, which only applies once the curtain is gone. */
+.tpl-retreat .reveal-img.is-visible:hover img {
+  transform: scale(1.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tpl-retreat .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .tpl-retreat .reveal-img::after {
+    display: none;
+  }
+  .tpl-retreat .reveal-img img,
+  .tpl-retreat .reveal-img.is-visible:hover img {
+    transform: none;
+  }
+}
+
+/* See the note on the patisserie rule above: without script nothing ever adds
+   `is-visible`, so the gate is dropped entirely rather than serving a blank
+   page. The template ships a <noscript> copy for browsers predating the media
+   feature; the two must stay in agreement. */
+@media (scripting: none) {
+  .tpl-retreat .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .tpl-retreat .reveal-img::after {
+    display: none;
+  }
+  .tpl-retreat .reveal-img img {
+    transform: none;
   }
 }

@@ -100,6 +100,31 @@ export function TextField<T extends FieldValues>({
   );
 }
 
+/**
+ * A calendar date, stored and submitted as ISO `YYYY-MM-DD`.
+ *
+ * `type="date"` is what makes this worth having over a TextField: the browser
+ * renders the owner's own date format and offers a picker, while the VALUE it
+ * submits is always ISO. Typing a date by hand in a locale where 03/08 means
+ * the 3rd of August, on a platform that would read it as the 8th of March, is
+ * a bug with no error message.
+ */
+export function DateField<T extends FieldValues>({
+  form,
+  name,
+  label,
+}: {
+  form: UseFormReturn<T>;
+  name: Path<T>;
+  label: string;
+}) {
+  return (
+    <Field label={label} error={fieldError(form, name)} htmlFor={name}>
+      <Input id={name} type="date" className={fieldClass} {...form.register(name)} />
+    </Field>
+  );
+}
+
 export function TextAreaField<T extends FieldValues>({
   form,
   name,

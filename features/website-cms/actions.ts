@@ -11,8 +11,8 @@ import { BusinessRepository } from "@/repositories/business-repository";
 import { revalidateTenantSite } from "@/lib/tenant/revalidate";
 import { WebsiteContentService } from "@/services/website-content-service";
 import { BusinessError } from "@/services/business-service";
-import { SECTION_SCHEMA } from "@/schemas/website-content";
-import { templateSections } from "@/templates/registry";
+import { sectionSchema } from "@/schemas/website-content";
+import { templateFields, templateSections } from "@/templates/registry";
 
 /**
  * Server Actions for the Website CMS. The client form serializes its section
@@ -66,13 +66,27 @@ async function saveSection(
     return { error: "Could not read the submitted content." };
   }
 
-  const parsed = SECTION_SCHEMA[section].safeParse(json);
+  // Validated against the tenant's OWN template: a field their design has no
+  // place for is not demanded of them, and one it renders still is. Same
+  // resolution as the section check above, so the form and the action can't
+  // disagree about which rules apply.
+  const parsed = sectionSchema(
+    section,
+    templateFields(context.business?.templateCode),
+  ).safeParse(json);
   if (!parsed.success) {
+    /*
+     * Grouped by top-level field, which is what `flatten()` used to do here.
+     * Built from the issues directly now that the schema is resolved at
+     * runtime: `flatten()` reads its keys from the schema's inferred type, and
+     * a schema chosen by a switch has no single one — so it typed the whole map
+     * as empty and the form lost every message.
+     */
     const fieldErrors: Record<string, string[]> = {};
-    for (const [key, messages] of Object.entries(
-      parsed.error.flatten().fieldErrors,
-    )) {
-      if (messages && messages.length) fieldErrors[key] = messages;
+    for (const issue of parsed.error.issues) {
+      const key = issue.path[0];
+      if (typeof key !== "string") continue;
+      (fieldErrors[key] ??= []).push(issue.message);
     }
     return { error: "Please fix the highlighted fields.", fieldErrors };
   }
@@ -109,6 +123,9 @@ export async function saveBarbers(formData: FormData) {
 }
 export async function saveGallery(formData: FormData) {
   return saveSection("gallery", formData);
+}
+export async function saveJournal(formData: FormData) {
+  return saveSection("journal", formData);
 }
 export async function saveProducts(formData: FormData) {
   return saveSection("products", formData);

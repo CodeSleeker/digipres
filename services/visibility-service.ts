@@ -367,6 +367,7 @@ function baselineChecks(): VisibilityCheck[] {
       services: null,
       barbers: null,
       gallery: null,
+      journal: null,
       products: null,
       testimonials: null,
       faq: null,

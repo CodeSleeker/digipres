@@ -1,8 +1,12 @@
 "use client";
 
+import { useMemo } from "react";
 import { useForm, useFieldArray, type UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { aboutSchema, type AboutFormValues } from "@/schemas/website-content";
+import {
+  aboutSchemaFor,
+  type AboutFormValues,
+} from "@/schemas/website-content";
 import { saveAbout } from "@/features/website-cms/actions";
 import type { TemplateFields } from "@/templates/registry";
 import {
@@ -26,8 +30,17 @@ export function AboutForm({
   fields: TemplateFields;
   businessId: string | null;
 }) {
+  /*
+   * Validated against the same rules the save action will apply.
+   *
+   * The button and the badge are required only where the template renders
+   * them; demanding them here as well would fail a form that never showed the
+   * inputs, with an error pointing at a field the owner cannot see.
+   */
+  const schema = useMemo(() => aboutSchemaFor(fields), [fields]);
+
   const form = useForm<AboutFormValues>({
-    resolver: zodResolver(aboutSchema),
+    resolver: zodResolver(schema),
     defaultValues,
   });
   const { result, pending, submit } = useCmsSubmit(saveAbout);
@@ -60,10 +73,12 @@ export function AboutForm({
         label="Describe the image (optional)"
         placeholder="The shop floor with three barber chairs and a client mid-cut"
       />
-      <div className="grid gap-3 sm:grid-cols-2">
-        <TextField form={form} name="badgeValue" label="Badge value" />
-        <TextField form={form} name="badgeLabel" label="Badge label" />
-      </div>
+      {fields.aboutBadge && (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <TextField form={form} name="badgeValue" label="Badge value" />
+          <TextField form={form} name="badgeLabel" label="Badge label" />
+        </div>
+      )}
 
       <StringListField
         form={form}
@@ -82,13 +97,15 @@ export function AboutForm({
 
       {fields.aboutEditorial && <EditorialFields form={form} />}
 
-      <div className="grid gap-3">
-        <SubHeading>Button</SubHeading>
-        <RepeatableRow title="Call to action">
-          <TextField form={form} name="cta.label" label="Label" />
-          <TextField form={form} name="cta.href" label="Link" />
-        </RepeatableRow>
-      </div>
+      {fields.aboutCta && (
+        <div className="grid gap-3">
+          <SubHeading>Button</SubHeading>
+          <RepeatableRow title="Call to action">
+            <TextField form={form} name="cta.label" label="Label" />
+            <TextField form={form} name="cta.href" label="Link" />
+          </RepeatableRow>
+        </div>
+      )}
 
       <SubmitBar pending={pending} result={result} />
     </form>

@@ -17,6 +17,7 @@ import {
   type ServicesContent,
   type BarbersContent,
   type GalleryContent,
+  type JournalContent,
   type ProductsContent,
   type TestimonialsContent,
   type FaqContent,
@@ -338,6 +339,7 @@ function toDomain(row: BusinessRow): Business {
       services: (row.services_content as unknown as ServicesContent) ?? null,
       barbers: (row.barbers_content as unknown as BarbersContent) ?? null,
       gallery: (row.gallery_content as unknown as GalleryContent) ?? null,
+      journal: (row.journal_content as unknown as JournalContent) ?? null,
       products: (row.products_content as unknown as ProductsContent) ?? null,
       testimonials:
         (row.testimonials_content as unknown as TestimonialsContent) ?? null,

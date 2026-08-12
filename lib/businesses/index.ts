@@ -1,6 +1,7 @@
 import type { BusinessProfile } from "@/types/business";
 import { ronies } from "./ronies";
 import { arah } from "./arah";
+import { gloria } from "./gloria";
 
 /**
  * Local business registry.
@@ -23,6 +24,7 @@ export interface DevBusiness {
 const registry: Record<string, DevBusiness> = {
   ronies: { profile: ronies, templateCode: "barber-luxury" },
   arah: { profile: arah, templateCode: "patisserie-boutique" },
+  gloria: { profile: gloria, templateCode: "retreat-lodge" },
 };
 
 /**

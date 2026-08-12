@@ -34,15 +34,34 @@ export function buildBusinessProfile(
 ): BusinessProfile {
   const { content } = business;
   const faq = content.faq ?? base.faq;
+  /*
+   * The journal falls back to the template default, like every section except
+   * the FAQ — so a tenant who has not written anything yet still renders the
+   * section, which is what makes the seeded entries worth shipping.
+   *
+   * KNOWN TRADE-OFF, decided deliberately. The default's entries are dated and
+   * written in the first person, so an owner who never opens the CMS publishes
+   * them as their own. The mitigation is in the content, not here: the seeded
+   * entries are atmosphere — the weather, the light — and carry no claim
+   * specific enough to be false about somebody else's property. Anything that
+   * could be wrong must not go in a default (see lib/businesses/gloria.ts).
+   *
+   * Clearing the list is still how an owner removes the section: an explicit
+   * `{ items: [] }` is stored content, not absence, so it does not fall back.
+   */
+  const journal = content.journal ?? base.journal;
 
   return {
     ...base,
-    // The FAQ link is dropped when there is nothing to jump to. `nav` is a
+    // Links to sections that have nothing in them are dropped. `nav` is a
     // static array on the template default, so an unconditional entry would
-    // give every tenant without an FAQ an anchor that scrolls nowhere.
-    nav: faq.items.length
-      ? base.nav
-      : base.nav.filter((item) => item.href !== "#faq"),
+    // give every tenant without an FAQ (or a journal) an anchor that scrolls
+    // nowhere.
+    nav: base.nav.filter(
+      (item) =>
+        (item.href !== "#faq" || faq.items.length > 0) &&
+        (item.href !== "#journal" || (journal?.items.length ?? 0) > 0),
+    ),
     // The tenant's OWN slug, not the template default's.
     //
     // `base` is a real profile (lib/businesses/ronies.ts) doubling as the
@@ -65,6 +84,7 @@ export function buildBusinessProfile(
     services: content.services ?? base.services,
     barbers: buildBarbers(base, business),
     gallery: content.gallery ?? base.gallery,
+    journal,
     products: content.products ?? base.products,
     testimonials: buildTestimonials(base, business),
     faq,

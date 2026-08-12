@@ -80,6 +80,11 @@ export const CATEGORY_TYPE: Record<BusinessCategory, string> = {
   retail: "Store",
   automotive: "AutomotiveBusiness",
   fitness: "HealthClub",
+  // The parent of Resort, BedAndBreakfast and VacationRental. Deliberately the
+  // umbrella rather than one of them: the same template serves a vacation home,
+  // a small lodge and a guest house, and claiming the narrow type would be
+  // wrong for two of the three.
+  lodging: "LodgingBusiness",
   other: "LocalBusiness",
 };
 
