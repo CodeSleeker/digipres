@@ -21,7 +21,9 @@ export function ImageBreak({ business }: { business: BusinessProfile }) {
   useParallax(sectionRef, layerRef);
 
   const content = business.retreat?.imageBreak;
-  if (!content) return null;
+  // The photograph IS the block — there is nothing here but a picture and one
+  // line over it — so clearing it is how an owner removes the break entirely.
+  if (!content?.image) return null;
 
   return (
     <section

@@ -12,7 +12,9 @@ import { stagger } from "../lib/reveal";
  */
 export function Experience({ business }: { business: BusinessProfile }) {
   const content = business.retreat?.experience;
-  if (!content) return null;
+  // The notes are the section; a heading with nothing under it is not one.
+  // Removing every note is how an owner takes the whole band off their page.
+  if (!content?.items.length) return null;
 
   return (
     <section

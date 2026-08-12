@@ -44,7 +44,9 @@ export function Stay({ business }: { business: BusinessProfile }) {
           )}
         </div>
 
-        {retreat?.stayImage && (
+        {/* Clearing the photograph closes the gap between the heading and the
+            cards, rather than leaving an empty sand-coloured band. */}
+        {retreat?.stayImage.src && (
           <Frame
             src={retreat.stayImage.src}
             alt={retreat.stayImage.alt}

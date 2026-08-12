@@ -86,6 +86,12 @@ export function buildBusinessProfile(
     barbers: buildBarbers(base, business),
     gallery: content.gallery ?? base.gallery,
     journal,
+    /*
+     * The retreat template's own blocks (migration 0039). Falls back to the
+     * template default like every other section — which is what every existing
+     * retreat tenant is already showing, so nothing changes until they edit.
+     */
+    retreat: content.retreat ?? base.retreat,
     products: content.products ?? base.products,
     testimonials: buildTestimonials(base, business),
     faq,

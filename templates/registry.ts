@@ -84,6 +84,16 @@ export interface TemplateFields {
   aboutBadge?: boolean;
   /** Extra paragraphs, a figures row and a sign-off under the story. */
   aboutEditorial?: boolean;
+  /**
+   * Extra paragraphs under the story, and nothing else.
+   *
+   * The narrow half of `aboutEditorial`, for a template whose story runs to a
+   * second paragraph but carries no figures row and no sign-off. Declaring the
+   * broad flag instead would offer an owner a Figures table and a Signature
+   * their page has nowhere to print — the same reason `heroBackdrop` exists
+   * beside `heroPhoto`.
+   */
+  aboutParagraphs?: boolean;
   /** A link set opposite a section heading ("See the full menu →"). */
   headingLinks?: boolean;
   /** A credit line on each gallery photograph ("By Ronie"). */
@@ -210,7 +220,19 @@ export const TEMPLATES: TemplateOption[] = [
      * customer's, so it is template copy (`RetreatSections.quote`) instead of a
      * testimonial an owner would be invited to collect more of.
      */
+    /*
+     * FIRST, so it sits directly under Branding in the navigation.
+     *
+     * `sections` is the order the CMS presents them in, not the order they
+     * appear on the page — and these two belong together: Branding and this
+     * are the entries that aren't ordinary page sections. Everything after
+     * runs top-to-bottom down the site.
+     */
     sections: [
+      // This template's own blocks: the wide photographs, the full-width
+      // break, the experience strip and the quotation. Rendered from the
+      // default until an owner edits them, and previously not editable at all.
+      "retreat",
       "hero",
       "about",
       "services",
@@ -228,6 +250,13 @@ export const TEMPLATES: TemplateOption[] = [
        * route to.
        */
       bookingOptions: true,
+      /*
+       * The story's second paragraph, which this template renders and could
+       * not previously be edited — the section read a field the CMS never
+       * offered. `aboutParagraphs` and not `aboutEditorial`: there is no
+       * figures row and no sign-off in this design.
+       */
+      aboutParagraphs: true,
     },
   },
 ];

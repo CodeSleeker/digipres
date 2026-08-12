@@ -10,7 +10,9 @@ import { stagger } from "../lib/reveal";
  */
 export function Quote({ business }: { business: BusinessProfile }) {
   const quote = business.retreat?.quote;
-  if (!quote) return null;
+  // Clearing the line removes the block — an empty pair of quotation marks
+  // centred on a page is worse than no section at all.
+  if (!quote?.text.trim()) return null;
 
   return (
     <section

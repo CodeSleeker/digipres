@@ -127,6 +127,9 @@ export async function saveGallery(formData: FormData) {
 export async function saveJournal(formData: FormData) {
   return saveSection("journal", formData);
 }
+export async function saveRetreat(formData: FormData) {
+  return saveSection("retreat", formData);
+}
 export async function saveProducts(formData: FormData) {
   return saveSection("products", formData);
 }

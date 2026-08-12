@@ -20,6 +20,7 @@ import { ServicesForm } from "../_forms/services-form";
 import { BarbersForm } from "../_forms/barbers-form";
 import { GalleryForm } from "../_forms/gallery-form";
 import { JournalForm } from "../_forms/journal-form";
+import { RetreatForm } from "../_forms/retreat-form";
 import { ProductsForm } from "../_forms/products-form";
 import { FaqForm } from "../_forms/faq-form";
 import { ContactForm } from "../_forms/contact-form";
@@ -171,6 +172,24 @@ function renderForm(
           }
           businessId={businessId}
         />
+      );
+    case "retreat":
+      /*
+       * `base.retreat` is optional on the profile — only one template has
+       * these blocks. A template that declared the section without shipping a
+       * default would otherwise hand the form `undefined` and blank every
+       * input, so it is guarded even though the pairing is enforced by the
+       * registry.
+       */
+      return base.retreat ? (
+        <RetreatForm
+          defaultValues={content?.retreat ?? base.retreat}
+          businessId={businessId}
+        />
+      ) : (
+        <p className="text-sm text-admin-muted">
+          This section isn&rsquo;t part of your website template.
+        </p>
       );
     case "products":
       return (

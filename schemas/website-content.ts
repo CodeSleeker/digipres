@@ -600,6 +600,69 @@ export const journalSchema = z.object({
     .max(24, "Add at most 24 entries."),
 });
 
+// ── Retreat-only blocks ──────────────────────────────────────────────────────
+/**
+ * The retreat template's own sections (migration 0039).
+ *
+ * Nearly every field here may be BLANK, and that is the feature rather than
+ * looseness: each block is optional on the page, so clearing the field a block
+ * hangs on is how an owner removes it. The template checks the same field it
+ * renders, so the two can't disagree — an empty quote hides the quote, an
+ * experience with no items hides the strip.
+ *
+ * The exceptions are the two that are not sections at all: `place` is printed
+ * in three places (hero, drawer, footer) and `introCaption` sits under a
+ * photograph that exists regardless. Blank simply prints nothing there.
+ */
+export const retreatSchema = z.object({
+  place: z.object({
+    locality: text.max(80),
+    country: text.max(80),
+  }),
+  introCaption: text.max(120),
+  stayImage: z.object({
+    src: optionalImageRef,
+    alt: altText,
+  }),
+  imageBreak: z.object({
+    titleLines: optionalStringList(4),
+    note: text.max(160),
+    image: optionalImageRef,
+    imageAlt: altText,
+  }),
+  experience: z.object({
+    label: text.max(80),
+    titleLines: optionalStringList(4),
+    items: z
+      .array(
+        z.object({
+          title: requiredText("Title is required.").max(80),
+          description: requiredText("Description is required.").max(400),
+        }),
+      )
+      .max(6, "Add at most 6."),
+  }),
+  location: z.object({
+    image: optionalImageRef,
+    imageAlt: altText,
+    mapLabel: text.max(120),
+    /**
+     * The fallback directions link, used only when no map pin is set — the
+     * template prefers the tenant's own coordinates. Blank removes the button.
+     */
+    mapCta: z.object({
+      label: text.max(80),
+      href: text.max(2048),
+      arrow: z.boolean().optional(),
+    }),
+  }),
+  quote: z.object({
+    text: text.max(300),
+    attribution: text.max(120),
+  }),
+  bookingImage: optionalImageRef,
+});
+
 // ── Contact (section-specific extras only) ───────────────────────────────────
 const bookingOptionSchema = z.object({
   label: requiredText("Option label is required."),
@@ -669,6 +732,7 @@ export const SECTION_SCHEMA = {
   barbers: barbersSchema,
   gallery: gallerySchema,
   journal: journalSchema,
+  retreat: retreatSchema,
   products: productsSchema,
   testimonials: testimonialsSchema,
   faq: faqSchema,
@@ -704,6 +768,7 @@ export type ServicesFormValues = z.infer<typeof servicesSchema>;
 export type BarbersFormValues = z.infer<typeof barbersSchema>;
 export type GalleryFormValues = z.infer<typeof gallerySchema>;
 export type JournalFormValues = z.infer<typeof journalSchema>;
+export type RetreatFormValues = z.infer<typeof retreatSchema>;
 export type ProductsFormValues = z.infer<typeof productsSchema>;
 export type TestimonialsFormValues = z.infer<typeof testimonialsSchema>;
 export type FaqFormValues = z.infer<typeof faqSchema>;

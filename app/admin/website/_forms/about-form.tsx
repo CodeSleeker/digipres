@@ -51,9 +51,16 @@ export function AboutForm({
       <TextAreaField
         form={form}
         name="text"
-        label={fields.aboutEditorial ? "Opening paragraph" : "Body text"}
+        label={
+          fields.aboutEditorial || fields.aboutParagraphs
+            ? "Opening paragraph"
+            : "Body text"
+        }
       />
-      {fields.aboutEditorial && (
+      {/* Either flag: `aboutEditorial` is the whole editorial block (paragraphs,
+          figures, sign-off), `aboutParagraphs` is a template that renders only
+          the extra paragraphs. */}
+      {(fields.aboutEditorial || fields.aboutParagraphs) && (
         <StringListField
           form={form}
           name="paragraphs"

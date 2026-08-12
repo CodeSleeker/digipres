@@ -6,6 +6,7 @@ import type {
   Service,
   GalleryItem,
   JournalEntry,
+  RetreatSections,
   Product,
   BookingOption,
   FaqItem,
@@ -43,6 +44,21 @@ export interface JournalContent {
   heading: SectionHeading;
   items: JournalEntry[];
 }
+
+/**
+ * The retreat template's own blocks (migration 0039).
+ *
+ * The ONE section in this catalogue that belongs to a single template, and it
+ * earns the exception: these are real, visible parts of a live page — the
+ * image break, the experience strip, the brand statement, and the photographs
+ * that sit inside otherwise-editable sections — that an owner previously had
+ * no way to change at all.
+ *
+ * Identical to the rendered shape (`RetreatSections`), because nothing here is
+ * derived. Only `retreat-lodge` declares it; every other template neither sees
+ * it in their navigation nor may write it.
+ */
+export type RetreatContent = RetreatSections;
 
 /**
  * One team member as STORED. Deliberately not `Barber`: the rendered type
@@ -133,6 +149,8 @@ export interface WebsiteContent {
    * publish another business's week as this one's.
    */
   journal: JournalContent | null;
+  /** Retreat-only blocks. `null` = the template default, like every section. */
+  retreat: RetreatContent | null;
   products: ProductsContent | null;
   testimonials: TestimonialsContent | null;
   /**
@@ -157,6 +175,10 @@ export const WEBSITE_SECTIONS: WebsiteSection[] = [
   // Beside the gallery: both are picture-led, and an owner adding photographs
   // is the one most likely to be writing a note at the same time.
   "journal",
+  // Where it falls on the page: after the picture-led sections it interleaves
+  // with, before the shop. An owner scanning the nav meets it where they meet
+  // it on their own site.
+  "retreat",
   "products",
   "testimonials",
   // Between testimonials and contact: objections get answered immediately
@@ -174,6 +196,7 @@ export const SECTION_COLUMN: Record<WebsiteSection, string> = {
   barbers: "barbers_content",
   gallery: "gallery_content",
   journal: "journal_content",
+  retreat: "retreat_content",
   products: "products_content",
   testimonials: "testimonials_content",
   faq: "faq_content",

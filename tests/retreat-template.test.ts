@@ -9,6 +9,7 @@ import {
   TEMPLATES,
 } from "@/templates/registry";
 import { sectionSchema, SECTION_SCHEMA } from "@/schemas/website-content";
+import { buildBusinessProfile } from "@/lib/website/build-profile";
 import type { WebsiteSection } from "@/types/website-content";
 import type { BusinessProfile } from "@/types/business";
 
@@ -35,7 +36,11 @@ describe("retreat/lodge registration", () => {
   it("offers every section it renders, and none it doesn't", () => {
     // No team, shop, testimonials or FAQ: a private house has no staff page and
     // no products, and its one quotation is a brand statement.
+    // Order is the CMS navigation order. `retreat` leads so it sits directly
+    // under Branding — the two entries that aren't ordinary page sections —
+    // and the rest run top-to-bottom down the page.
     expect(template!.sections).toEqual([
+      "retreat",
       "hero",
       "about",
       "services",
@@ -57,6 +62,10 @@ describe("retreat/lodge registration", () => {
     expect(template!.fields).toEqual({
       heroBackdrop: true,
       bookingOptions: true,
+      // The story's second paragraph. NOT `aboutEditorial`: this design has no
+      // figures row and no sign-off, so offering them would collect content
+      // the page can't print.
+      aboutParagraphs: true,
     });
   });
 
@@ -216,6 +225,23 @@ describe("retreat/lodge registration", () => {
           expect(item.by, `${code} gallery credit`).toBeFalsy();
         }
       }
+      /*
+       * The story's extra parts, each behind the flag that offers it.
+       *
+       * This is the check that was missing when the retreat shipped a second
+       * paragraph it rendered and the CMS never offered — the equivalent loop
+       * in the patisserie suite covers `aboutEditorial`, but only iterates the
+       * barber and the patisserie, so the retreat walked straight past it.
+       */
+      if (!declared.aboutEditorial && !declared.aboutParagraphs) {
+        expect(profile!.about.paragraphs ?? [], `${code} paragraphs`).toEqual(
+          [],
+        );
+      }
+      if (!declared.aboutEditorial) {
+        expect(profile!.about.stats ?? [], `${code} about stats`).toEqual([]);
+        expect(profile!.about.signature, `${code} signature`).toBeFalsy();
+      }
     }
   });
 });
@@ -349,3 +375,111 @@ function defaultFor(section: WebsiteSection): unknown {
       ];
   }
 }
+
+/**
+ * The template's own blocks, made editable (migration 0039).
+ *
+ * They were rendered from the template default and offered nowhere: an owner
+ * could rewrite all four cards in "The Stay" and not the photograph between
+ * them. These pin that every one of them now round-trips through the CMS, and
+ * that clearing a block's essential field is what removes it.
+ */
+describe("retreat/lodge own blocks", () => {
+  it("offers the section, and ships a default for it", () => {
+    expect(templateSections("retreat-lodge")).toContain("retreat");
+    expect(gloria.retreat).toBeTruthy();
+  });
+
+  it("is offered to no other template", () => {
+    expect(templateSections("barber-luxury")).not.toContain("retreat");
+    expect(templateSections("patisserie-boutique")).not.toContain("retreat");
+  });
+
+  it("validates its own default against the schema the CMS saves through", () => {
+    const result = SECTION_SCHEMA.retreat.safeParse(gloria.retreat);
+    expect(result.success, JSON.stringify(result.error)).toBe(true);
+  });
+
+  /**
+   * Every block the page renders has to survive the save, or an owner who
+   * opened the form and pressed save without typing would lose it.
+   */
+  it("round-trips every block the page renders", () => {
+    const parsed = SECTION_SCHEMA.retreat.parse(
+      gloria.retreat,
+    ) as NonNullable<typeof gloria.retreat>;
+
+    expect(parsed.place.locality).toBe(gloria.retreat!.place.locality);
+    expect(parsed.introCaption).toBe(gloria.retreat!.introCaption);
+    expect(parsed.stayImage.src).toBe(gloria.retreat!.stayImage.src);
+    expect(parsed.imageBreak.image).toBe(gloria.retreat!.imageBreak.image);
+    expect(parsed.imageBreak.titleLines).toHaveLength(2);
+    expect(parsed.experience.items).toHaveLength(3);
+    expect(parsed.location.image).toBe(gloria.retreat!.location.image);
+    expect(parsed.location.mapCta.href).toBe(
+      gloria.retreat!.location.mapCta.href,
+    );
+    expect(parsed.quote.text).toBe(gloria.retreat!.quote.text);
+    expect(parsed.bookingImage).toBe(gloria.retreat!.bookingImage);
+  });
+
+  /** Clearing a block is a legitimate save, and how an owner removes it. */
+  it("accepts a cleared block rather than refusing the save", () => {
+    const emptied = SECTION_SCHEMA.retreat.parse({
+      ...gloria.retreat,
+      imageBreak: { titleLines: [], note: "", image: "", imageAlt: "" },
+      experience: { label: "", titleLines: [], items: [] },
+      quote: { text: "", attribution: "" },
+      stayImage: { src: "", alt: "" },
+      bookingImage: "",
+    }) as NonNullable<typeof gloria.retreat>;
+
+    expect(emptied.imageBreak.image).toBeUndefined();
+    expect(emptied.experience.items).toEqual([]);
+    expect(emptied.quote.text).toBe("");
+    expect(emptied.stayImage.src).toBeUndefined();
+  });
+
+  it("still refuses a half-written experience note", () => {
+    // Blank is how you remove a note; a title with no description is a mistake.
+    const result = SECTION_SCHEMA.retreat.safeParse({
+      ...gloria.retreat,
+      experience: {
+        label: "The Experience",
+        titleLines: ["Less rush."],
+        items: [{ title: "Wake Slowly", description: "" }],
+      },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("prefers the tenant's own blocks over the template's", () => {
+    const stored = {
+      ...gloria.retreat!,
+      quote: { text: "Ours", attribution: "Us" },
+    };
+    const profile = buildBusinessProfile(gloria, {
+      slug: "tenant",
+      name: "Tenant",
+      hours: [],
+      content: { ...emptyContent, retreat: stored },
+    } as never);
+    expect(profile.retreat?.quote.text).toBe("Ours");
+  });
+});
+
+/** A blank WebsiteContent, for the merge test above. */
+const emptyContent = {
+  hero: null,
+  about: null,
+  services: null,
+  barbers: null,
+  gallery: null,
+  journal: null,
+  retreat: null,
+  products: null,
+  testimonials: null,
+  faq: null,
+  contact: null,
+  footer: null,
+};
