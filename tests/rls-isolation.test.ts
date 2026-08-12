@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { CustomerService } from "@/services/customer-service";
 import { CustomerRepository } from "@/repositories/customer-repository";
+import { EnquiryRepository } from "@/repositories/enquiry-repository";
 import { BusinessError } from "@/services/business-service";
 import type { CustomerListQuery } from "@/types/customer";
 import type { Database } from "@/types/database";
@@ -75,6 +76,9 @@ function makeSupabaseRecorder(): {
   const result: QueryResult = { data: [], error: null, count: 0 };
   const builder = {
     select: () => builder,
+    // Additive only — `update` and `limit` are what the enquiry repository
+    // chains; nothing that existed before this reaches them.
+    update: () => builder,
     eq: (col: string, val: unknown) => {
       calls.eq.push([col, val]);
       return builder;
@@ -85,6 +89,7 @@ function makeSupabaseRecorder(): {
     },
     or: () => builder,
     order: () => builder,
+    limit: () => Promise.resolve(result),
     range: () => Promise.resolve(result),
     then: (res: (v: QueryResult) => unknown, rej?: (e: unknown) => unknown) =>
       Promise.resolve(result).then(res, rej),
@@ -106,6 +111,53 @@ describe("tenant isolation — repository query scoping", () => {
     await repo.list("biz-A", query);
 
     expect(calls.table).toBe("customers");
+    expect(calls.eq).toContainEqual(["business_id", "biz-A"]);
+    expect(calls.is).toContainEqual(["deleted_at", null]);
+  });
+
+  /*
+   * Enquiries arrive from strangers and are read by one owner, so every path
+   * has to carry the tenant. RLS says the same thing, but the policy is not
+   * what a reader of this repository sees — these are.
+   */
+  it("filters the enquiry inbox by business_id and active rows", async () => {
+    const { client, calls } = makeSupabaseRecorder();
+
+    await new EnquiryRepository(client).list("biz-A");
+
+    expect(calls.table).toBe("enquiries");
+    expect(calls.eq).toContainEqual(["business_id", "biz-A"]);
+    expect(calls.is).toContainEqual(["deleted_at", null]);
+  });
+
+  it("counts unread within one business only", async () => {
+    const { client, calls } = makeSupabaseRecorder();
+
+    await new EnquiryRepository(client).unreadCount("biz-A");
+
+    expect(calls.eq).toContainEqual(["business_id", "biz-A"]);
+    expect(calls.is).toContainEqual(["deleted_at", null]);
+    expect(calls.is).toContainEqual(["read_at", null]);
+  });
+
+  it("scopes mark-read to the business, and to rows not already read", async () => {
+    const { client, calls } = makeSupabaseRecorder();
+
+    await new EnquiryRepository(client).markRead("biz-A", "enq-1");
+
+    expect(calls.eq).toContainEqual(["id", "enq-1"]);
+    expect(calls.eq).toContainEqual(["business_id", "biz-A"]);
+    // Without this, reopening an enquiry would rewrite the timestamp and lose
+    // when the owner FIRST saw it — the only thing the column is for.
+    expect(calls.is).toContainEqual(["read_at", null]);
+  });
+
+  it("scopes removal to the business, and soft-deletes", async () => {
+    const { client, calls } = makeSupabaseRecorder();
+
+    await new EnquiryRepository(client).remove("biz-A", "enq-1");
+
+    expect(calls.eq).toContainEqual(["id", "enq-1"]);
     expect(calls.eq).toContainEqual(["business_id", "biz-A"]);
     expect(calls.is).toContainEqual(["deleted_at", null]);
   });

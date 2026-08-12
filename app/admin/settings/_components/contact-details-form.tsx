@@ -34,6 +34,8 @@ interface Defaults {
   addressRegion: string;
   addressPostalCode: string;
   addressCountry: string;
+  /** The stored pin, shown back as "lat, lng" — see the settings page. */
+  mapLocation: string;
   notifyPhone: string;
   notifyEmail: string;
   notifyCustomerSms: boolean;
@@ -153,6 +155,22 @@ export function ContactDetailsForm({ defaults }: { defaults: Defaults }) {
             hint="Two letters, e.g. PH. Not shown on your site."
           />
         </div>
+
+        {/*
+         * The map pin, asked for in the only form an owner can supply it: a
+         * pasted link. Nobody knows their own latitude, and asking for two
+         * decimal numbers would leave this empty on every account — which is
+         * exactly what it has been.
+         */}
+        <TextRow
+          name="mapLocation"
+          label="Map location"
+          type="text"
+          placeholder="Paste a Google Maps link, or 8.2280, 124.9120"
+          defaultValue={defaults.mapLocation}
+          error={state.fieldErrors?.mapLocation?.[0]}
+          hint="Open your place on Google Maps and copy the link from the address bar. This puts a map on your site and tells search engines exactly where you are. Clear the box to remove the pin."
+        />
       </section>
 
       <section className="grid gap-4">

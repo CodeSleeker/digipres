@@ -3,6 +3,7 @@ import type { BusinessStatusEnum, Database, Json } from "@/types/database";
 import type {
   Business,
   BusinessBrand,
+  LodgingDetails,
   BusinessHours,
 } from "@/types/business-entity";
 import type {
@@ -148,6 +149,8 @@ export class BusinessRepository {
       address_region: input.addressRegion ?? null,
       address_postal_code: input.addressPostalCode ?? null,
       address_country: input.addressCountry ?? null,
+      latitude: input.latitude ?? null,
+      longitude: input.longitude ?? null,
       logo_url: input.logoUrl ?? null,
       wordmark_url: input.wordmarkUrl ?? null,
       favicon_url: input.faviconUrl ?? null,
@@ -206,6 +209,10 @@ export class BusinessRepository {
       patch.address_postal_code = input.addressPostalCode;
     if (input.addressCountry !== undefined)
       patch.address_country = input.addressCountry;
+    // Written as a PAIR: the column constraint refuses a half-filled point, so
+    // setting one without the other would fail the whole save.
+    if (input.latitude !== undefined) patch.latitude = input.latitude;
+    if (input.longitude !== undefined) patch.longitude = input.longitude;
     if (input.logoUrl !== undefined) patch.logo_url = input.logoUrl;
     if (input.wordmarkUrl !== undefined)
       patch.wordmark_url = input.wordmarkUrl;
@@ -255,6 +262,29 @@ export class BusinessRepository {
       .single();
     if (error) throw error;
     return toDomain(row);
+  }
+
+  /**
+   * Overwrite the lodging facts (migration 0037).
+   *
+   * Its own method rather than a field on the general update, because it writes
+   * ONE jsonb document wholesale — the same shape as `updateContent` and
+   * `updateOnboarding`, and for the same reason: a partial merge would leave
+   * the caller unable to clear a field.
+   */
+  async updateLodgingDetails(
+    id: string,
+    details: LodgingDetails,
+  ): Promise<Business> {
+    const { data, error } = await this.supabase
+      .from("businesses")
+      .update({ lodging_details: details as unknown as Json })
+      .eq("id", id)
+      .is("deleted_at", null)
+      .select("*")
+      .single();
+    if (error) throw error;
+    return toDomain(data);
   }
 
   /** Overwrite onboarding progress. */
@@ -321,6 +351,14 @@ function toDomain(row: BusinessRow): Business {
     addressRegion: row.address_region,
     addressPostalCode: row.address_postal_code,
     addressCountry: row.address_country,
+    /*
+     * Postgres `numeric` arrives over the wire as a STRING, not a number. The
+     * domain type says number, and letting a string through would break every
+     * arithmetic reader (the map's bounding box, any future distance query)
+     * quietly rather than loudly.
+     */
+    latitude: row.latitude === null ? null : Number(row.latitude),
+    longitude: row.longitude === null ? null : Number(row.longitude),
     logoUrl: row.logo_url,
     wordmarkUrl: row.wordmark_url ?? null,
     faviconUrl: row.favicon_url,
@@ -352,6 +390,7 @@ function toDomain(row: BusinessRow): Business {
     themeCode: row.theme_code,
     status: row.status,
     brand: (row.brand as BusinessBrand | null) ?? null,
+    lodgingDetails: (row.lodging_details as LodgingDetails | null) ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     deletedAt: row.deleted_at,

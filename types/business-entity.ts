@@ -28,6 +28,32 @@ export type BusinessHours = DayHours[];
  * Two-tone wordmark, e.g. RONIES (primary) + BARBER (accent), plus the single
  * letter used for the logo mark.
  */
+/**
+ * What a place to stay has that a shop does not.
+ *
+ * Every field maps to a schema.org `LodgingBusiness` property, which is the
+ * reason each one is here — these are the questions a guest asks before
+ * booking, and the ones an answer engine can only relay if they are structured.
+ *
+ * All optional. An unanswered question publishes nothing rather than a default:
+ * emitting `petsAllowed: false` because nobody ticked a box would be a claim
+ * the owner never made.
+ */
+export interface LodgingDetails {
+  /** `checkinTime` — "14:00", the guest's own wall clock. */
+  checkInTime?: string;
+  /** `checkoutTime`. */
+  checkOutTime?: string;
+  /** `numberOfRooms` — bedrooms, which is what a guest counts. */
+  bedrooms?: number;
+  /** `occupancy` — the most people the place sleeps. */
+  maxGuests?: number;
+  /** `petsAllowed`. Undefined means unanswered, not "no". */
+  petsAllowed?: boolean;
+  /** `amenityFeature` — wifi, parking, kitchen, and the rest. */
+  amenities?: string[];
+}
+
 export interface BusinessBrand {
   namePrimary: string;
   nameAccent: string;
@@ -96,6 +122,13 @@ export interface Business {
   addressPostalCode: string | null;
   /** ISO 3166-1 alpha-2, e.g. "PH" — `addressCountry`. */
   addressCountry: string | null;
+  /**
+   * Where the place actually is (migration 0038). Always both or neither — a
+   * latitude alone describes a line around the planet, and the database
+   * constraint makes the half-filled state unstorable.
+   */
+  latitude: number | null;
+  longitude: number | null;
   logoUrl: string | null;
   /**
    * Optional image of the business NAME for the header (migration 0030).
@@ -123,6 +156,12 @@ export interface Business {
   themeCode: string;
   /** Wordmark override; derived from `name` when null. */
   brand: BusinessBrand | null;
+  /**
+   * Structured facts about a place to STAY (migration 0037). Null for every
+   * category except lodging, and every field inside is optional — a partly
+   * filled document publishes the parts it has.
+   */
+  lodgingDetails: LodgingDetails | null;
   /** Lifecycle: draft (staff-created), active, or suspended. */
   status: BusinessStatus;
   createdAt: string;

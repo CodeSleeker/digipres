@@ -144,8 +144,17 @@
   --color-bark: #20211e;
   --color-bark-soft: #5a5c55; /* 6.4:1 on ivory */
   --color-forest: #344338;
-  --color-sage: #798273; /* 3.4:1 — rules, dots and small caps only */
-  --color-clay: #8a684b; /* 4.9:1 on ivory */
+  /*
+   * Both carry SMALL text on ivory — eyebrows, captions, dt labels, the
+   * section numbers — so both are held to 4.5:1, not the 3:1 that large
+   * text and UI marks may use.
+   *
+   * Darkened from the mockup's #798273 and #8a684b, which measured 3.55:1
+   * and 4.48:1 and failed that bar. The hue is unchanged; only the
+   * lightness moved, by the smallest step that clears it.
+   */
+  --color-sage: #687063; /* 4.56:1 on ivory */
+  --color-clay: #88674a; /* 4.56:1 on ivory */
 
   --font-lodge: var(--font-cormorant), Georgia, "Times New Roman", serif;
   --font-lodge-sans: var(--font-manrope), -apple-system, BlinkMacSystemFont,

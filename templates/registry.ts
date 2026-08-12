@@ -216,11 +216,18 @@ export const TEMPLATES: TemplateOption[] = [
       "services",
       "gallery",
       "journal",
+      "faq",
       "contact",
       "footer",
     ],
     fields: {
       heroBackdrop: true,
+      /*
+       * The enquiry form's "what kind of stay" dropdown. Declared, and
+       * `staffOptions` deliberately not: a whole-property let has no one to
+       * route to.
+       */
+      bookingOptions: true,
     },
   },
 ];

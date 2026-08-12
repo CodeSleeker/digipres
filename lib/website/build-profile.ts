@@ -13,6 +13,7 @@ import type {
 } from "@/types/business-entity";
 import type { BarberEntry, TestimonialEntry } from "@/types/website-content";
 import { formatAddress } from "@/lib/businesses/address";
+import { coordinatesOf } from "@/lib/geo/coordinates";
 
 /**
  * Merge a database Business over the template's default profile to produce the
@@ -273,6 +274,7 @@ export function deriveInitials(author: string): string {
 
 function buildContact(base: BusinessProfile, business: Business): Contact {
   const c = business.content.contact;
+  const geo = coordinatesOf(business);
   return {
     label: c?.label ?? base.contact.label,
     titleLines: c?.titleLines ?? base.contact.titleLines,
@@ -280,8 +282,27 @@ function buildContact(base: BusinessProfile, business: Business): Contact {
     details: buildContactDetails(base, business),
     serviceOptions: c?.serviceOptions ?? base.contact.serviceOptions,
     barberOptions: c?.barberOptions ?? base.contact.barberOptions,
+    /*
+     * The pin comes from the tenant's own columns, never from template content
+     * — a default coordinate would put every un-configured site's map on
+     * somebody else's property. Omitted entirely rather than zeroed: 0,0 is a
+     * real place in the Atlantic, and a template checking `geo` for truthiness
+     * would happily render it.
+     */
+    ...(geo ? { geo } : {}),
   };
 }
+
+/**
+ * The socials card's title.
+ *
+ * Exported because it is a JOIN, not a label: the card summarises the platforms
+ * as text ("Facebook · Instagram"), and a template that would rather render
+ * them as real links has to recognise the card to replace it. Matching the
+ * string in two files is how that quietly breaks the first time one is
+ * reworded.
+ */
+export const SOCIALS_DETAIL_TITLE = "SOCIALS";
 
 /** Derive the LOCATION/HOURS/PHONE/SOCIALS detail cards from scalar columns. */
 function buildContactDetails(
@@ -310,6 +331,22 @@ function buildContactDetails(
     details.push({ icon: "📱", title: "PHONE", lines: [business.phone] });
   }
 
+  /*
+   * The email address, which used to reach search engines and nobody else.
+   *
+   * It has always been collected (Settings → Public contact details) and has
+   * always gone into the LocalBusiness JSON-LD — so Google had it while the
+   * visitor reading the page did not. Templates that link their detail lines
+   * render it as a `mailto:` (lib/website/contact-line.ts).
+   *
+   * Placed after PHONE and before SOCIALS so the card reads in the order
+   * someone actually tries to make contact: come here, we're open then, ring
+   * us, write to us, find us elsewhere.
+   */
+  if (business.email) {
+    details.push({ icon: "✉", title: "EMAIL", lines: [business.email] });
+  }
+
   const platforms = SOCIAL_PLATFORMS.filter((p) => p.url(business)).map(
     (p) => p.name,
   );
@@ -317,7 +354,7 @@ function buildContactDetails(
   if (platforms.length) {
     details.push({
       icon: "✉",
-      title: "SOCIALS",
+      title: SOCIALS_DETAIL_TITLE,
       lines: [platforms.join(" · ")],
     });
   }

@@ -76,6 +76,8 @@ export interface Database {
           address_region: string | null;
           address_postal_code: string | null;
           address_country: string | null;
+          latitude: number | null;
+          longitude: number | null;
           logo_url: string | null;
           wordmark_url: string | null;
           favicon_url: string | null;
@@ -112,6 +114,7 @@ export interface Database {
           theme_code: string;
           status: BusinessStatusEnum;
           brand: Json | null;
+          lodging_details: Json | null;
           created_at: string;
           updated_at: string;
           deleted_at: string | null;
@@ -129,6 +132,8 @@ export interface Database {
           address_region?: string | null;
           address_postal_code?: string | null;
           address_country?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
           logo_url?: string | null;
           wordmark_url?: string | null;
           favicon_url?: string | null;
@@ -165,6 +170,7 @@ export interface Database {
           theme_code?: string;
           status?: BusinessStatusEnum;
           brand?: Json | null;
+          lodging_details?: Json | null;
           created_at?: string;
           updated_at?: string;
           deleted_at?: string | null;
@@ -182,6 +188,8 @@ export interface Database {
           address_region?: string | null;
           address_postal_code?: string | null;
           address_country?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
           logo_url?: string | null;
           wordmark_url?: string | null;
           favicon_url?: string | null;
@@ -218,6 +226,7 @@ export interface Database {
           theme_code?: string;
           status?: BusinessStatusEnum;
           brand?: Json | null;
+          lodging_details?: Json | null;
           created_at?: string;
           updated_at?: string;
           deleted_at?: string | null;
@@ -558,6 +567,47 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
+      };
+      enquiries: {
+        Row: {
+          id: string;
+          business_id: string;
+          name: string;
+          email: string | null;
+          phone: string | null;
+          topic: string | null;
+          message: string;
+          read_at: string | null;
+          created_at: string;
+          updated_at: string;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          business_id: string;
+          name: string;
+          email?: string | null;
+          phone?: string | null;
+          topic?: string | null;
+          message: string;
+          read_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Update: {
+          name?: string;
+          email?: string | null;
+          phone?: string | null;
+          topic?: string | null;
+          message?: string;
+          read_at?: string | null;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        // See the note on `leads` below: omitting this degrades EVERY table's
+        // query types to `never`, not just this one.
         Relationships: [];
       };
       leads: {

@@ -44,7 +44,7 @@ export function SiteFooter({ business }: { business: BusinessProfile }) {
 
           {footer.columns.map((column) => (
             <div key={column.title}>
-              <h2 className="mb-6 text-[0.66rem] font-semibold uppercase tracking-[0.22em] text-[rgba(245,241,232,0.44)]">
+              <h2 className="mb-6 text-[0.66rem] font-semibold uppercase tracking-[0.22em] text-[rgba(245,241,232,0.58)]">
                 {column.title}
               </h2>
               <ul className="grid gap-3">
@@ -64,7 +64,7 @@ export function SiteFooter({ business }: { business: BusinessProfile }) {
 
           {footer.socials.length > 0 && (
             <div>
-              <h2 className="mb-6 text-[0.66rem] font-semibold uppercase tracking-[0.22em] text-[rgba(245,241,232,0.44)]">
+              <h2 className="mb-6 text-[0.66rem] font-semibold uppercase tracking-[0.22em] text-[rgba(245,241,232,0.58)]">
                 Connect
               </h2>
               <ul className="grid gap-3">
@@ -85,7 +85,7 @@ export function SiteFooter({ business }: { business: BusinessProfile }) {
           )}
         </div>
 
-        <div className="mt-[clamp(3rem,6vw,5rem)] flex flex-wrap justify-between gap-4 border-t border-[var(--lodge-rule-invert)] pt-[1.8rem] text-[0.7rem] tracking-[0.12em] text-[rgba(245,241,232,0.42)]">
+        <div className="mt-[clamp(3rem,6vw,5rem)] flex flex-wrap justify-between gap-4 border-t border-[var(--lodge-rule-invert)] pt-[1.8rem] text-[0.7rem] tracking-[0.12em] text-[rgba(245,241,232,0.58)]">
           <p>
             © {new Date().getFullYear()} {footer.copyright}
           </p>

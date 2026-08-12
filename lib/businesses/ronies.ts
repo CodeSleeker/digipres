@@ -445,7 +445,9 @@ export const ronies: BusinessProfile = {
       },
     ],
     copyright: "© 2026 Ronie's Barber Shop. All rights reserved.",
-    credit: "Crafted by AliAmz Digital",
+    // "Aliamz", not "AliAmz" — the canonical spelling, matching the platform's
+    // own metadata in app/page.tsx.
+    credit: "Crafted by Aliamz Digital",
     socials: [
       { label: "FB", href: "#", ariaLabel: "Facebook" },
       { label: "IG", href: "#", ariaLabel: "Instagram" },

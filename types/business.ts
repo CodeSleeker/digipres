@@ -290,6 +290,14 @@ export interface Contact {
   details: ContactDetail[];
   serviceOptions: BookingOption[];
   barberOptions: BookingOption[];
+  /**
+   * The map pin, derived from the tenant's own columns (migration 0038).
+   *
+   * Absent until the owner sets one, which is why a template must render the
+   * map conditionally rather than assuming a point exists. Always both halves —
+   * the database refuses a half-filled pair.
+   */
+  geo?: { latitude: number; longitude: number };
 }
 
 export interface FooterColumn {

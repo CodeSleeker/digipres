@@ -2,6 +2,7 @@ import type { Business } from "@/types/business-entity";
 import type { BusinessCategory } from "@/types/business-entity";
 import type { FaqItem } from "@/types/business";
 import { postalAddress } from "@/lib/businesses/address";
+import { coordinatesOf } from "@/lib/geo/coordinates";
 
 /**
  * Build a schema.org FAQPage node from the questions a tenant has published.
@@ -154,5 +155,79 @@ export function buildLocalBusinessJsonLd(
     }));
   if (openingHours.length) data.openingHoursSpecification = openingHours;
 
+  /*
+   * The point on the earth (migration 0038).
+   *
+   * An address is a string a machine has to geocode and can get wrong —
+   * especially a rural one with no street number. `geo` is the answer with
+   * nothing left to interpret, and it is what lets an assistant place the
+   * business on a map or answer "how far is it from me".
+   *
+   * Both or neither: the column constraint guarantees the pair, and this
+   * re-checks rather than assuming, because a null longitude with a real
+   * latitude would emit a coordinate pointing at the Gulf of Guinea.
+   */
+  const geo = coordinatesOf(business);
+  if (geo) {
+    data.geo = {
+      "@type": "GeoCoordinates",
+      latitude: geo.latitude,
+      longitude: geo.longitude,
+    };
+  }
+
+  addLodgingFacts(data, business);
+
   return data;
+}
+
+/**
+ * The properties a `LodgingBusiness` has and a shop does not.
+ *
+ * Without these, `category: "lodging"` told an answer engine what KIND of place
+ * this is and nothing about staying in it — not the check-in time, not whether
+ * dogs are welcome, not how many bedrooms. Those are the questions guests
+ * actually ask, and a machine can only relay an answer it can parse.
+ *
+ * Written onto the node only when the owner has filled them in. An absent field
+ * is silence, not a default: publishing `petsAllowed: false` because a box was
+ * never ticked would put a claim in structured data that nobody made — and
+ * Google's structured-data policy treats markup that misrepresents the business
+ * as a violation, not a nitpick.
+ */
+function addLodgingFacts(
+  data: Record<string, unknown>,
+  business: Business,
+): void {
+  const details = business.lodgingDetails;
+  if (!details) return;
+
+  if (details.checkInTime) data.checkinTime = details.checkInTime;
+  if (details.checkOutTime) data.checkoutTime = details.checkOutTime;
+  if (details.bedrooms) data.numberOfRooms = details.bedrooms;
+  if (typeof details.petsAllowed === "boolean") {
+    data.petsAllowed = details.petsAllowed;
+  }
+
+  if (details.maxGuests) {
+    // schema.org models capacity as a QuantitativeValue, not a bare number —
+    // `occupancy: 8` is not valid and is quietly ignored by parsers.
+    data.occupancy = {
+      "@type": "QuantitativeValue",
+      maxValue: details.maxGuests,
+      unitText: "guests",
+    };
+  }
+
+  const amenities = (details.amenities ?? []).filter(Boolean);
+  if (amenities.length) {
+    // LocationFeatureSpecification, each with `value: true` — the type exists
+    // so a property can also state what it does NOT have. We only ever list
+    // what an owner said it HAS, so the value is always true.
+    data.amenityFeature = amenities.map((name) => ({
+      "@type": "LocationFeatureSpecification",
+      name,
+      value: true,
+    }));
+  }
 }

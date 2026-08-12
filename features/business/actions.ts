@@ -12,8 +12,13 @@ import {
   revalidateTenantSite,
 } from "@/lib/tenant/revalidate";
 import { BusinessRepository } from "@/repositories/business-repository";
+import { isShortMapLink, parseCoordinates } from "@/lib/geo/coordinates";
 import { BusinessError, BusinessService } from "@/services/business-service";
-import { createBusinessSchema, updateBusinessSchema } from "@/schemas/business";
+import {
+  createBusinessSchema,
+  lodgingDetailsSchema,
+  updateBusinessSchema,
+} from "@/schemas/business";
 
 /**
  * Server Actions for the Business entity — the thin boundary the (future)
@@ -83,7 +88,21 @@ export async function updateBusiness(
     return { error: "Create your business profile first." };
   }
 
-  const parsed = updateBusinessSchema.safeParse(readForm(formData));
+  /*
+   * The map pin arrives as something an owner can actually get: a pasted
+   * Google Maps link, or a "lat, lng" pair. Resolved before validation so a
+   * link that carries no coordinate gets a message about the link, rather than
+   * a "must be a number" error on a field the form never showed.
+   */
+  const location = resolveMapLocation(formData);
+  if ("error" in location) {
+    return { fieldErrors: { mapLocation: [location.error] } };
+  }
+
+  const parsed = updateBusinessSchema.safeParse({
+    ...readForm(formData),
+    ...location.values,
+  });
   if (!parsed.success) {
     return { fieldErrors: fieldErrorsOf(parsed.error) };
   }
@@ -106,6 +125,66 @@ export async function updateBusiness(
   if (parsed.data.slug && parsed.data.slug !== business.slug) {
     revalidateTenantSite(parsed.data.slug);
   }
+  return { success: true };
+}
+
+/**
+ * The lodging facts — check-in, bedrooms, pets, amenities.
+ *
+ * Separate from `updateBusiness` because it writes one JSONB document rather
+ * than a set of columns, and because it is offered only to a lodging tenant.
+ * The CATEGORY IS CHECKED HERE, not just in the page that renders the form:
+ * hiding a form does not stop a crafted POST, and publishing `checkinTime` on a
+ * barber's structured data would be markup that misdescribes the business.
+ */
+export async function updateLodgingDetails(
+  _prevState: BusinessFormState,
+  formData: FormData,
+): Promise<BusinessFormState> {
+  const context = await getOwnerContext();
+  const { supabase, businessId, business } = context;
+  if (!businessId || !business) {
+    return { error: "Create your business profile first." };
+  }
+  if (business.category !== "lodging") {
+    return { error: "These details only apply to places to stay." };
+  }
+
+  const parsed = lodgingDetailsSchema.safeParse({
+    checkInTime: formData.get("checkInTime"),
+    checkOutTime: formData.get("checkOutTime"),
+    bedrooms: formData.get("bedrooms"),
+    maxGuests: formData.get("maxGuests"),
+    petsAllowed: formData.get("petsAllowed"),
+    // One per line, like the other string lists in the CMS.
+    amenities: (formData.get("amenities")?.toString() ?? "").split("\n"),
+  });
+  if (!parsed.success) {
+    return { fieldErrors: fieldErrorsOf(parsed.error) };
+  }
+
+  const { petsAllowed, ...rest } = parsed.data;
+  try {
+    await new BusinessRepository(supabase).updateLodgingDetails(businessId, {
+      ...rest,
+      checkInTime: rest.checkInTime ?? undefined,
+      checkOutTime: rest.checkOutTime ?? undefined,
+      bedrooms: rest.bedrooms ?? undefined,
+      maxGuests: rest.maxGuests ?? undefined,
+      // The tri-state survives the round trip: "yes"/"no" become a boolean,
+      // and "not said" stays absent rather than becoming false.
+      ...(petsAllowed ? { petsAllowed: petsAllowed === "yes" } : {}),
+    });
+    await auditTenantAction(context, "business.lodging_updated", {
+      entity: "business",
+      entityId: businessId,
+    });
+  } catch (error) {
+    return { error: toMessage(error) };
+  }
+
+  revalidatePath("/admin/settings");
+  revalidateTenantSite(business.slug);
   return { success: true };
 }
 
@@ -143,6 +222,37 @@ export async function deleteBusiness(): Promise<BusinessFormState> {
  * included, so update stays a genuine partial (omitted fields are untouched).
  * `hours` and `brand` arrive as JSON string fields.
  */
+/**
+ * Turn the pasted map location into the two columns.
+ *
+ * Three outcomes, all of them meaningful:
+ *   field absent   — this form didn't offer it; leave the stored pin alone.
+ *   field blank    — the owner cleared it; both columns go null TOGETHER,
+ *                    because the constraint refuses a half-filled point.
+ *   field filled   — parse it, or explain why it couldn't be.
+ */
+function resolveMapLocation(
+  formData: FormData,
+): { values: Record<string, unknown> } | { error: string } {
+  if (!formData.has("mapLocation")) return { values: {} };
+
+  const raw = (formData.get("mapLocation")?.toString() ?? "").trim();
+  if (!raw) return { values: { latitude: null, longitude: null } };
+
+  const point = parseCoordinates(raw);
+  if (point) {
+    return { values: { latitude: point.latitude, longitude: point.longitude } };
+  }
+
+  // A short link is the common failure and has its own instruction: it holds
+  // no coordinate at all, so no amount of parsing will help.
+  return {
+    error: isShortMapLink(raw)
+      ? "Short links don't carry the coordinates. Open the link, then copy the full address-bar URL and paste that."
+      : "We couldn't find coordinates in that. Paste the URL from your browser's address bar with the place open on Google Maps, or type the latitude and longitude separated by a comma.",
+  };
+}
+
 function readForm(formData: FormData): Record<string, unknown> {
   const raw: Record<string, unknown> = {};
   for (const key of FIELDS) {

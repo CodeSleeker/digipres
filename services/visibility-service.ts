@@ -1,4 +1,6 @@
 import type { Business } from "@/types/business-entity";
+import type { BusinessProfile } from "@/types/business";
+import { coordinatesOf } from "@/lib/geo/coordinates";
 import type {
   CheckStatus,
   VisibilityCheck,
@@ -36,7 +38,9 @@ const PLATFORM = {
   // No `hasFaqSection` here on purpose. The FAQ section exists platform-wide
   // (migration 0031), but whether a given tenant HAS questions is their own
   // data — see faqItemCount, which the check reads instead.
-  hasCoordinatesField: false, // Business entity has no lat/lng
+  // No `hasCoordinatesField` either, for the same reason as the FAQ: the
+  // columns exist platform-wide (migration 0038), but whether a given tenant
+  // has PINNED their location is their own data — see hasCoordinates.
   // No `hasImageAltField` either: gallery items now carry an `alt`, so what
   // matters is how many of THIS tenant's photos have one — see describedImageCount.
 } as const;
@@ -47,9 +51,27 @@ export class VisibilityService {
    * business (null when the owner hasn't created one yet), so this needs no
    * database access of its own.
    */
-  analyze(business: Business | null): VisibilityReport {
+  /**
+   * @param profile What the tenant's site actually PUBLISHES — the resolved
+   *   profile, template defaults merged over stored content, exactly as
+   *   app/s/[slug] renders it.
+   *
+   *   Content checks read this, not `business.content`. The two differ for
+   *   every tenant who hasn't opened the CMS: the stored column is null while
+   *   the live page shows the template's own gallery and questions AND emits
+   *   FAQPage markup for them. Scoring the stored value reported "No FAQ
+   *   content exists" about a page publishing five questions — measuring the
+   *   database where the subject is the website.
+   *
+   *   Null only when the caller couldn't resolve one, which falls back to the
+   *   stored content rather than failing the report.
+   */
+  analyze(
+    business: Business | null,
+    profile: BusinessProfile | null = null,
+  ): VisibilityReport {
     return business
-      ? scoreReport(true, buildChecks(business))
+      ? scoreReport(true, buildChecks(business, profile))
       : scoreReport(false, baselineChecks());
   }
 }
@@ -60,12 +82,28 @@ function has(value: string | null | undefined): boolean {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+/** Both halves of the pin, and both real numbers — see `coordinatesOf`. */
+function hasCoordinates(business: Business): boolean {
+  return coordinatesOf(business) !== null;
+}
+
 function openDayCount(business: Business): number {
   return business.hours.filter((h) => !h.closed && h.open && h.close).length;
 }
 
-function galleryImageCount(business: Business): number {
-  return business.content.gallery?.items.length ?? 0;
+/**
+ * The gallery the SITE shows.
+ *
+ * `profile` is the resolved one — template defaults merged over stored content
+ * — so an un-customized tenant is measured on the photographs their visitors
+ * actually see, not on an empty database column. Falls back to the stored
+ * content when no profile could be resolved.
+ */
+function galleryImageCount(
+  business: Business,
+  profile: BusinessProfile | null,
+): number {
+  return (profile?.gallery.items ?? business.content.gallery?.items ?? []).length;
 }
 
 /**
@@ -76,8 +114,12 @@ function galleryImageCount(business: Business): number {
  * twice — scoring it would reward the exact defect the field was added to fix.
  * (The save schema refuses it too; this guards content stored before that.)
  */
-function describedImageCount(business: Business): number {
-  return (business.content.gallery?.items ?? []).filter((item) => {
+function describedImageCount(
+  business: Business,
+  profile: BusinessProfile | null,
+): number {
+  const items = profile?.gallery.items ?? business.content.gallery?.items ?? [];
+  return items.filter((item) => {
     const alt = item.alt?.trim();
     return Boolean(alt) && alt!.toLowerCase() !== item.title.trim().toLowerCase();
   }).length;
@@ -86,19 +128,38 @@ function describedImageCount(business: Business): number {
 /**
  * Published questions, counted the same way buildFaqJsonLd counts them: a row
  * missing either half is dropped from the markup, so it must not score here.
+ *
+ * Read from the RESOLVED profile — the same array app/s/[slug] hands to
+ * buildFaqJsonLd. Anything else scores a different set of questions from the
+ * ones in the markup.
  */
-function faqItemCount(business: Business): number {
-  return (business.content.faq?.items ?? []).filter(
-    (item) => item.question.trim() && item.answer.trim(),
-  ).length;
+function faqItemCount(
+  business: Business,
+  profile: BusinessProfile | null,
+): number {
+  const items = profile?.faq.items ?? business.content.faq?.items ?? [];
+  return items.filter((item) => item.question.trim() && item.answer.trim())
+    .length;
 }
 
-function buildChecks(b: Business): VisibilityCheck[] {
+/** True when the tenant has never saved this section — it is still the template's. */
+function isTemplateDefault(
+  business: Business,
+  section: "faq" | "gallery",
+): boolean {
+  return business.content[section] === null;
+}
+
+function buildChecks(
+  b: Business,
+  profile: BusinessProfile | null,
+): VisibilityCheck[] {
   const descLen = b.description?.trim().length ?? 0;
-  const gallery = galleryImageCount(b);
+  const gallery = galleryImageCount(b, profile);
   const openDays = openDayCount(b);
-  const faqCount = faqItemCount(b);
-  const described = describedImageCount(b);
+  const faqCount = faqItemCount(b, profile);
+  const described = describedImageCount(b, profile);
+  const faqIsDefault = isTemplateDefault(b, "faq");
 
   // Which LocalBusiness fields are ready to emit.
   const localReady: string[] = [];
@@ -112,7 +173,7 @@ function buildChecks(b: Business): VisibilityCheck[] {
   (has(b.phone) ? localReady : localMissing).push("phone");
   (openDays > 0 ? localReady : localMissing).push("hours");
   (has(b.logoUrl) ? localReady : localMissing).push("logo");
-  (PLATFORM.hasCoordinatesField ? localReady : localMissing).push("geo");
+  (hasCoordinates(b) ? localReady : localMissing).push("geo");
 
   return [
     /* --- Structured data --- */
@@ -151,13 +212,29 @@ function buildChecks(b: Business): VisibilityCheck[] {
       // so a constant here would award the points to every client the moment we
       // deployed — including the ones with an empty FAQ and no FAQPage markup.
       // Three is where a list starts reading as coverage rather than a token.
-      status: faqCount >= 3 ? "pass" : faqCount > 0 ? "warn" : "fail",
+      /*
+       * Still-default questions are a WARN even when there are enough of them.
+       *
+       * They are genuinely published, with FAQPage markup, so "fail" would be
+       * false — but they are the template's generic answers, not this
+       * business's. Full marks would tell an owner they were finished with the
+       * single highest-value thing they could do.
+       */
+      status:
+        faqCount === 0
+          ? "fail"
+          : faqIsDefault || faqCount < 3
+            ? "warn"
+            : "pass",
       finding:
         faqCount === 0
           ? "No FAQ content exists. Question/answer pairs are the format AI assistants quote from most readily."
-          : `${faqCount} question${faqCount === 1 ? "" : "s"} published with FAQPage schema.`,
-      recommendation:
-        faqCount >= 3
+          : faqIsDefault
+            ? `${faqCount} starter question${faqCount === 1 ? "" : "s"} are published with FAQPage schema, but they are still the template's wording — not answers about your business.`
+            : `${faqCount} question${faqCount === 1 ? "" : "s"} published with FAQPage schema.`,
+      recommendation: faqIsDefault
+        ? "Open Website → FAQ and rewrite the starter answers in your own words. Say what is actually true of your place — an assistant can only repeat what you publish, and generic answers are the ones it will skip."
+        : faqCount >= 3
           ? "Keep answers current, and add questions as customers ask them."
           : "Add question/answer pairs under Website → FAQ. Answer what customers ask before booking (parking, walk-ins, payment, how long it takes) and write each answer so it stands on its own.",
     },
@@ -294,12 +371,18 @@ function buildChecks(b: Business): VisibilityCheck[] {
       label: "Business Coordinates",
       category: "technical",
       weight: 6,
-      status: PLATFORM.hasCoordinatesField ? "pass" : "fail",
-      finding: PLATFORM.hasCoordinatesField
-        ? "Latitude/longitude are stored for the business."
-        : "No latitude/longitude are captured, so geo can't be added to LocalBusiness schema or an embedded map.",
-      recommendation:
-        "Capture lat/lng (e.g. from the address) to power LocalBusiness geo, a map embed, and near-me discovery.",
+      // Per-tenant, not platform-level. The capability now exists for everyone
+      // (migration 0038), so a constant here would award the points to every
+      // client the moment we deployed — including the ones whose location is
+      // still a street line nobody has pinned. Same correction the FAQ check
+      // needed when that capability landed.
+      status: hasCoordinates(b) ? "pass" : "fail",
+      finding: hasCoordinates(b)
+        ? "Latitude and longitude are set, so LocalBusiness carries a geo point and the site can show a map."
+        : "No map pin is set, so the location is only a street line — search engines have to guess where that is, and the site can't show a map.",
+      recommendation: hasCoordinates(b)
+        ? "Check the pin sits on the entrance guests actually use, not the middle of the plot."
+        : "Open your place on Google Maps, copy the link from the address bar, and paste it under Contact details → Map location. We read the coordinates out of it.",
     },
     {
       id: "performance",
@@ -379,10 +462,16 @@ function baselineChecks(): VisibilityCheck[] {
     themeCode: "default",
     status: "draft",
     brand: null,
+    lodgingDetails: null,
+    latitude: null,
+    longitude: null,
     createdAt: "",
     updatedAt: "",
     deletedAt: null,
-  });
+    // No profile: there is no business yet, so there is no published page to
+    // measure. Every content check falls back to the empty stored content,
+    // which is the honest baseline.
+  }, null);
 }
 
 /* --- Scoring -------------------------------------------------------------- */

@@ -3,10 +3,17 @@ import { TenantImage } from "@/components/ui/tenant-image";
 import { Btn } from "../components/buttons";
 import { Eyebrow } from "../components/section-head";
 import { stagger } from "../lib/reveal";
+import { messengerLink } from "../lib/messenger";
+import { EnquiryForm } from "./enquiry-form";
 
-/** The closing invitation to book. */
+/** The closing invitation to book, and the enquiry that carries it. */
 export function BookingCta({ business }: { business: BusinessProfile }) {
   const { ctaBanner, retreat } = business;
+  // Derived from the tenant's own Facebook column (build-profile), never from
+  // template content — so it is a real page or it is nothing.
+  const messenger = messengerLink(
+    business.footer.socials.find((s) => s.label === "FB")?.href,
+  );
 
   return (
     <section
@@ -50,25 +57,41 @@ export function BookingCta({ business }: { business: BusinessProfile }) {
           {ctaBanner.description}
         </p>
 
-        <div
-          className="reveal mt-[2.8rem] flex flex-wrap justify-center gap-4 max-[520px]:[&>a]:flex-[1_1_100%] max-[520px]:[&>a]:justify-center"
-          style={stagger(3)}
-        >
-          <Btn
-            href={ctaBanner.primaryCta.href}
-            variant="light"
-            arrow={ctaBanner.primaryCta.arrow}
+        {/*
+         * The enquiry itself, where two dead buttons used to be.
+         *
+         * The approved mockup leaves both as `href="#"` with a TODO for the
+         * booking link, so there was never a working destination to port. A
+         * form here reaches the platform's own intake — the owner gets an SMS,
+         * an email and a live dashboard entry — which no link to a third-party
+         * site can do.
+         */}
+        <EnquiryForm business={business} />
+
+        {/*
+         * The other way to reach them, and the answer to "notify the owner on
+         * Messenger": a visitor writing to the Page is what makes Facebook
+         * notify the owner. See lib/messenger.ts for why the reverse isn't
+         * possible. Rendered only when the owner has set a Facebook page —
+         * `footer.socials` is derived from their own column, so an unset one
+         * yields nothing rather than a dead link.
+         */}
+        {messenger && (
+          <div
+            className="reveal mt-[2.2rem] flex justify-center"
+            style={stagger(4)}
           >
-            {ctaBanner.primaryCta.label}
-          </Btn>
-          <Btn
-            href={ctaBanner.callCta.href}
-            variant="ghostLight"
-            arrow={ctaBanner.callCta.arrow}
-          >
-            {ctaBanner.callCta.label}
-          </Btn>
-        </div>
+            <Btn
+              href={messenger}
+              variant="ghostLight"
+              arrow
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {ctaBanner.callCta.label}
+            </Btn>
+          </div>
+        )}
       </div>
     </section>
   );

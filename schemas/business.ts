@@ -119,6 +119,66 @@ export const businessBrandSchema = z.object({
   // Blank is allowed: `resolveBrand` backfills it from the primary word.
   initial: z.string().trim().max(2).default(""),
 });
+/**
+ * A wall-clock time, `HH:mm`, or nothing.
+ *
+ * Anchored on the hour and minute RANGES rather than the shape: some mobile
+ * keyboards hand over a seconds component or an out-of-range hour, and "25:00"
+ * would otherwise be published as a check-in time.
+ */
+const optionalTime = z.preprocess(
+  emptyToNull,
+  z
+    .string()
+    .trim()
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Use a 24-hour time, like 14:00.")
+    .nullable()
+    .optional(),
+);
+
+/**
+ * A count an owner types, or nothing.
+ *
+ * An empty number input arrives as NaN, which must become "unanswered" rather
+ * than failing the save — losing the whole form because a field was left blank
+ * is the wrong error to make.
+ */
+const optionalCount = (max: number) =>
+  z.preprocess(
+    (v) => (v === "" || v === null || Number.isNaN(v) ? null : v),
+    z.coerce.number().int().min(1).max(max).nullable().optional(),
+  );
+
+/**
+ * Structured facts about a place to stay (migration 0037).
+ *
+ * Every field is optional, and that is the contract: an unanswered question
+ * publishes nothing. A `petsAllowed: false` that nobody chose would be a claim
+ * the owner never made, so the tri-state is preserved all the way through —
+ * yes, no, or not said.
+ */
+export const lodgingDetailsSchema = z.object({
+  checkInTime: optionalTime,
+  checkOutTime: optionalTime,
+  bedrooms: optionalCount(60),
+  maxGuests: optionalCount(200),
+  petsAllowed: z.preprocess(
+    (v) => (v === "" || v === "unset" || v === null ? null : v),
+    z.enum(["yes", "no"]).nullable().optional(),
+  ),
+  amenities: z
+    .array(z.string())
+    .transform((items) => items.map((s) => s.trim()).filter(Boolean))
+    .refine((items) => items.length <= 40, "Add at most 40 amenities.")
+    .refine(
+      (items) => items.every((s) => s.length <= 60),
+      "Keep each amenity under 60 characters.",
+    )
+    .optional(),
+});
+
+export type LodgingDetailsInput = z.infer<typeof lodgingDetailsSchema>;
+
 const optionalEmail = z.preprocess(
   emptyToNull,
   z.string().email("Enter a valid email address.").nullable().optional(),
@@ -251,6 +311,20 @@ export const createBusinessSchema = z.object({
   faviconUrl: optionalUrl,
   coverImageUrl: optionalUrl,
   brand: businessBrandSchema.nullable().optional(),
+  /*
+   * A point on the earth, or nothing. Bounded because an out-of-range value is
+   * not a typo the database will catch politely — the column constraint would
+   * reject the whole save, and a longitude of 1240 (a mistyped 124.0) that DID
+   * get through would publish the business as being nowhere.
+   */
+  latitude: z.preprocess(
+    (v) => (v === "" || v === null || Number.isNaN(v) ? null : v),
+    z.coerce.number().min(-90).max(90).nullable().optional(),
+  ),
+  longitude: z.preprocess(
+    (v) => (v === "" || v === null || Number.isNaN(v) ? null : v),
+    z.coerce.number().min(-180).max(180).nullable().optional(),
+  ),
   category: z.enum(BUSINESS_CATEGORIES),
   ownerName: z.preprocess(
     emptyToNull,

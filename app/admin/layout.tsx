@@ -13,6 +13,7 @@ import { ImpersonationBanner } from "./_components/impersonation-banner";
 import { getEntitlement } from "@/features/billing/queries";
 import { defaultFeatures } from "@/lib/features/catalogue";
 import { getPendingAppointmentCount } from "@/features/appointments/queries";
+import { getUnreadEnquiryCount } from "@/features/enquiries/queries";
 import { LiveAppointments } from "./_components/live-appointments";
 import { DesktopAlertsToggle } from "./_components/desktop-alerts-toggle";
 import { BookingSoundSettings } from "./_components/booking-sound-settings";
@@ -47,6 +48,11 @@ export default async function AdminLayout({
   const pendingAppointments = features.appointments
     ? await getPendingAppointmentCount()
     : 0;
+
+  // Unread questions. Unconditional, because enquiries are not a paid feature —
+  // any tenant whose site has a contact route can receive one, and a question
+  // nobody is told about is the failure this inbox exists to prevent.
+  const unreadEnquiries = await getUnreadEnquiryCount();
 
   // A business that isn't `active` gets a notice instead of the dashboard —
   // rendered in place rather than redirected, so there's no loop and the owner
@@ -83,6 +89,19 @@ export default async function AdminLayout({
             <NavLink href="/admin/domains">Domains</NavLink>
           )}
           <NavLink href="/admin/customers">Customers</NavLink>
+          {/* Beside Customers, not under Website: an enquiry is a person to
+              reply to, not a page to edit. */}
+          <NavLink
+            href="/admin/enquiries"
+            className="flex items-center justify-between gap-2"
+          >
+            Enquiries
+            {unreadEnquiries > 0 && (
+              <span className="min-w-5 rounded-full bg-admin-accent px-1.5 text-center text-[0.65rem] font-semibold leading-5 text-admin-on-accent">
+                {unreadEnquiries > 99 ? "99+" : unreadEnquiries}
+              </span>
+            )}
+          </NavLink>
           {features.appointments && (
             <NavLink
               href="/admin/appointments"

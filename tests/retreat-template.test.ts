@@ -41,6 +41,7 @@ describe("retreat/lodge registration", () => {
       "services",
       "gallery",
       "journal",
+      "faq",
       "contact",
       "footer",
     ]);
@@ -50,10 +51,13 @@ describe("retreat/lodge registration", () => {
     // The CMS builds its inputs from this. A field the template reads but does
     // not declare is a field the form won't render — and a save then drops it.
     //
-    // Neither booking flag: this design's Location section has no enquiry form
-    // at all, so an owner is never asked for dropdown options their site has
-    // nowhere to show.
-    expect(template!.fields).toEqual({ heroBackdrop: true });
+    // `bookingOptions` for the enquiry form's "what kind of stay" dropdown,
+    // and NOT `staffOptions`: a whole-property let has nobody to route to, so
+    // the owner is never asked for a list their site has nowhere to show.
+    expect(template!.fields).toEqual({
+      heroBackdrop: true,
+      bookingOptions: true,
+    });
   });
 
   it("validates its own default content against the section schemas", () => {
@@ -264,15 +268,50 @@ describe("retreat/lodge content", () => {
     expect(gloria.gallery.items.at(-1)?.wide).toBe(true);
   });
 
-  it("renders no team, shop, testimonials or FAQ, and offers none", () => {
+  it("renders no team, shop or testimonials, and offers none", () => {
     expect(gloria.barbers.items).toEqual([]);
     expect(gloria.products.items).toEqual([]);
     expect(gloria.testimonials.items).toEqual([]);
-    expect(gloria.faq.items).toEqual([]);
 
     const sections = templateSections("retreat-lodge");
-    for (const section of ["barbers", "products", "testimonials", "faq"]) {
+    for (const section of ["barbers", "products", "testimonials"]) {
       expect(sections).not.toContain(section);
+    }
+  });
+
+  /**
+   * The FAQ ships with starter questions, so the section is visible from day
+   * one and an owner edits rather than facing a blank form.
+   *
+   * These are also published as FAQPage structured data, which is what makes
+   * the CONTENT of the default a correctness question and not a copy one: a
+   * tenant who never edits them is telling search engines these answers are
+   * true of their property. The rule the seed follows is below.
+   */
+  it("ships starter questions the owner can edit", () => {
+    expect(templateSections("retreat-lodge")).toContain("faq");
+    expect(gloria.faq.items.length).toBeGreaterThanOrEqual(3);
+    expect(gloria.faq.heading.label).toBeTruthy();
+    expect(gloria.faq.heading.title).toBeTruthy();
+  });
+
+  /**
+   * No seeded answer states a figure.
+   *
+   * A time, a price or a headcount in a default is a claim about a real
+   * property that nobody checked — and one that would be published as
+   * structured data. The seeded answers either hold for any whole-house let or
+   * point the reader at something on the page, so the worst case is vagueness
+   * rather than a lie.
+   */
+  it("states no checkable figure in a seeded answer", () => {
+    for (const item of gloria.faq.items) {
+      expect(
+        /\b\d{1,2}(:\d{2})?\s*(am|pm)\b|\bPHP|₱|\b\d+\s*(guests|people|bedrooms|nights)\b/i.test(
+          item.answer,
+        ),
+        `"${item.question}" states a figure`,
+      ).toBe(false);
     }
   });
 

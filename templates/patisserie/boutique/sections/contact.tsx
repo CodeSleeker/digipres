@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useState } from "react";
 import type { BusinessProfile } from "@/types/business";
 import { cn } from "@/lib/utils";
+import { contactLine } from "@/lib/website/contact-line";
 import { BtnAction } from "../components/buttons";
 import { Field, FormMessage, fieldClass, selectClass } from "../components/fields";
 import { Eyebrow, SectionTitle } from "../components/section-head";
@@ -304,28 +305,18 @@ export function Contact({ business }: { business: BusinessProfile }) {
 /**
  * A detail line, made actionable when it is a number or an address.
  *
- * The lines arrive as plain strings derived from the tenant's own columns, so
- * the shape is what identifies them. A phone number that can't be tapped on a
- * phone is a small failure repeated by every visitor holding one.
+ * The rules that decide WHICH it is now live in lib/website/contact-line.ts and
+ * are shared with the retreat template — they are a fact about the string, and
+ * a regex that gets a phone number wrong should be wrong in one place. The
+ * markup below is unchanged and stays this template's own.
  */
 function ContactLine({ line }: { line: string }) {
-  const digits = line.replace(/[^\d+]/g, "");
-  const isPhone = /^\+?\d[\d\s()+-]{6,}$/.test(line.trim());
-  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(line.trim());
+  const { href } = contactLine(line);
 
-  if (isPhone) {
-    return (
-      <a href={`tel:${digits}`} className="hover:text-paper">
-        {line}
-      </a>
-    );
-  }
-  if (isEmail) {
-    return (
-      <a href={`mailto:${line.trim()}`} className="hover:text-paper">
-        {line}
-      </a>
-    );
-  }
-  return <>{line}</>;
+  if (!href) return <>{line}</>;
+  return (
+    <a href={href} className="hover:text-paper">
+      {line}
+    </a>
+  );
 }

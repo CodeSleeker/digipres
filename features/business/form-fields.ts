@@ -29,6 +29,11 @@ export const FIELDS = [
   "addressRegion",
   "addressPostalCode",
   "addressCountry",
+  // Set from the `mapLocation` paste box rather than typed — see readForm.
+  // They are still listed here because they are schema fields, and the
+  // allow-list is compared against the schema by a test.
+  "latitude",
+  "longitude",
   "logoUrl",
   "wordmarkUrl",
   "faviconUrl",

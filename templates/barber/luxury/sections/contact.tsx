@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useState } from "react";
 import type { BusinessProfile } from "@/types/business";
 import { cn } from "@/lib/utils";
+import { contactLine } from "@/lib/website/contact-line";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -135,7 +136,7 @@ export function Contact({ business }: { business: BusinessProfile }) {
                     <p className="text-[0.9rem] leading-[1.6] text-gray-light">
                       {detail.lines.map((line, i) => (
                         <Fragment key={i}>
-                          {line}
+                          <DetailLine line={line} />
                           {i < detail.lines.length - 1 && <br />}
                         </Fragment>
                       ))}
@@ -280,5 +281,23 @@ export function Contact({ business }: { business: BusinessProfile }) {
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * A detail line, made actionable when it is a number or an address.
+ *
+ * The rules live in lib/website/contact-line.ts and are shared with the other
+ * templates — a phone number is a phone number on every design. Only the
+ * markup is this template's own: gold on hover, matching the links around it.
+ */
+function DetailLine({ line }: { line: string }) {
+  const { href } = contactLine(line);
+
+  if (!href) return <>{line}</>;
+  return (
+    <a href={href} className="transition-colors duration-300 hover:text-gold">
+      {line}
+    </a>
   );
 }

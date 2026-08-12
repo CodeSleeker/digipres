@@ -236,14 +236,73 @@ export const gloria: BusinessProfile = {
   // The page's one quotation is a brand statement, not a customer's — it lives
   // in `retreat.quote` rather than pretending to be a review.
   testimonials: { heading: { label: "", title: "" }, items: [] },
-  faq: { heading: { label: "", title: "" }, items: [] },
+  /*
+   * Starter questions, meant to be edited.
+   *
+   * These are the five a mountain property is asked most often, seeded so the
+   * section is visible from day one and an owner edits real answers rather than
+   * facing a blank form. Every one is removable under Website → FAQ.
+   *
+   * KNOW WHAT THIS COSTS. Unlike the rest of the seed, these are also published
+   * as FAQPage structured data — so a tenant who never edits them is telling
+   * search engines these answers are true of their property. The answers below
+   * are therefore written to be either universally true of a whole-house let
+   * ("the house is yours alone") or explicitly soft ("ask us and we will
+   * confirm"), and none states a figure that could be wrong. Anything specific
+   * enough to be false does not belong in a default.
+   */
+  faq: {
+    heading: {
+      label: "Before you come",
+      title: "The things guests usually ask.",
+      subtitle:
+        "Amenities, house rules and getting here. Anything else, send us a note and we will answer it.",
+    },
+    items: [
+      {
+        question: "What time can we arrive, and when do we need to leave?",
+        answer:
+          "Check-in and check-out times are listed on this page. If you need a little longer at either end, tell us when you enquire and we will confirm what is possible for your dates.",
+      },
+      {
+        question: "Is the whole house ours?",
+        answer:
+          "Yes. Gloria's is let to one group at a time, so the house, the deck and the garden are yours for the whole of your stay. You will not be sharing with anyone else.",
+      },
+      {
+        question: "How do we get there?",
+        answer:
+          "The property is in Dahilayan, in the highlands of Bukidnon. Use the directions link on this page for door-to-door navigation, and message us before you set out if you would like us to talk you through the last stretch.",
+      },
+      {
+        question: "Can we bring our dog?",
+        answer:
+          "Ask us when you enquire and we will let you know for your dates. If pets are welcome we will explain where they can and cannot go before you arrive.",
+      },
+      {
+        question: "Do we need to bring anything?",
+        answer:
+          "Bring warm layers — the highlands are cooler than the lowlands, especially in the early morning and after dark. Tell us what you are planning and we will say what is already here and what is worth packing.",
+      },
+    ],
+  },
   ctaBanner: {
     label: "Your mountain escape awaits",
     titleLines: ["Ready for a slower kind of weekend?"],
     description:
       "Come to Dahilayan, settle in, and make Gloria's yours for a while.",
-    primaryCta: { label: "Check Availability", href: "#location", arrow: true },
-    callCta: { label: "Message Us", href: "#location", arrow: true },
+    /*
+     * `primaryCta` is not rendered by this template: the section carries the
+     * enquiry form itself, so there is no button to send anywhere. It is kept
+     * as the label the form's own submit uses in spirit, and left pointing at
+     * the section rather than at the mockup's placeholder "#".
+     *
+     * `callCta` IS rendered — as the Messenger link, but only for a tenant who
+     * has set a Facebook page. Its href is ignored; the destination is derived
+     * from that column.
+     */
+    primaryCta: { label: "Check Availability", href: "#book", arrow: true },
+    callCta: { label: "Message Us on Facebook", href: "#book", arrow: true },
   },
   contact: {
     label: "Dahilayan, Bukidnon",
@@ -264,8 +323,23 @@ export const gloria: BusinessProfile = {
         lines: ["From 2pm", "Check out by 11am"],
       },
     ],
-    // No booking form on this template; enquiries go through the CTA links.
-    serviceOptions: [],
+    /*
+     * The map pin. For a real tenant this is DERIVED from their own latitude
+     * and longitude columns (lib/website/build-profile.ts); it is seeded here
+     * because the dev preview renders this profile directly, without that
+     * merge, and a retreat with no map is not the design.
+     *
+     * Dahilayan, Manolo Fortich — the locality, not a specific plot.
+     */
+    geo: { latitude: 8.1836, longitude: 124.8619 },
+    // The enquiry form's "what kind of stay" dropdown.
+    serviceOptions: [
+      { label: "Weekend stay" },
+      { label: "Midweek stay" },
+      { label: "Whole property" },
+      { label: "Something longer" },
+    ],
+    // No per-person routing: the whole house is let as one.
     barberOptions: [],
   },
   footer: {
@@ -289,7 +363,10 @@ export const gloria: BusinessProfile = {
       },
     ],
     copyright: "Gloria's. All rights reserved.",
-    credit: "Website by Aliamz Digital",
+    // "Crafted by" is the house style (see ronies.ts); the mockup's "Website
+    // by" was ported verbatim and made this template the odd one out. Editable
+    // per tenant — this is only what a new one starts with.
+    credit: "Crafted by Aliamz Digital",
     // Derived from the tenant's own social columns at render time.
     socials: [],
   },

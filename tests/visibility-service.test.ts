@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import { VisibilityService } from "@/services/visibility-service";
 import type { Business } from "@/types/business-entity";
 import type { VisibilityCheck } from "@/types/ai-visibility";
+import { buildBusinessProfile } from "@/lib/website/build-profile";
+import { gloria } from "@/lib/businesses/gloria";
 
 /**
  * The AI Visibility report is shown to CLIENTS, and its `PLATFORM` flags are
@@ -116,5 +118,99 @@ describe("report scoring", () => {
         /guarantee|rank #|top of google|first page/i,
       );
     }
+  });
+});
+
+/**
+ * The report describes the PAGE, not the database row.
+ *
+ * The two diverge for every tenant who has not opened the CMS: the stored
+ * content columns are null while the live site publishes the template's own
+ * gallery and questions — with FAQPage markup for them. Scoring the stored
+ * value reported "No FAQ content exists" about a page publishing five.
+ */
+describe("measured against the published page, not the stored row", () => {
+  const retreat = (over: Partial<Business> = {}): Business =>
+    business({
+      templateCode: "retreat-lodge",
+      content: {
+        hero: null,
+        about: null,
+        services: null,
+        barbers: null,
+        gallery: null,
+        journal: null,
+        products: null,
+        testimonials: null,
+        faq: null,
+        contact: null,
+        footer: null,
+      },
+      ...over,
+    } as Partial<Business>);
+
+  const checkFor = (b: Business, id: string) =>
+    find(
+      new VisibilityService().analyze(b, buildBusinessProfile(gloria, b)).checks,
+      id,
+    );
+
+  it("counts the questions the site actually publishes", () => {
+    const faq = checkFor(retreat(), "faq");
+    expect(faq.status).not.toBe("fail");
+    expect(faq.finding).toContain("FAQPage schema");
+  });
+
+  it("does not award full marks for the template's own answers", () => {
+    // Published, so not a failure — but generic, and a pass would tell the
+    // owner they were done with the highest-value task on the list.
+    const faq = checkFor(retreat(), "faq");
+    expect(faq.status).toBe("warn");
+    expect(faq.recommendation).toContain("your own words");
+  });
+
+  it("passes once the owner has written their own", () => {
+    const own = retreat({
+      content: {
+        ...retreat().content,
+        faq: {
+          heading: { label: "l", title: "t" },
+          items: [
+            { question: "Wifi?", answer: "Yes, throughout the house." },
+            { question: "Parking?", answer: "Space for three cars." },
+            { question: "Pets?", answer: "Dogs are welcome downstairs." },
+          ],
+        },
+      },
+    } as Partial<Business>);
+    const faq = checkFor(own, "faq");
+    expect(faq.status).toBe("pass");
+    expect(faq.finding).not.toContain("starter");
+  });
+
+  it("credits alt text on the photographs the site shows", () => {
+    // Same defect as the FAQ: the seeded gallery is fully described, and was
+    // being scored as though there were no photographs at all.
+    expect(checkFor(retreat(), "image-alt").status).toBe("pass");
+  });
+
+  it("falls back to the stored content when no profile could be resolved", () => {
+    // A template that fails to load must degrade to the old behaviour rather
+    // than take the whole report down.
+    const faq = find(
+      new VisibilityService().analyze(retreat(), null).checks,
+      "faq",
+    );
+    expect(faq.status).toBe("fail");
+  });
+
+  it("reports no map pin until the owner sets one", () => {
+    expect(checkFor(retreat(), "coordinates").status).toBe("fail");
+    expect(
+      checkFor(
+        retreat({ latitude: 8.18, longitude: 124.86 } as Partial<Business>),
+        "coordinates",
+      ).status,
+    ).toBe("pass");
   });
 });

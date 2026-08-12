@@ -73,19 +73,18 @@ const PAPER_AND_MINT: ThemePalette = {
 /**
  * Ivory and forest — the retreat/lodge theme.
  *
- * `accent` is the clay brown rather than the sage: both are used as small marks
- * in the design, but sage measures 3.4:1 on ivory against clay's 4.9:1, and on
- * the card the accent is a hairline rule and a single initial.
+ * `accent` is the clay brown rather than the sage: on the card the accent is a
+ * hairline rule and a single initial, and clay is the warmer of the two.
  *
  * Values are from the `@theme` block in app/globals.css:
  *   ivory #f5f1e8 · ivory-alt #efeadf · bark #20211e · bark-soft #5a5c55
- *   sand #ded5c5 · clay #8a684b
+ *   sand #ded5c5 · clay #88674a
  */
 const IVORY_AND_FOREST: ThemePalette = {
   background: "#f5f1e8",
   foreground: "#20211e",
   muted: "#5a5c55",
-  accent: "#8a684b",
+  accent: "#88674a",
   surface: "#efeadf",
   border: "#ded5c5",
 };

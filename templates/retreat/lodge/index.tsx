@@ -9,6 +9,7 @@ import { Gallery } from "./sections/gallery";
 import { Experience } from "./sections/experience";
 import { Journal } from "./sections/journal";
 import { Location } from "./sections/location";
+import { Faq } from "./sections/faq";
 import { Quote } from "./sections/quote";
 import { BookingCta } from "./sections/booking-cta";
 import { SiteFooter } from "./sections/site-footer";
@@ -70,6 +71,11 @@ export function LodgeRetreatTemplate({
             owner writes an entry. */}
         <Journal business={business} />
         <Location business={business} />
+        {/* Objections answered immediately before the invitation to book —
+            amenities, house rules, getting there. The platform's own section
+            order puts the FAQ here for the same reason. Renders nothing until
+            an owner writes a question. */}
+        <Faq business={business} />
         <Quote business={business} />
         <BookingCta business={business} />
       </main>
