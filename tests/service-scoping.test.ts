@@ -173,7 +173,7 @@ describe("domain service", () => {
     };
     const admin = {
       markVerified: vi.fn(async () => undefined),
-      publishRouting: vi.fn(async () => true),
+      publishRouting: vi.fn(async () => ({ ok: true }) as const),
     };
     const service = new DomainService(
       repo as unknown as DomainRepository,

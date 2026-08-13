@@ -28,14 +28,17 @@ const NO_BUSINESS: DomainState = {
 /**
  * Shown when the change was saved but the edge routing table wasn't rewritten.
  *
- * Deliberately names the consequence rather than the cause: the site still
- * works, so "failed" would overstate it, while silence understates it — the
- * canonical redirect won't happen until the table is published.
+ * Names the consequence AND the cause: the site still works, so "failed" would
+ * overstate it, while silence understates it — the canonical redirect won't
+ * happen until the table is published. `reason` comes from the publisher, which
+ * knows which of several unrelated failures actually occurred.
  */
-const UNPUBLISHED_NOTICE =
-  "Saved, but the change isn't live at the edge yet — your site still works, " +
-  "but redirects to your primary domain won't happen until it is. Use " +
-  "“Republish routing” below, and check /platform/health if it keeps failing.";
+function unpublishedNotice(reason: string): string {
+  return (
+    "Saved, but the change isn't live at the edge yet — your site still works, " +
+    `but redirects to your primary domain won't happen until it is. ${reason}`
+  );
+}
 
 /** The owner's hostnames, including unverified ones. */
 export async function getMyDomains(): Promise<BusinessDomain[]> {
@@ -110,8 +113,8 @@ export async function verifyDomain(formData: FormData): Promise<DomainState> {
       // loud, because the alternative is a green tick over a site that is still
       // resolving the slow way and never redirects to its canonical hostname.
       notice:
-        result.verified && result.published === false
-          ? UNPUBLISHED_NOTICE
+        result.verified && result.published && !result.published.ok
+          ? unpublishedNotice(result.published.reason)
           : undefined,
       error: result.verified
         ? undefined
@@ -149,7 +152,7 @@ export async function setPrimaryDomain(
     revalidatePath("/admin/domains");
     return {
       success: true,
-      notice: published ? undefined : UNPUBLISHED_NOTICE,
+      notice: published.ok ? undefined : unpublishedNotice(published.reason),
     };
   } catch (error) {
     return { error: toMessage(error) };
@@ -176,16 +179,15 @@ export async function republishRouting(): Promise<DomainState> {
     const published = await makeDomainService(supabase).republishRouting();
     await auditTenantAction(context, "domain.routing_republished", {
       entity: "business_domain",
-      metadata: { published },
+      metadata: {
+        published: published.ok,
+        ...(published.ok ? {} : { reason: published.reason }),
+      },
     });
     revalidatePath("/admin/domains");
-    return published
+    return published.ok
       ? { success: true, notice: "Routing republished — redirects are live." }
-      : {
-          error:
-            "Couldn't reach the routing store. Check GLOBAL_CONFIG and " +
-            "VERCEL_API_TOKEN are set on this deployment, then try again.",
-        };
+      : { error: published.reason };
   } catch (error) {
     return { error: toMessage(error) };
   }

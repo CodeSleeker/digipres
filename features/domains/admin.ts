@@ -1,6 +1,9 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { DomainRepository } from "@/repositories/domain-repository";
-import { publishTenantRouting } from "@/lib/domains/edge-config";
+import {
+  publishTenantRouting,
+  type PublishResult,
+} from "@/lib/domains/edge-config";
 import { logError } from "@/lib/observability/logger";
 import type { DomainAdminPort } from "@/services/domain-service";
 
@@ -19,16 +22,22 @@ export function makeDomainAdmin(): DomainAdminPort {
       await new DomainRepository(supabase).markVerified(domainId);
     },
 
-    async publishRouting(): Promise<boolean> {
+    async publishRouting(): Promise<PublishResult> {
       try {
         const supabase = createServiceClient();
         const routes = await new DomainRepository(supabase).listVerifiedRoutes();
         return await publishTenantRouting(routes);
       } catch (error) {
         // Never fail the owner's action because the edge sync hiccuped — the
-        // table can be republished on the next domain change.
+        // table can be republished from the domains page at any time.
         logError(error, { scope: "domains:publishRouting" });
-        return false;
+        return {
+          ok: false,
+          reason:
+            error instanceof Error
+              ? `Couldn't read the domain list: ${error.message}`
+              : "Couldn't read the domain list.",
+        };
       }
     },
   };

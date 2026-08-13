@@ -1,6 +1,7 @@
 import type { DomainRepository } from "@/repositories/domain-repository";
 import { isValidHostname, normalizeHostname } from "@/repositories/domain-repository";
 import type { DomainProvider, DnsInstruction } from "@/lib/domains/provider";
+import type { PublishResult } from "@/lib/domains/edge-config";
 import type { BusinessDomain } from "@/types/domain";
 import { BusinessError } from "./business-service";
 
@@ -13,8 +14,8 @@ import { BusinessError } from "./business-service";
  */
 export interface DomainAdminPort {
   markVerified(domainId: string): Promise<void>;
-  /** Republish hostname → tenant routing to the edge. Returns false if unconfigured. */
-  publishRouting(): Promise<boolean>;
+  /** Republish hostname → tenant routing to the edge, with a reason on failure. */
+  publishRouting(): Promise<PublishResult>;
 }
 
 export interface DomainSetupResult {
@@ -37,7 +38,7 @@ export interface DomainVerifyResult {
    * database fallback with no canonical redirect. Reported so the caller can
    * say so instead of swallowing it.
    */
-  published?: boolean;
+  published?: PublishResult;
 }
 
 /**
@@ -103,7 +104,7 @@ export class DomainService {
   }
 
   /** Choose the canonical hostname; aliases then 301 to it. */
-  async setPrimary(businessId: string, id: string): Promise<boolean> {
+  async setPrimary(businessId: string, id: string): Promise<PublishResult> {
     const domain = await this.domains.findById(businessId, id);
     if (!domain) throw new BusinessError("NOT_FOUND");
 
@@ -120,7 +121,7 @@ export class DomainService {
    * would have retried it disappears exactly when it is needed. This is the
    * retry: it changes no data, and is safe to run at any time.
    */
-  republishRouting(): Promise<boolean> {
+  republishRouting(): Promise<PublishResult> {
     return this.admin.publishRouting();
   }
 
