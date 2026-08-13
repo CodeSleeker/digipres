@@ -4,6 +4,7 @@ import { useActionState, useState, useTransition } from "react";
 import {
   addDomain,
   removeDomain,
+  republishRouting,
   setPrimaryDomain,
   verifyDomain,
   type DomainState,
@@ -73,6 +74,17 @@ export function DomainsManager({
    * Verifying DNS can take seconds — long enough to wonder if the click landed.
    */
   const [running, setRunning] = useState<string | null>(null);
+  /** Result of the section-level republish, which belongs to no single row. */
+  const [routingState, setRoutingState] = useState<DomainState | null>(null);
+
+  function republish() {
+    setRoutingState(null);
+    setRunning("routing:republish");
+    start(async () => {
+      setRoutingState(await republishRouting());
+      setRunning(null);
+    });
+  }
 
   function run(
     action: (formData: FormData) => Promise<DomainState>,
@@ -139,7 +151,34 @@ export function DomainsManager({
 
       {/* Existing domains */}
       <section className="grid gap-3">
-        <h2 className="font-admin-heading text-lg tracking-[2px]">Your domains</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-admin-heading text-lg tracking-[2px]">
+            Your domains
+          </h2>
+          {/* Publishing otherwise only happens as a side effect of a change,
+              and the change most likely to need retrying — setting the primary
+              domain — hides its button once applied. This is always reachable. */}
+          {domains.some((d) => d.verified) && (
+            <RowAction
+              active={running === "routing:republish"}
+              disabled={pending}
+              onClick={republish}
+              pendingLabel="Republishing…"
+              className="text-xs text-admin-muted hover:text-admin-accent"
+            >
+              Republish routing
+            </RowAction>
+          )}
+        </div>
+
+        {routingState?.error && (
+          <p role="alert" className="text-sm text-destructive">
+            {routingState.error}
+          </p>
+        )}
+        {routingState?.notice && (
+          <p className="text-sm text-[#6cbf84]">{routingState.notice}</p>
+        )}
 
         {domains.length === 0 ? (
           <p className="border border-admin-line bg-admin-panel p-5 text-sm text-admin-muted">
@@ -218,9 +257,14 @@ export function DomainsManager({
                       {state.error}
                     </p>
                   )}
-                  {state?.verified && (
+                  {state?.verified && !state.notice && (
                     <p className="mt-3 text-sm text-[#6cbf84]">
                       Verified — this domain is now serving your site.
+                    </p>
+                  )}
+                  {state?.notice && (
+                    <p className="mt-3 text-sm text-[#d8b26a]">
+                      {state.notice}
                     </p>
                   )}
                   {state?.instructions && state.instructions.length > 0 && (

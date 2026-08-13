@@ -28,6 +28,16 @@ export interface DomainVerifyResult {
   verified: boolean;
   instructions: DnsInstruction[];
   error?: string;
+  /**
+   * Whether the edge routing table was actually rewritten.
+   *
+   * Publishing is best-effort and returns false rather than throwing, which
+   * used to end here — the owner was told the domain was verified while the
+   * edge never learned about it, and the site kept resolving through the
+   * database fallback with no canonical redirect. Reported so the caller can
+   * say so instead of swallowing it.
+   */
+  published?: boolean;
 }
 
 /**
@@ -88,17 +98,30 @@ export class DomainService {
     }
 
     await this.admin.markVerified(domain.id);
-    await this.admin.publishRouting();
-    return { verified: true, instructions: [] };
+    const published = await this.admin.publishRouting();
+    return { verified: true, instructions: [], published };
   }
 
   /** Choose the canonical hostname; aliases then 301 to it. */
-  async setPrimary(businessId: string, id: string): Promise<void> {
+  async setPrimary(businessId: string, id: string): Promise<boolean> {
     const domain = await this.domains.findById(businessId, id);
     if (!domain) throw new BusinessError("NOT_FOUND");
 
     await this.domains.setPrimary(businessId, id);
-    await this.admin.publishRouting();
+    return this.admin.publishRouting();
+  }
+
+  /**
+   * Rewrite the edge routing table from the current verified rows.
+   *
+   * Every other path publishes as a side effect of changing something, which
+   * leaves no way to recover from a publish that failed at the time — and the
+   * UI hides "Make primary" once a domain IS primary, so the one button that
+   * would have retried it disappears exactly when it is needed. This is the
+   * retry: it changes no data, and is safe to run at any time.
+   */
+  republishRouting(): Promise<boolean> {
+    return this.admin.publishRouting();
   }
 
   /** Remove a hostname from the tenant and deregister it at the edge. */
