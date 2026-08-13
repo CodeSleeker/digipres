@@ -384,27 +384,43 @@ function buildChecks(
         ? "Check the pin sits on the entrance guests actually use, not the middle of the plot."
         : "Open your place on Google Maps, copy the link from the address bar, and paste it under Contact details → Map location. We read the coordinates out of it.",
     },
+    /*
+     * The two rows nobody can pass or fail.
+     *
+     * Every other check above is answered from the owner's own data. Speed and
+     * accessibility can only be judged by testing the live site, which is why
+     * they carry no weight and sit at "info" — they are a note, not a score.
+     *
+     * They are ALSO the two rows a business owner reads, and they used to be
+     * written to a developer: Core Web Vitals, Lighthouse, next/image, aria-
+     * labels, axe. That is the wrong audience for this screen — the checklist
+     * is in the client back office — and worse, it told an owner to go audit a
+     * site whose speed we already handle for them (pre-rendered pages,
+     * per-device image sizing). Rewritten for the person actually reading it,
+     * with the one part that IS theirs — describing photographs — named
+     * plainly, so the row points at the gallery instead of at a dead end.
+     */
     {
       id: "performance",
-      label: "Performance",
+      label: "Speed",
       category: "technical",
       weight: 0,
       status: "info",
       finding:
-        "Performance can't be measured from data alone; it needs a live audit (Core Web Vitals).",
+        "How fast your pages feel can only be judged by testing the live site, not from your details.",
       recommendation:
-        "Run Lighthouse / PageSpeed Insights, serve images via next/image with sized assets, and cache static content. Fast pages help crawlers and users alike.",
+        "Your pages are built ready-made and your photographs are sized for whatever screen is looking, so they open quickly. If a page ever feels slow, tell us and we'll look at it.",
     },
     {
       id: "accessibility",
-      label: "Accessibility",
+      label: "Easy for everyone to use",
       category: "technical",
       weight: 0,
       status: "info",
       finding:
-        "The page sets lang=\"en\" and social links have aria-labels; full a11y needs a manual/automated audit.",
+        "Your site is built to work on any phone and to be usable without a mouse. A full check needs a person to test it.",
       recommendation:
-        "Verify colour contrast, heading order, keyboard navigation, and image alt text. Run axe or Lighthouse a11y. Accessible pages are also more machine-readable.",
+        "The part in your hands is your photographs — give each one a short description under Website → Gallery, so visitors who can't see them still know what's there.",
     },
   ];
 }
