@@ -24,6 +24,7 @@ import {
   TextField,
   fieldClass,
 } from "@/app/admin/website/_forms/form-kit";
+import { ImageField } from "@/app/admin/website/_forms/image-field";
 
 /**
  * One list, defined next to the validator that enforces it (schemas/business).
@@ -135,6 +136,15 @@ export function OnboardingWizard({ view }: { view: OnboardingView }) {
     new Set(view.completedSteps),
   );
   const [percentage, setPercentage] = useState(view.percentage);
+  /*
+   * Held in state, not read straight off `view`.
+   *
+   * An owner starting from nothing creates the business at step 1 and reaches
+   * the photo step without the page ever re-rendering from the server — so the
+   * prop is still null by the time the uploader needs an id. The save result
+   * carries the new id forward instead.
+   */
+  const [businessId, setBusinessId] = useState<string | null>(view.businessId);
   const [current, setCurrent] = useState(0);
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<OnboardingSaveResult | null>(null);
@@ -176,6 +186,7 @@ export function OnboardingWizard({ view }: { view: OnboardingView }) {
     if (res.success) {
       setCompleted((prev) => new Set(prev).add(step.id));
       if (typeof res.percentage === "number") setPercentage(res.percentage);
+      if (res.businessId) setBusinessId(res.businessId);
       if (current < ONBOARDING_STEPS.length - 1) setCurrent(current + 1);
     } else if (res.fieldErrors) {
       for (const [key, messages] of Object.entries(res.fieldErrors)) {
@@ -250,7 +261,9 @@ export function OnboardingWizard({ view }: { view: OnboardingView }) {
           <p className="mt-1 text-sm text-admin-muted">{step.blurb}</p>
         </div>
 
-        <div className="grid max-w-xl gap-5">{renderStep(step.id, form)}</div>
+        <div className="grid max-w-xl gap-5">
+          {renderStep(step.id, form, businessId)}
+        </div>
 
         <div className="mt-8 flex flex-wrap items-center gap-4 border-t border-admin-line pt-5">
           <Button
@@ -295,6 +308,7 @@ export function OnboardingWizard({ view }: { view: OnboardingView }) {
 function renderStep(
   stepId: OnboardingStepId,
   form: ReturnType<typeof useForm<WizardValues>>,
+  businessId: string | null,
 ) {
   switch (stepId) {
     case "info":
@@ -366,17 +380,30 @@ function renderStep(
     case "hours":
       return <HoursEditor form={form} />;
     case "photos":
+      /*
+       * The same uploader the CMS and Branding use, not a pair of URL boxes.
+       *
+       * An owner on a phone has the photograph ON the phone; asking them to
+       * host it somewhere first and paste a link is a step most of them cannot
+       * complete, and it left the two images Google most wants — the logo and
+       * the cover — as the likeliest to be skipped. The file goes straight from
+       * the browser to storage and the resulting link fills the field, so a
+       * pasted URL still works for anyone who prefers it.
+       */
       return (
         <>
-          <TextField form={form} name="logoUrl" label="Logo image URL" />
-          <TextField
+          <ImageField
+            form={form}
+            name="logoUrl"
+            label="Logo"
+            businessId={businessId}
+          />
+          <ImageField
             form={form}
             name="coverImageUrl"
-            label="Cover image URL"
+            label="Cover photo"
+            businessId={businessId}
           />
-          <p className="text-xs text-admin-muted">
-            Paste image URLs for now. (Direct file uploads can be added later.)
-          </p>
         </>
       );
     case "description":

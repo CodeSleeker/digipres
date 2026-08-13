@@ -16,6 +16,15 @@ import { stepSchemas } from "@/schemas/onboarding";
 /** Flattened, client-safe snapshot the wizard and dashboard card render from. */
 export interface OnboardingView {
   hasBusiness: boolean;
+  /**
+   * The acting tenant's id, for the photo step's uploader.
+   *
+   * Storage writes are scoped to `<business_id>/…` (migration 0019), so the key
+   * cannot be built before the business exists — which is exactly the state the
+   * wizard is in at step 1. Null until then; `ImageField` offers the URL box
+   * alone and says why.
+   */
+  businessId: string | null;
   fields: {
     name: string;
     phone: string;
@@ -42,6 +51,13 @@ export type OnboardingSaveResult = {
   fieldErrors?: Record<string, string[]>;
   completedSteps?: OnboardingStepId[];
   percentage?: number;
+  /**
+   * Returned so the wizard learns the id the moment step 1 CREATES the business,
+   * without a reload. The owner walks straight on to the photo step in the same
+   * session, and without this the uploader would still believe there is no
+   * business to scope an upload to.
+   */
+  businessId?: string | null;
 };
 
 function makeService(supabase: SupabaseClient<Database>): OnboardingService {
@@ -57,6 +73,7 @@ export async function getOnboardingView(): Promise<OnboardingView> {
 
   return {
     hasBusiness: Boolean(business),
+    businessId: business?.id ?? null,
     fields: {
       name: business?.name ?? "",
       phone: business?.phone ?? "",
@@ -135,6 +152,7 @@ export async function saveOnboardingStep(
       success: true,
       completedSteps: state.progress.completedSteps,
       percentage: state.percentage,
+      businessId: state.business?.id ?? null,
     };
   } catch (error) {
     return { error: toMessage(error) };
