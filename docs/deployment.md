@@ -58,6 +58,7 @@ later requires a redeploy.
 | `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`                                     | AI SMS variations; template fallback without                                                            |
 | `ERROR_WEBHOOK_URL`                                                         | optional error forwarding (Slack webhook etc.)                                                          |
 | `VERCEL_API_TOKEN` / `VERCEL_PROJECT_ID` / `EDGE_CONFIG` / `EDGE_CONFIG_ID` | only when enabling **custom domains** (see §6)                                                          |
+| `VERCEL_DNS_TARGET`                                                         | this project's CNAME target (e.g. `33165ec7eaa7cde9.vercel-dns-017.com`) — see §4                       |
 | `RETENTION_*_DAYS`                                                          | optional; defaults 90/90/730                                                                            |
 
 Deploy. `vercel.json` registers the two cron jobs automatically:
@@ -83,18 +84,28 @@ In **Vercel → Project → Domains** add `aliamzdigital.com` and
 `www.aliamzdigital.com`. Vercel shows the exact record values to create; in
 Cloudflare DNS they are typically:
 
-| Record | Host                                | Value                  | Proxy                     |
-| ------ | ----------------------------------- | ---------------------- | ------------------------- |
-| CNAME  | `@` (apex — Cloudflare flattens it) | `cname.vercel-dns.com` | **DNS-only (gray cloud)** |
-| CNAME  | `www`                               | `cname.vercel-dns.com` | DNS-only                  |
+| Record | Host                                | Value                     | Proxy                     |
+| ------ | ----------------------------------- | ------------------------- | ------------------------- |
+| CNAME  | `@` (apex — Cloudflare flattens it) | `<project>.vercel-dns-0NN.com` | **DNS-only (gray cloud)** |
+| CNAME  | `www`                               | `<project>.vercel-dns-0NN.com` | DNS-only                  |
 
 DNS-only is the simplest correct setup with Vercel (Vercel then terminates TLS
 and issues certificates itself).
 
+> **The CNAME target is per-project.** Read it from **View DNS configuration**
+> on any domain in Vercel → Domains; it looks like
+> `33165ec7eaa7cde9.vercel-dns-017.com`. Put that same value in
+> `VERCEL_DNS_TARGET` (§3) so `/admin/domains` hands clients the records Vercel
+> currently recommends. The legacy `cname.vercel-dns.com` / `76.76.21.21` keep
+> working — Vercel is expanding its IP range, not retiring the old ones — but a
+> domain still on them shows an amber **DNS Change Recommended** in the
+> dashboard.
+
 **Per tenant subdomain** (repeat when onboarding a client):
 
 1. Vercel → Domains → add `roniesbarber.aliamzdigital.com`.
-2. Cloudflare DNS → CNAME `roniesbarber` → `cname.vercel-dns.com`, DNS-only.
+2. Cloudflare DNS → CNAME `roniesbarber` → the `VERCEL_DNS_TARGET` value,
+   DNS-only.
 
 The app needs no change — `NEXT_PUBLIC_ROOT_DOMAIN` already routes any
 `<slug>.aliamzdigital.com` request to that tenant; these two steps just make

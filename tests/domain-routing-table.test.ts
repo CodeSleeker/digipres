@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { buildRoutingTable } from "@/lib/domains/edge-config";
-import { vercelDnsFor } from "@/lib/domains/provider";
+import { vercelDnsFor, vercelDnsTarget } from "@/lib/domains/provider";
 import { isValidHostname } from "@/repositories/domain-repository";
 import type { DomainRoute } from "@/types/domain";
 
@@ -38,16 +38,49 @@ describe("buildRoutingTable", () => {
 });
 
 describe("vercelDnsFor", () => {
-  it("returns an A record for an apex domain", () => {
-    expect(vercelDnsFor("roniesbarber.com")).toEqual([
-      { type: "A", name: "@", value: "76.76.21.21" },
-    ]);
+  describe("without a project target (legacy records)", () => {
+    it("returns an A record for an apex domain", () => {
+      expect(vercelDnsFor("roniesbarber.com", undefined)).toEqual([
+        { type: "A", name: "@", value: "76.76.21.21" },
+      ]);
+    });
+
+    it("returns a CNAME for a subdomain", () => {
+      expect(vercelDnsFor("www.roniesbarber.com", undefined)).toEqual([
+        { type: "CNAME", name: "www", value: "cname.vercel-dns.com" },
+      ]);
+    });
   });
 
-  it("returns a CNAME for a subdomain", () => {
-    expect(vercelDnsFor("www.roniesbarber.com")).toEqual([
-      { type: "CNAME", name: "www", value: "cname.vercel-dns.com" },
-    ]);
+  describe("with a project target (Vercel's current recommendation)", () => {
+    const target = "33165ec7eaa7cde9.vercel-dns-017.com";
+
+    it("uses a CNAME at the apex, not an A record", () => {
+      expect(vercelDnsFor("roniesbarber.com", target)).toEqual([
+        { type: "CNAME", name: "@", value: target },
+      ]);
+    });
+
+    it("uses the same target for a subdomain", () => {
+      expect(vercelDnsFor("www.roniesbarber.com", target)).toEqual([
+        { type: "CNAME", name: "www", value: target },
+      ]);
+    });
+  });
+});
+
+describe("vercelDnsTarget", () => {
+  it("is undefined when unset or blank", () => {
+    expect(vercelDnsTarget({})).toBeUndefined();
+    expect(vercelDnsTarget({ VERCEL_DNS_TARGET: "   " })).toBeUndefined();
+  });
+
+  it("strips the trailing dot the dashboard prints", () => {
+    expect(
+      vercelDnsTarget({
+        VERCEL_DNS_TARGET: "33165ec7eaa7cde9.vercel-dns-017.com.",
+      }),
+    ).toBe("33165ec7eaa7cde9.vercel-dns-017.com");
   });
 });
 
