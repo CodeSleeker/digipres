@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "smoke": "node scripts/smoke.mjs",
-    "seed": "node scripts/seed.mjs"
+    "seed": "node scripts/seed.mjs",
+    "messenger:ping": "node scripts/messenger-ping.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.112.5",
