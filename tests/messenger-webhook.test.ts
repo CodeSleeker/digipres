@@ -77,54 +77,95 @@ describe("verifyChallenge", () => {
           "hub.challenge": "1158201444",
         }),
       ),
-    ).toBe("1158201444");
+    ).toEqual({ ok: true, challenge: "1158201444" });
   });
 
-  it("rejects a wrong verify token", () => {
-    expect(
-      verifyChallenge(
-        token,
-        params({
-          "hub.mode": "subscribe",
-          "hub.verify_token": "not-the-token",
-          "hub.challenge": "1158201444",
-        }),
-      ),
-    ).toBeNull();
+  /*
+   * Each rejection names its own cause. Meta stops delivering messages to a
+   * callback it can't verify, so an unexplained 403 here silently disables a
+   * working integration — the failure that cost a day of debugging.
+   */
+  it("rejects a wrong verify token and says so", () => {
+    const result = verifyChallenge(
+      token,
+      params({
+        "hub.mode": "subscribe",
+        "hub.verify_token": "not-the-tokn",
+        "hub.challenge": "1158201444",
+      }),
+    );
+    expect(result.ok).toBe(false);
+    expect(result.ok === false && result.reason).toMatch(
+      /does not match META_WEBHOOK_VERIFY_TOKEN/,
+    );
   });
 
-  it("rejects a token of a different length without throwing", () => {
-    expect(
-      verifyChallenge(
-        token,
-        params({
-          "hub.mode": "subscribe",
-          "hub.verify_token": "short",
-          "hub.challenge": "1158201444",
-        }),
-      ),
-    ).toBeNull();
+  it("reports both lengths, so a truncated paste is obvious", () => {
+    const result = verifyChallenge(
+      token,
+      params({
+        "hub.mode": "subscribe",
+        "hub.verify_token": "short",
+        "hub.challenge": "1158201444",
+      }),
+    );
+    expect(result.ok).toBe(false);
+    expect(result.ok === false && result.reason).toContain(
+      `expected ${token.length} chars, received 5`,
+    );
+  });
+
+  /** The token itself must never reach a log line. */
+  it("never puts either token value in the reason", () => {
+    const result = verifyChallenge(
+      token,
+      params({
+        "hub.mode": "subscribe",
+        "hub.verify_token": "wrong-token!",
+        "hub.challenge": "1158201444",
+      }),
+    );
+    expect(result.ok === false && result.reason).not.toContain(token);
+    expect(result.ok === false && result.reason).not.toContain("wrong-token!");
   });
 
   it("rejects a mode other than subscribe", () => {
-    expect(
-      verifyChallenge(
-        token,
-        params({
-          "hub.mode": "unsubscribe",
-          "hub.verify_token": token,
-          "hub.challenge": "1158201444",
-        }),
-      ),
-    ).toBeNull();
+    const result = verifyChallenge(
+      token,
+      params({
+        "hub.mode": "unsubscribe",
+        "hub.verify_token": token,
+        "hub.challenge": "1158201444",
+      }),
+    );
+    expect(result.ok).toBe(false);
+    expect(result.ok === false && result.reason).toContain("unsubscribe");
+  });
+
+  /** Crawlers and browsers hitting a public URL — noise, not a broken setup. */
+  it("distinguishes ordinary GET traffic from a failed handshake", () => {
+    const result = verifyChallenge(token, params({}));
+    expect(result.ok).toBe(false);
+    expect(result.ok === false && result.reason).toContain(
+      "ordinary GET traffic",
+    );
   });
 
   it("rejects a request with no challenge to echo", () => {
-    expect(
-      verifyChallenge(
-        token,
-        params({ "hub.mode": "subscribe", "hub.verify_token": token }),
-      ),
-    ).toBeNull();
+    const result = verifyChallenge(
+      token,
+      params({ "hub.mode": "subscribe", "hub.verify_token": token }),
+    );
+    expect(result.ok).toBe(false);
+    expect(result.ok === false && result.reason).toContain("hub.challenge");
+  });
+
+  it("rejects a request with no verify token", () => {
+    const result = verifyChallenge(
+      token,
+      params({ "hub.mode": "subscribe", "hub.challenge": "1158201444" }),
+    );
+    expect(result.ok).toBe(false);
+    expect(result.ok === false && result.reason).toContain("hub.verify_token");
   });
 });

@@ -179,33 +179,33 @@ function buildChecks(
     /* --- Structured data --- */
     {
       id: "schema-org",
-      label: "Schema.org",
+      label: "Your details, in a form machines read",
       category: "structured-data",
       weight: 12,
       status: PLATFORM.hasJsonLd ? "pass" : "fail",
       finding: PLATFORM.hasJsonLd
-        ? "Structured data (JSON-LD) is emitted on the public site."
-        : "No Schema.org JSON-LD is emitted. AI assistants and search engines can't read structured facts about the business.",
-      recommendation:
-        "Add Organization and WebSite JSON-LD (name, url, logo, sameAs socials) to the public page head so machines can parse core business facts.",
+        ? "Your name, contact details and hours are published in the format Google and AI assistants read directly, alongside the page people see."
+        : "Your details aren't published in a form search engines and AI assistants can read.",
+      recommendation: PLATFORM.hasJsonLd
+        ? "Nothing to do — this updates itself whenever you edit your contact details."
+        : "Contact us — this is published by the platform, not something you set up.",
     },
     {
       id: "local-business",
-      label: "LocalBusiness Schema",
+      label: "Recognised as a local business",
       category: "structured-data",
       weight: 12,
       status: PLATFORM.hasJsonLd ? "pass" : has(b.address) ? "warn" : "fail",
       finding: PLATFORM.hasJsonLd
-        ? "LocalBusiness JSON-LD is emitted."
-        : `No LocalBusiness JSON-LD yet. Ready fields: ${
-            localReady.join(", ") || "none"
-          }. Missing: ${localMissing.join(", ") || "none"}.`,
-      recommendation:
-        "Emit LocalBusiness JSON-LD (address, telephone, openingHours, geo, priceRange, sameAs). Fill the missing fields above — geo especially — for a complete entity.",
+        ? "Search engines are told you're a real business with a place, not just a website — the difference that gets you into “near me” results."
+        : `Not published yet. Ready: ${localReady.join(", ") || "none"}. Still needed: ${localMissing.join(", ") || "none"}.`,
+      recommendation: PLATFORM.hasJsonLd
+        ? "Keep your address, phone and opening hours current under Contact details — they're what this publishes."
+        : "Fill in the missing details above under Contact details.",
     },
     {
       id: "faq",
-      label: "FAQ",
+      label: "Questions and answers",
       category: "content",
       weight: 6,
       // Per-tenant, not platform-level. The capability now exists for everyone,
@@ -242,7 +242,7 @@ function buildChecks(
     /* --- Metadata --- */
     {
       id: "meta-tags",
-      label: "Meta Tags",
+      label: "How you appear in search results",
       category: "metadata",
       weight: 10,
       status: !has(b.name)
@@ -253,20 +253,20 @@ function buildChecks(
             ? "warn"
             : "pass",
       finding: !has(b.name)
-        ? "Business name is missing, so the page title can't be generated."
+        ? "Your business name is missing, so search results have no title to show."
         : descLen === 0
-          ? "No business description, so the meta description is empty."
+          ? "You have no business description, so the grey summary line under your search result is empty."
           : descLen < 50
-            ? `Meta description is short (${descLen} chars). Aim for 50–160.`
+            ? `Your description is short (${descLen} characters). Around 50–160 fills the space Google gives you.`
             : descLen > 160
-              ? `Meta description is long (${descLen} chars) and may be truncated. Aim for 50–160.`
-              : `Title and a well-sized meta description (${descLen} chars) are generated.`,
+              ? `Your description is long (${descLen} characters) and Google will cut it off. Around 50–160 fits.`
+              : `Your name and a well-sized description (${descLen} characters) are what people see in search results.`,
       recommendation:
-        "Keep a unique title and a 50–160 character description that names the business, category, and location.",
+        "Write a description under Contact details that says what you do and where — it's the sentence people read before deciding to click.",
     },
     {
       id: "open-graph",
-      label: "Open Graph",
+      label: "Link previews",
       category: "metadata",
       weight: 6,
       status: PLATFORM.emitsOgImage ? "pass" : "warn",
@@ -286,13 +286,13 @@ function buildChecks(
     },
     {
       id: "twitter-cards",
-      label: "Twitter Cards",
+      label: "Link previews on X",
       category: "metadata",
       weight: 4,
       status: PLATFORM.emitsTwitterImage ? "pass" : "warn",
       finding: PLATFORM.emitsTwitterImage
-        ? "A summary_large_image card is emitted, using the same generated share image as Open Graph."
-        : "A summary_large_image card is declared but has no image, so it falls back to a plain card.",
+        ? "Your link shows the same large preview card on X as it does on Facebook and WhatsApp."
+        : "Your link shows a plain preview on X, with no picture.",
       // Same image as Open Graph, so the same advice applies; saying it twice
       // in a checklist reads as two separate jobs.
       recommendation: has(b.logoUrl)
@@ -301,47 +301,50 @@ function buildChecks(
     },
     {
       id: "canonical",
-      label: "Canonical URLs",
+      label: "One official web address",
       category: "technical",
       weight: 6,
       status: PLATFORM.hasCanonical ? "pass" : "fail",
       finding: PLATFORM.hasCanonical
-        ? "A canonical URL is set per page."
-        : "No canonical URL or metadataBase is set, risking duplicate-content ambiguity across domains/paths.",
-      recommendation:
-        "Set metadataBase to the tenant's domain and alternates.canonical to the page's absolute URL.",
+        ? "Every page tells search engines its one official address, so your ranking isn't split between two versions of the same page."
+        : "Pages don't declare an official address, so search engines may treat two versions of a page as competitors.",
+      recommendation: PLATFORM.hasCanonical
+        ? "Nothing to do. If you connect your own domain, mark it Primary under Domains so it becomes the official one."
+        : "Contact us — this is handled by the platform, not something you set up.",
     },
 
     /* --- Crawlability --- */
     {
       id: "robots",
-      label: "Robots.txt",
+      label: "Search engines are let in",
       category: "crawlability",
       weight: 8,
       status: PLATFORM.hasRobots ? "pass" : "fail",
       finding: PLATFORM.hasRobots
-        ? "robots.txt is served and references the sitemap."
-        : "No robots.txt is served. Crawlers and AI bots have no explicit crawl guidance.",
-      recommendation:
-        "Add app/robots.ts allowing public pages, disallowing /admin and /api, and pointing to sitemap.xml.",
+        ? "Google and AI assistants are explicitly invited to read your public pages, and kept out of your dashboard."
+        : "Nothing tells search engines which pages they may read.",
+      recommendation: PLATFORM.hasRobots
+        ? "Nothing to do — this is set up for you."
+        : "Contact us — this is handled by the platform, not something you set up.",
     },
     {
       id: "sitemap",
-      label: "Sitemap.xml",
+      label: "A map of your site for search engines",
       category: "crawlability",
       weight: 8,
       status: PLATFORM.hasSitemap ? "pass" : "fail",
       finding: PLATFORM.hasSitemap
-        ? "A sitemap.xml is generated and served."
-        : "No sitemap.xml exists, so crawlers must discover pages on their own.",
-      recommendation:
-        "Add app/sitemap.ts listing the public page(s) with lastModified so crawlers index efficiently.",
+        ? "Your pages are listed for search engines, so they don't have to stumble across them."
+        : "Search engines have no list of your pages and must find them by chance.",
+      recommendation: PLATFORM.hasSitemap
+        ? "Nothing to do — it updates itself as your site changes."
+        : "Contact us — this is handled by the platform, not something you set up.",
     },
 
     /* --- Media --- */
     {
       id: "image-alt",
-      label: "Image Alt Text",
+      label: "Photo descriptions",
       category: "media",
       weight: 6,
       // Per-tenant, and scoped to the images that actually need describing.
@@ -368,7 +371,7 @@ function buildChecks(
     /* --- Technical --- */
     {
       id: "coordinates",
-      label: "Business Coordinates",
+      label: "Your exact location",
       category: "technical",
       weight: 6,
       // Per-tenant, not platform-level. The capability now exists for everyone
@@ -378,8 +381,8 @@ function buildChecks(
       // needed when that capability landed.
       status: hasCoordinates(b) ? "pass" : "fail",
       finding: hasCoordinates(b)
-        ? "Latitude and longitude are set, so LocalBusiness carries a geo point and the site can show a map."
-        : "No map pin is set, so the location is only a street line — search engines have to guess where that is, and the site can't show a map.",
+        ? "Your exact spot is pinned, so your site shows a live map and search engines know precisely where you are."
+        : "You have an address but no map pin, so search engines have to guess where that is — and your site can't show a map.",
       recommendation: hasCoordinates(b)
         ? "Check the pin sits on the entrance guests actually use, not the middle of the plot."
         : "Open your place on Google Maps, copy the link from the address bar, and paste it under Contact details → Map location. We read the coordinates out of it.",

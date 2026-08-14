@@ -55,7 +55,10 @@ later requires a redeploy.
 | `IMPERSONATION_SECRET`                                                      | optional (falls back to service key)                                                                    |
 | `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_MESSAGING_SERVICE_SID` | real SMS; without them sends are logged no-ops                                                          |
 | `SMS_DEFAULT_COUNTRY_CODE`                                                  | e.g. `63` — normalizes national numbers to E.164                                                        |
-| `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`                                     | AI SMS variations; template fallback without                                                            |
+| `AI_SMS_PROVIDER`                                                           | `openai` \| `anthropic`. **Blank ⇒ templates.** A key alone never enables AI SMS                          |
+| `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`                                     | Keys for the provider named above, and the Messenger bot's fallback keys                                 |
+| `MESSENGER_AI_PROVIDER`                                                     | `openai` \| `anthropic`. **Blank ⇒ the Messenger bot never replies** (see docs/messenger-ai.md)           |
+| `MESSENGER_TOKEN_ENCRYPTION_KEY`                                            | ≥32 chars; encrypts Page tokens at rest. Needed before a Page can send                                   |
 | `ERROR_WEBHOOK_URL`                                                         | optional error forwarding (Slack webhook etc.)                                                          |
 | `VERCEL_API_TOKEN` / `VERCEL_PROJECT_ID` / `EDGE_CONFIG` / `EDGE_CONFIG_ID` | only when enabling **custom domains** (see §6)                                                          |
 | `VERCEL_DNS_TARGET`                                                         | this project's CNAME target (e.g. `33165ec7eaa7cde9.vercel-dns-017.com`) — see §4                       |

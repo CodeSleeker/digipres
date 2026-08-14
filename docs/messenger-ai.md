@@ -327,11 +327,21 @@ from the dashboard.
 | `META_WEBHOOK_VERIFY_TOKEN`       | **Secret.** Long random string you invent                |
 | `META_GRAPH_VERSION`              | Pinned, e.g. `v23.0` — never "latest"                    |
 | `MESSENGER_TOKEN_ENCRYPTION_KEY`  | **Secret.** Encrypts Page tokens at rest                 |
-| `AI_CHAT_PROVIDER`                | `openai` \| `anthropic`; unset ⇒ auto-detect by key      |
-| `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` | Existing vars, reused                               |
+| `MESSENGER_AI_PROVIDER`           | `openai` \| `anthropic`; **unset ⇒ the bot never replies** |
+| `MESSENGER_OPENAI_API_KEY` / `MESSENGER_ANTHROPIC_API_KEY` | Optional per-feature keys; fall back to the shared `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` |
+| `MESSENGER_MODEL`                 | Optional override. Defaults: `claude-opus-5`, or `OPENAI_MODEL`/`gpt-4o-mini` |
+| `MESSENGER_EFFORT`                | Anthropic only: `low` \| `medium` \| `high`. Default `low` |
+
+**AI is opt-in per feature — a key alone switches nothing on.** `MESSENGER_AI_PROVIDER`
+must name a provider *and* that provider must have a key, or the bot stores
+messages and stays silent. This is deliberate: an earlier version auto-detected
+whichever key existed, so setting `ANTHROPIC_API_KEY` here also flipped AI SMS
+off its templates — a paid channel writing to customers, changed as a side
+effect. AI SMS has the same shape now (`AI_SMS_PROVIDER`); see `lib/ai/index.ts`.
 
 Page IDs and Page Access Tokens are **not** env vars — they are per-Page and
-live in `messaging_channels`.
+live in `messaging_channels`. Store one with
+`POST /api/jobs/messenger-connect` (bearer `CRON_SECRET`).
 
 ---
 

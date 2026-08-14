@@ -3,7 +3,9 @@ import type { Database, Json } from "@/types/database";
 import type {
   MessagingChannel,
   InboundMessage,
+  OutboundMessage,
 } from "@/types/messenger";
+import { decryptPageToken, encryptPageToken } from "@/lib/messenger/token-crypto";
 
 type ChannelRow = Database["public"]["Tables"]["messaging_channels"]["Row"];
 
@@ -102,6 +104,101 @@ export class MessengerRepository {
     const { error } = await this.supabase
       .from("conversations")
       .update({ last_customer_message_at: at })
+      .eq("id", conversationId);
+    if (error) throw error;
+  }
+
+  /**
+   * The recent transcript for a thread, oldest first.
+   *
+   * Fetched newest-first and reversed rather than ordered ascending with an
+   * offset: "the last N messages" is what a reply needs, and an ascending query
+   * would have to count the whole thread to find where N from the end begins.
+   */
+  async recentTurns(
+    conversationId: string,
+    limit: number,
+  ): Promise<{ role: "customer" | "assistant"; text: string }[]> {
+    const { data, error } = await this.supabase
+      .from("messenger_messages")
+      .select("direction,text,created_at")
+      .eq("conversation_id", conversationId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+
+    return (data ?? [])
+      .reverse()
+      .filter((row) => Boolean(row.text?.trim()))
+      .map((row) => ({
+        role: row.direction === "inbound" ? ("customer" as const) : ("assistant" as const),
+        text: row.text as string,
+      }));
+  }
+
+  /** Record a message the bot sent, so it becomes context for the next turn. */
+  async recordOutbound(message: OutboundMessage): Promise<void> {
+    const { error } = await this.supabase.from("messenger_messages").insert({
+      conversation_id: message.conversationId,
+      direction: "outbound",
+      text: message.text,
+      ai_model: message.model,
+      tokens: message.tokens,
+      latency_ms: message.latencyMs,
+    });
+    if (error) throw error;
+  }
+
+  /**
+   * The Page token for sending, decrypted.
+   *
+   * Fetched on its own rather than carried on `MessagingChannel`, so the
+   * credential only exists in memory when a send is actually about to happen —
+   * and can never be logged by something that dumps a channel object.
+   */
+  async pageTokenFor(channelId: string): Promise<string | null> {
+    const { data, error } = await this.supabase
+      .from("messaging_channels")
+      .select("page_access_token_encrypted")
+      .eq("id", channelId)
+      .maybeSingle();
+    if (error) throw error;
+
+    const stored = data?.page_access_token_encrypted;
+    if (!stored) return null;
+    return decryptPageToken(stored);
+  }
+
+  /** Store (or rotate) a Page token, encrypted at rest. */
+  async setPageToken(pageId: string, token: string): Promise<boolean> {
+    const { data, error } = await this.supabase
+      .from("messaging_channels")
+      .update({
+        page_access_token_encrypted: encryptPageToken(token),
+        connected_at: new Date().toISOString(),
+      })
+      .eq("page_id", pageId)
+      .select("id");
+    if (error) throw error;
+    return (data ?? []).length > 0;
+  }
+
+  /** The person this thread belongs to — the address a reply is sent to. */
+  async psidFor(conversationId: string): Promise<string | null> {
+    const { data, error } = await this.supabase
+      .from("conversations")
+      .select("psid")
+      .eq("id", conversationId)
+      .maybeSingle();
+    if (error) throw error;
+    return data?.psid ?? null;
+  }
+
+  /** Count the AI turns so far, for the per-conversation cap. */
+  async bumpAiCount(conversationId: string, current: number): Promise<void> {
+    const { error } = await this.supabase
+      .from("conversations")
+      .update({ ai_message_count: current + 1 })
       .eq("id", conversationId);
     if (error) throw error;
   }

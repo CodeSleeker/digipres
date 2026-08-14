@@ -37,11 +37,25 @@ export function isValidMetaSignature(
 }
 
 /**
+ * Why a verification request was refused, or the challenge to echo back.
+ *
+ * A bare null was not enough, and the cost of that was a day.
+ *
+ * Meta re-verifies a callback periodically and will NOT deliver messages to one
+ * it cannot verify — so a failing handshake silently stops every message,
+ * while the app dashboard still shows a subscription that looks healthy. All
+ * four causes returned 403 with nothing written anywhere, which is
+ * indistinguishable from Meta never calling at all.
+ */
+export type ChallengeResult =
+  | { ok: true; challenge: string }
+  | { ok: false; reason: string };
+
+/**
  * Meta's callback-verification handshake.
  *
  * Meta GETs the callback URL with `hub.mode=subscribe`, the verify token we
- * gave it, and a `hub.challenge` it expects echoed back verbatim. Returns the
- * challenge when the request is genuine, otherwise null.
+ * gave it, and a `hub.challenge` it expects echoed back verbatim.
  *
  * The token comparison is constant time for the same reason the signature one
  * is: this endpoint is public, unauthenticated and unrate-limited by Meta's
@@ -50,16 +64,45 @@ export function isValidMetaSignature(
 export function verifyChallenge(
   expectedToken: string,
   params: URLSearchParams,
-): string | null {
-  if (params.get("hub.mode") !== "subscribe") return null;
+): ChallengeResult {
+  const mode = params.get("hub.mode");
+  if (mode !== "subscribe") {
+    /* A plain GET with no parameters is the common case here — a crawler, an
+       uptime check, someone opening the URL in a browser. Naming it stops that
+       ordinary noise being mistaken for a broken handshake. */
+    return {
+      ok: false,
+      reason: mode
+        ? `hub.mode was "${mode}", expected "subscribe"`
+        : "no hub.mode — not a verification request (ordinary GET traffic)",
+    };
+  }
 
   const provided = params.get("hub.verify_token");
+  if (!provided) return { ok: false, reason: "no hub.verify_token" };
+
   const challenge = params.get("hub.challenge");
-  if (!provided || !challenge) return null;
+  if (!challenge) return { ok: false, reason: "no hub.challenge to echo" };
 
   const a = Buffer.from(expectedToken);
   const b = Buffer.from(provided);
-  if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
+  if (a.length !== b.length || !timingSafeEqual(a, b)) {
+    /*
+     * LENGTHS, never the values.
+     *
+     * The token itself must not reach a log, but the two lengths are what
+     * actually identify the mistake: equal lengths mean a genuinely different
+     * string, and unequal ones point straight at a truncated paste or trailing
+     * whitespace — which is exactly how this failed in practice.
+     */
+    return {
+      ok: false,
+      reason:
+        `hub.verify_token does not match META_WEBHOOK_VERIFY_TOKEN on this ` +
+        `deployment (expected ${a.length} chars, received ${b.length}). ` +
+        `Re-enter it in Messenger → Settings → Webhooks.`,
+    };
+  }
 
-  return challenge;
+  return { ok: true, challenge };
 }

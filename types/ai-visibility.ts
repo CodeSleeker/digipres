@@ -9,13 +9,20 @@ export type CheckCategory =
   | "media"
   | "technical";
 
+/**
+ * Headings for the checklist, written for the person reading it.
+ *
+ * The keys stay technical because they are code; the labels are what a business
+ * owner sees in their dashboard, and "Crawlability" tells them nothing about
+ * what the section is for.
+ */
 export const CATEGORY_LABEL: Record<CheckCategory, string> = {
-  "structured-data": "Structured Data",
-  metadata: "Metadata",
-  crawlability: "Crawlability",
-  content: "Content",
-  media: "Media",
-  technical: "Technical",
+  "structured-data": "What search engines and AI can read",
+  metadata: "How you look in search and shared links",
+  crawlability: "Being found at all",
+  content: "Your content",
+  media: "Your photos",
+  technical: "Under the hood",
 };
 
 export const CATEGORY_ORDER: CheckCategory[] = [

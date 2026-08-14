@@ -1,15 +1,20 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, after, type NextRequest } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import {
   isValidMetaSignature,
   verifyChallenge,
 } from "@/lib/messenger/signature";
 import { inboundEventsFrom } from "@/lib/messenger/payload";
+import { generateReply } from "@/lib/messenger/reply";
+import { replyWithPresence } from "@/lib/messenger/send";
 import { MessengerRepository } from "@/repositories/messenger-repository";
 import type { MessengerWebhookBody } from "@/types/messenger";
 import { logError } from "@/lib/observability/logger";
 
 export const dynamic = "force-dynamic";
+
+/** Turns fetched for context. The last one is the message being answered. */
+const HISTORY_LIMIT = 13;
 
 /**
  * Messenger webhook — phase 1 of docs/messenger-ai.md.
@@ -40,15 +45,25 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const challenge = verifyChallenge(
-    expected,
-    request.nextUrl.searchParams,
-  );
-  if (challenge === null) {
+  const result = verifyChallenge(expected, request.nextUrl.searchParams);
+
+  if (!result.ok) {
+    /*
+     * Meta re-verifies periodically and stops delivering messages to a callback
+     * that fails — so a silent 403 here doesn't just break setup, it switches
+     * off a working integration with no trace. The reason is logged for the
+     * same purpose as on the POST path: to tell "Meta rejected us" apart from
+     * "Meta never called", which look identical from the outside.
+     */
+    logError(new Error(`Rejected webhook verification: ${result.reason}`), {
+      scope: "messenger:webhook:verify",
+      host: request.headers.get("host"),
+      userAgent: request.headers.get("user-agent"),
+    });
     return new NextResponse("Verification failed", { status: 403 });
   }
 
-  return new NextResponse(challenge, {
+  return new NextResponse(result.challenge, {
     status: 200,
     headers: { "Content-Type": "text/plain; charset=utf-8" },
   });
@@ -191,7 +206,7 @@ async function persist(body: MessengerWebhookBody): Promise<void> {
       event.psid,
     );
 
-    await repo.recordInbound({
+    const stored = await repo.recordInbound({
       conversationId,
       mid: event.mid,
       text: event.text,
@@ -201,5 +216,78 @@ async function persist(body: MessengerWebhookBody): Promise<void> {
     // Outside the dedupe check on purpose: a redelivery still proves the
     // customer wrote at that time, and this value gates whether we may reply.
     await repo.touchCustomerActivity(conversationId, event.sentAt);
+
+    /*
+     * Answering happens AFTER the response, via `after()`.
+     *
+     * A model call takes seconds and Meta disables a subscription whose
+     * acknowledgement is slow, so the reply cannot run inline. `after()` is
+     * Next's supported way to keep work alive past the response on serverless —
+     * without it, a fire-and-forget promise is killed the moment the function
+     * returns.
+     *
+     * Gated on `stored`: a redelivered message must not be answered twice, and
+     * the dedupe insert is the only place that knows which one this is.
+     */
+    if (stored && channel.aiEnabled && event.text?.trim()) {
+      after(() => respond(channel.id, conversationId, event.text as string));
+    }
+  }
+}
+
+/**
+ * Compose and send one reply.
+ *
+ * Runs detached from the request, so it swallows everything: there is no caller
+ * left to receive an error, and an unhandled rejection here would be noise in
+ * the logs at best. A failure means the thread simply doesn't get an automated
+ * reply — which is the same outcome as the AI being switched off, and the safe
+ * one when something is wrong.
+ */
+async function respond(
+  channelId: string,
+  conversationId: string,
+  incoming: string,
+): Promise<void> {
+  try {
+    const repo = new MessengerRepository(createServiceClient());
+
+    /*
+     * The token first, because it is the cheapest way to find out we cannot
+     * send. Generating a reply and then discovering there is no way to deliver
+     * it would burn a model call for nothing.
+     */
+    const pageToken = await repo.pageTokenFor(channelId);
+    if (!pageToken) {
+      logError(new Error(`No Page token stored for channel ${channelId}`), {
+        scope: "messenger:respond:no-token",
+      });
+      return;
+    }
+
+    // The message just stored is the last turn, so it is excluded from the
+    // history and passed separately — otherwise the model sees it twice.
+    const history = await repo.recentTurns(conversationId, HISTORY_LIMIT);
+    const reply = await generateReply(history.slice(0, -1), incoming);
+    if (!reply) return; // declined, unconfigured, or errored — a human takes it
+
+    const psid = await repo.psidFor(conversationId);
+    if (!psid) return;
+
+    const sent = await replyWithPresence(pageToken, psid, reply.text);
+    if (!sent) return;
+
+    // Recorded only after a confirmed send: a message in the transcript that
+    // never reached the customer would be fed back as context next turn, and
+    // the bot would answer as though it had already said it.
+    await repo.recordOutbound({
+      conversationId,
+      text: reply.text,
+      model: reply.model,
+      tokens: reply.tokens,
+      latencyMs: reply.latencyMs,
+    });
+  } catch (error) {
+    logError(error, { scope: "messenger:respond" });
   }
 }

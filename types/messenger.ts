@@ -29,6 +29,16 @@ export interface MessagingChannel {
   status: MessagingChannelStatus;
 }
 
+/** One reply the bot sent, with the cost of producing it. */
+export interface OutboundMessage {
+  conversationId: string;
+  text: string;
+  /** The model that wrote it — null for anything a human sent. */
+  model: string | null;
+  tokens: number | null;
+  latencyMs: number | null;
+}
+
 /** One inbound message, already resolved to its thread. */
 export interface InboundMessage {
   conversationId: string;
