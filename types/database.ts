@@ -15,6 +15,24 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
+/**
+ * Messenger (migration 0040). Text + check constraints in the database rather
+ * than Postgres enums, matching `leads` — the lists grow, and adding an enum
+ * value needs DDL that can't share a transaction on some Postgres versions.
+ */
+export type MessagingChannelKindEnum = "platform" | "tenant";
+
+export type MessagingChannelStatusEnum = "active" | "paused" | "disconnected";
+
+export type ConversationStateEnum =
+  | "ai_active"
+  | "collecting"
+  | "awaiting_confirm"
+  | "human"
+  | "closed";
+
+export type MessageDirectionEnum = "inbound" | "outbound";
+
 export type BusinessCategoryEnum =
   | "barber"
   | "salon"
@@ -662,6 +680,120 @@ export interface Database {
         // EVERY table's query types to `never` — not just this one.
         Relationships: [];
       };
+      messaging_channels: {
+        Row: {
+          id: string;
+          page_id: string;
+          page_name: string | null;
+          page_access_token_encrypted: string | null;
+          business_id: string | null;
+          channel_kind: MessagingChannelKindEnum;
+          ai_enabled: boolean;
+          persona: Json;
+          status: MessagingChannelStatusEnum;
+          connected_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          page_id: string;
+          page_name?: string | null;
+          page_access_token_encrypted?: string | null;
+          business_id?: string | null;
+          channel_kind: MessagingChannelKindEnum;
+          ai_enabled?: boolean;
+          persona?: Json;
+          status?: MessagingChannelStatusEnum;
+          connected_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          page_name?: string | null;
+          page_access_token_encrypted?: string | null;
+          business_id?: string | null;
+          channel_kind?: MessagingChannelKindEnum;
+          ai_enabled?: boolean;
+          persona?: Json;
+          status?: MessagingChannelStatusEnum;
+          connected_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      conversations: {
+        Row: {
+          id: string;
+          channel_id: string;
+          psid: string;
+          state: ConversationStateEnum;
+          intent: string | null;
+          collected: Json;
+          outcome_ref: string | null;
+          last_customer_message_at: string | null;
+          ai_message_count: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          channel_id: string;
+          psid: string;
+          state?: ConversationStateEnum;
+          intent?: string | null;
+          collected?: Json;
+          outcome_ref?: string | null;
+          last_customer_message_at?: string | null;
+          ai_message_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          state?: ConversationStateEnum;
+          intent?: string | null;
+          collected?: Json;
+          outcome_ref?: string | null;
+          last_customer_message_at?: string | null;
+          ai_message_count?: number;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      messenger_messages: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          direction: MessageDirectionEnum;
+          mid: string | null;
+          text: string | null;
+          payload: Json | null;
+          ai_model: string | null;
+          tokens: number | null;
+          latency_ms: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          direction: MessageDirectionEnum;
+          mid?: string | null;
+          text?: string | null;
+          payload?: Json | null;
+          ai_model?: string | null;
+          tokens?: number | null;
+          latency_ms?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          text?: string | null;
+          payload?: Json | null;
+          ai_model?: string | null;
+          tokens?: number | null;
+          latency_ms?: number | null;
+        };
+        Relationships: [];
+      };
       review_messages: {
         Row: {
           id: string;
@@ -859,11 +991,13 @@ export interface Database {
           p_message_days: number;
           p_job_run_days: number;
           p_audit_days: number;
+          p_messenger_days: number;
         };
         Returns: {
           messages_deleted: number;
           job_runs_deleted: number;
           audit_deleted: number;
+          messenger_deleted: number;
         }[];
       };
     };

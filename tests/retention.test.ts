@@ -24,8 +24,34 @@ describe("retention window configuration", () => {
         RETENTION_MESSAGE_DAYS: "30",
         RETENTION_JOB_RUN_DAYS: "14",
         RETENTION_AUDIT_DAYS: "1095",
+        RETENTION_MESSENGER_DAYS: "45",
       }),
-    ).toEqual({ messageDays: 30, jobRunDays: 14, auditDays: 1095 });
+    ).toEqual({
+      messageDays: 30,
+      jobRunDays: 14,
+      auditDays: 1095,
+      messengerDays: 45,
+    });
+  });
+
+  /**
+   * Messenger transcripts are other people's private conversations — the most
+   * sensitive rows the platform holds — so they must never default to being
+   * kept longer than ordinary operational data.
+   */
+  it("does not keep Messenger transcripts longer than operational data", () => {
+    expect(DEFAULT_RETENTION.messengerDays).toBeLessThanOrEqual(
+      DEFAULT_RETENTION.messageDays,
+    );
+    expect(DEFAULT_RETENTION.messengerDays).toBeLessThan(
+      DEFAULT_RETENTION.auditDays,
+    );
+  });
+
+  it("falls back rather than shortening the Messenger window", () => {
+    expect(
+      retentionWindows({ RETENTION_MESSENGER_DAYS: "0" }).messengerDays,
+    ).toBe(DEFAULT_RETENTION.messengerDays);
   });
 
   it.each([

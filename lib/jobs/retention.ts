@@ -5,6 +5,14 @@ export interface RetentionWindows {
   jobRunDays: number;
   /** Staff audit trail — kept longest; it is the accountability record. */
   auditDays: number;
+  /**
+   * Messenger transcripts.
+   *
+   * The most sensitive data the platform holds — other people's private
+   * conversations — so the default matches the shortest window in use rather
+   * than the longest. The `conversations` row survives; only the messages go.
+   */
+  messengerDays: number;
 }
 
 /** What the database function defaults to when nothing is configured. */
@@ -12,6 +20,7 @@ export const DEFAULT_RETENTION: RetentionWindows = {
   messageDays: 90,
   jobRunDays: 90,
   auditDays: 730,
+  messengerDays: 90,
 };
 
 /** Windows are >= 1 day; the purge function rejects anything smaller. */
@@ -34,6 +43,10 @@ export function retentionWindows(
     ),
     jobRunDays: days(env.RETENTION_JOB_RUN_DAYS, DEFAULT_RETENTION.jobRunDays),
     auditDays: days(env.RETENTION_AUDIT_DAYS, DEFAULT_RETENTION.auditDays),
+    messengerDays: days(
+      env.RETENTION_MESSENGER_DAYS,
+      DEFAULT_RETENTION.messengerDays,
+    ),
   };
 }
 

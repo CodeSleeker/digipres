@@ -1,24 +1,25 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import {
   isValidMetaSignature,
   verifyChallenge,
 } from "@/lib/messenger/signature";
+import { inboundEventsFrom } from "@/lib/messenger/payload";
+import { MessengerRepository } from "@/repositories/messenger-repository";
+import type { MessengerWebhookBody } from "@/types/messenger";
 import { logError } from "@/lib/observability/logger";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Messenger webhook — phase 1a: the handshake and the door.
+ * Messenger webhook — phase 1 of docs/messenger-ai.md.
  *
- * This route makes Meta's callback verification pass and authenticates every
- * delivery that follows. It deliberately does NOT yet store conversations:
- * `messaging_channels`, `conversations` and `messenger_messages` (with RLS,
- * encrypted Page tokens and `mid` dedupe) are the rest of phase 1, and none of
- * them are needed to turn the callback screen green. See docs/messenger-ai.md.
+ * Verifies Meta's callback handshake, authenticates every delivery against the
+ * app secret, and persists inbound messages against the Page's channel.
  *
- * Until that lands, a verified delivery is acknowledged and dropped. That is a
- * deliberate no-op rather than a silent failure — the alternative, holding the
- * subscription open with no endpoint at all, is what blocks the whole setup.
+ * It does NOT reply. Generating an answer means an LLM call, which cannot run
+ * before the acknowledgement without risking Meta's ~20s deadline — that is
+ * phase 2, and it runs in the background off the back of these rows.
  */
 
 /**
@@ -89,22 +90,96 @@ export async function POST(request: NextRequest) {
   }
 
   /*
-   * Parsed only to confirm the payload is the shape we expect, and logged so a
-   * test message from the Meta dashboard is visibly ARRIVING while the storage
-   * half is still being built. A malformed body from a correctly signed sender
-   * is Meta's problem, not a reason to fail the delivery — the ACK still goes
-   * back, because a non-200 would have Meta retry a payload we cannot use.
+   * A malformed body from a correctly signed sender is acknowledged, not
+   * retried. Meta signed it, so it is not a transport error — replaying it would
+   * fail identically every time until the subscription is disabled.
    */
+  let body: MessengerWebhookBody;
   try {
-    const payload = JSON.parse(rawBody) as { object?: string };
-    if (payload.object !== "page") {
-      logError(new Error(`Unexpected webhook object: ${payload.object}`), {
-        scope: "messenger:webhook",
-      });
-    }
+    body = JSON.parse(rawBody) as MessengerWebhookBody;
   } catch (error) {
     logError(error, { scope: "messenger:webhook:parse" });
+    return new NextResponse("EVENT_RECEIVED", { status: 200 });
+  }
+
+  if (body.object !== "page") {
+    logError(new Error(`Unexpected webhook object: ${body.object}`), {
+      scope: "messenger:webhook",
+    });
+    return new NextResponse("EVENT_RECEIVED", { status: 200 });
+  }
+
+  try {
+    await persist(body);
+  } catch (error) {
+    /*
+     * A STORAGE failure is the one case worth a non-200.
+     *
+     * Meta retries a failed delivery, and `mid` is unique, so a retry either
+     * lands the message that was lost or is deduped away — whereas acking here
+     * would discard a customer's message permanently to protect the
+     * subscription. The subscription is recoverable; the message is not.
+     */
+    logError(error, { scope: "messenger:webhook:persist" });
+    return new NextResponse("Storage failed", { status: 500 });
   }
 
   return new NextResponse("EVENT_RECEIVED", { status: 200 });
+}
+
+/**
+ * Resolve each event to its Page's channel and store it.
+ *
+ * Sequential rather than parallel: several events in one delivery are usually
+ * the same person on the same thread, and `ensureConversation` upserting
+ * concurrently against itself is exactly the contention the unique constraint
+ * would then have to arbitrate on every message.
+ */
+async function persist(body: MessengerWebhookBody): Promise<void> {
+  const events = inboundEventsFrom(body);
+  if (events.length === 0) return;
+
+  const repo = new MessengerRepository(createServiceClient());
+  /** Page id → channel, so one delivery resolves each Page once. */
+  const channels = new Map<string, Awaited<
+    ReturnType<MessengerRepository["findChannelByPageId"]>
+  >>();
+
+  for (const event of events) {
+    if (!channels.has(event.pageId)) {
+      channels.set(event.pageId, await repo.findChannelByPageId(event.pageId));
+    }
+    const channel = channels.get(event.pageId) ?? null;
+
+    /*
+     * A Page Meta delivers for but nobody connected here.
+     *
+     * Normal, not exceptional: the app is subscribed at the Page level in the
+     * Meta dashboard, and that can happen before — or without — a
+     * `messaging_channels` row. Logged once per delivery so connecting a Page in
+     * one place and not the other is visible rather than mysterious.
+     */
+    if (!channel) {
+      logError(new Error(`No channel for page ${event.pageId}`), {
+        scope: "messenger:webhook:unknown-page",
+      });
+      continue;
+    }
+
+    const conversationId = await repo.ensureConversation(
+      channel.id,
+      event.psid,
+    );
+
+    await repo.recordInbound({
+      conversationId,
+      mid: event.mid,
+      text: event.text,
+      payload: event.payload,
+    });
+
+    // Outside the dedupe check on purpose: a redelivery still proves the
+    // customer wrote at that time, and this value gates whether we may reply.
+    await repo.touchCustomerActivity(conversationId, event.sentAt);
+  }
 }

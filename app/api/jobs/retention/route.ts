@@ -42,6 +42,7 @@ async function handle(request: NextRequest) {
       p_message_days: windows.messageDays,
       p_job_run_days: windows.jobRunDays,
       p_audit_days: windows.auditDays,
+      p_messenger_days: windows.messengerDays,
     });
     if (error) throw error;
 
@@ -49,7 +50,8 @@ async function handle(request: NextRequest) {
     const deleted =
       (row?.messages_deleted ?? 0) +
       (row?.job_runs_deleted ?? 0) +
-      (row?.audit_deleted ?? 0);
+      (row?.audit_deleted ?? 0) +
+      (row?.messenger_deleted ?? 0);
 
     await jobRuns
       .record({
