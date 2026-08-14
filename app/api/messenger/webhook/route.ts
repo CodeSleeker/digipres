@@ -76,14 +76,34 @@ export async function POST(request: NextRequest) {
   }
 
   const rawBody = await request.text();
+  const header = request.headers.get("x-hub-signature-256");
 
-  if (
-    !isValidMetaSignature(
-      appSecret,
-      rawBody,
-      request.headers.get("x-hub-signature-256"),
-    )
-  ) {
+  if (!isValidMetaSignature(appSecret, rawBody, header)) {
+    /*
+     * LOG THE REJECTION, don't just refuse it.
+     *
+     * A 403 here is indistinguishable from Meta never calling at all: both
+     * leave empty tables and an empty log. That ambiguity cost an afternoon,
+     * so the three causes are now told apart in the log itself —
+     *
+     *   no header        Meta didn't sign it, or something else is posting here
+     *   sha1= present    an older app signing scheme we deliberately don't accept
+     *   digest mismatch  META_APP_SECRET here differs from the app that signed
+     *
+     * The signature itself is not logged: it is a keyed digest of the body, and
+     * writing it out hands an attacker a valid one to replay.
+     */
+    const reason = !header
+      ? "no x-hub-signature-256 header"
+      : header.startsWith("sha1=")
+        ? "sha1 signature offered; only sha256 is accepted"
+        : "digest mismatch — META_APP_SECRET may not match the signing app";
+    logError(new Error(`Rejected webhook delivery: ${reason}`), {
+      scope: "messenger:webhook:signature",
+      bodyBytes: rawBody.length,
+      otherSignatureHeader: Boolean(request.headers.get("x-hub-signature")),
+    });
+
     // No detail in the body: this endpoint is public, and an unsigned caller
     // learns nothing beyond "rejected".
     return new NextResponse("Invalid signature", { status: 403 });
