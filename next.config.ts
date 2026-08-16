@@ -70,6 +70,27 @@ const nextConfig = (phase: string): NextConfig => {
     async headers() {
       return [{ source: "/:path*", headers: securityHeaders(isDev) }];
     },
+    /**
+     * Extensionless URLs for the hand-written static documents in `public/`.
+     *
+     * The Due privacy policy is a complete, self-contained HTML file — its own
+     * styling, its own light/dark handling, and deliberately zero external
+     * requests, which is the point of a privacy policy. Rendering it as a Next
+     * page would wrap it in the app's root layout and inject the platform's
+     * fonts and global CSS, contradicting the document's own promise.
+     *
+     * So it is served as a static asset and this rewrite gives it the clean
+     * address. `/due/privacy-policy.html` keeps working too — Google Play is
+     * given the extensionless one.
+     */
+    async rewrites() {
+      return [
+        {
+          source: "/due/privacy-policy",
+          destination: "/due/privacy-policy.html",
+        },
+      ];
+    },
   };
 };
 
