@@ -4,6 +4,7 @@ import {
   Cormorant_Garamond,
   Inter,
   Manrope,
+  Montserrat,
   Playfair_Display,
 } from "next/font/google";
 import "./globals.css";
@@ -14,6 +15,7 @@ import "./globals.css";
  * Barber / luxury:       Bebas Neue (headings), Playfair Display, Inter (body).
  * Patisserie / boutique: Playfair Display (headings), Manrope (body).
  * Retreat / lodge:       Cormorant Garamond (headings), Manrope (body).
+ * Events / elegance:     Cormorant Garamond (headings), Montserrat (body).
  *
  * Loaded here rather than per template because next/font must run at the module
  * top level of a server file; a template can't self-host its own. The faces are
@@ -52,15 +54,28 @@ const manrope = Manrope({
 });
 
 /**
- * The retreat's display face. Light weights and the italic are both load
- * bearing: the design sets its headlines at 300–400 and marks the emphasised
- * clause in italic, so a synthesised oblique would be visible at 6rem.
+ * The display face shared by the retreat and the events template. Light
+ * weights and the italic are both load bearing: both designs set headlines at
+ * 300–400 and mark the emphasised clause in italic, so a synthesised oblique
+ * would be visible at 6rem.
+ *
+ * 600 and 700 are the events template's addition — its gold italic clauses are
+ * semibold against the light roman beside them, and that contrast is the
+ * emphasis. Weights nobody's page references are never fetched.
  */
 const cormorantGaramond = Cormorant_Garamond({
   variable: "--font-cormorant",
   subsets: ["latin"],
-  weight: ["300", "400", "500"],
+  weight: ["300", "400", "500", "600", "700"],
   style: ["normal", "italic"],
+  display: "swap",
+});
+
+/** The events template's body face. */
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -101,7 +116,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bebasNeue.variable} ${playfairDisplay.variable} ${inter.variable} ${manrope.variable} ${cormorantGaramond.variable} antialiased`}
+      className={`${bebasNeue.variable} ${playfairDisplay.variable} ${inter.variable} ${manrope.variable} ${cormorantGaramond.variable} ${montserrat.variable} antialiased`}
     >
       <body>{children}</body>
     </html>

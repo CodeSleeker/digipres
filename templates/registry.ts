@@ -1,9 +1,6 @@
 import type { ComponentType } from "react";
 import type { BusinessProfile } from "@/types/business";
-import {
-  WEBSITE_SECTIONS,
-  type WebsiteSection,
-} from "@/types/website-content";
+import { WEBSITE_SECTIONS, type WebsiteSection } from "@/types/website-content";
 
 /**
  * Available website templates and themes.
@@ -259,6 +256,56 @@ export const TEMPLATES: TemplateOption[] = [
       aboutParagraphs: true,
     },
   },
+  {
+    code: "events-elegance",
+    name: "Events — Elegance",
+    /*
+     * `other`, not an `events` value: business_category has none, and adding
+     * one is a database migration, which this change deliberately does not
+     * make. The consequence is narrow and worth naming — `lib/seo/json-ld.ts`
+     * maps `other` to schema.org LocalBusiness rather than a narrower type.
+     * Add the enum value (see 0032/0034 for the pattern) when the backend
+     * work for this template is picked up.
+     */
+    industry: "other",
+    description:
+      "Cream and gold single page for an event stylist: hero, portfolio, filterable event grid, services, story, enquiry.",
+    themes: [{ code: "default", name: "Cream & Gold" }],
+    /*
+     * No team, products, gallery, journal or FAQ. The portfolio strip and the
+     * event grid are this template's own content (`EventsSections`), drawn
+     * from the template default until the CMS grows forms that know about
+     * them — the same route PatisserieSections and RetreatSections took.
+     */
+    sections: [
+      "hero",
+      "services",
+      "about",
+      "testimonials",
+      "contact",
+      "footer",
+    ],
+    fields: {
+      /*
+       * The hero photograph, its status pill and the card beside it. The
+       * proof strip this flag also offers is NOT drawn by this hero — but
+       * declaring the narrower flag is the dangerous direction: a field the
+       * form omits is dropped on save, while a field it offers and the page
+       * ignores merely goes unused.
+       */
+      heroPhoto: true,
+      /* A glyph on each service card, and no price — an event is quoted. */
+      itemIcons: true,
+      /* The story's second paragraph, figures row and sign-off. */
+      aboutEditorial: true,
+      aboutBadge: true,
+      /*
+       * Deliberately absent: `bookingOptions` and `staffOptions`. The enquiry
+       * form's dropdowns come from `events.inquiry`, so offering an owner the
+       * shared booking options would collect answers the form never shows.
+       */
+    },
+  },
 ];
 
 export const DEFAULT_TEMPLATE_CODE = "barber-luxury";
@@ -328,6 +375,17 @@ export async function loadTemplate(
         code: "retreat-lodge",
         Component: LodgeRetreatTemplate,
         defaultProfile: gloria,
+      };
+    }
+    case "events-elegance": {
+      const [{ EleganceEventsTemplate }, { bem }] = await Promise.all([
+        import("./events/elegance"),
+        import("@/lib/businesses/bem"),
+      ]);
+      return {
+        code: "events-elegance",
+        Component: EleganceEventsTemplate,
+        defaultProfile: bem,
       };
     }
     case "patisserie-boutique": {

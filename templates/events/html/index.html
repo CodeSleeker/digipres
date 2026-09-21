@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elegance by Bem | Luxury Event Styling & Design</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            50: '#fefdf8',
+                            100: '#fdf9e7',
+                            200: '#fbf0c4',
+                            300: '#f7e28e',
+                            400: '#f0cf4e',
+                            500: '#c9a93c',
+                            600: '#a8862d',
+                            700: '#866a23',
+                            800: '#6b5520',
+                            900: '#4a3a16',
+                        },
+                        cream: '#faf8f4',
+                        charcoal: '#1a1a1a',
+                    },
+                    fontFamily: {
+                        serif: ['Cormorant Garamond', 'serif'],
+                        sans: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .font-serif {
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #faf8f4;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c9a93c;
+            border-radius: 3px;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes borderRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .animate-fade-up {
+            animation: fadeInUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .animate-scale-in {
+            animation: scaleIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .animate-slide-left {
+            animation: slideInLeft 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .animate-slide-right {
+            animation: slideInRight 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .delay-400 { animation-delay: 0.4s; }
+        .delay-500 { animation-delay: 0.5s; }
+        .delay-600 { animation-delay: 0.6s; }
+        .delay-700 { animation-delay: 0.7s; }
+
+        .observe-hidden {
+            opacity: 0;
+        }
+
+        /* Gold shimmer text */
+        .gold-shimmer {
+            background: linear-gradient(90deg, #c9a93c, #f7e28e, #c9a93c, #f7e28e, #c9a93c);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3.5s linear infinite;
+        }
+
+        /* Divider */
+        .gold-divider {
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #c9a93c, transparent);
+            transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .gold-divider-wide {
+            width: 120px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #c9a93c, transparent);
+            transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* Hover effects */
+        .hover-lift {
+            transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .hover-lift:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(201, 169, 60, 0.18), 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        .hover-glow {
+            transition: all 0.3s ease;
+        }
+        .hover-glow:hover {
+            box-shadow: 0 0 30px rgba(201, 169, 60, 0.2);
+        }
+
+        /* Image overlay */
+        .img-overlay {
+            position: relative;
+            overflow: hidden;
+        }
+        .img-overlay::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 40%, rgba(26, 26, 26, 0.6));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .img-overlay:hover::after {
+            opacity: 1;
+        }
+
+        /* Glass effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(201, 169, 60, 0.12);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Nav */
+        .nav-scrolled {
+            background: rgba(250, 248, 244, 0.97);
+            backdrop-filter: blur(24px);
+            box-shadow: 0 1px 0 rgba(201, 169, 60, 0.08), 0 4px 30px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Nav link hover underline */
+        .nav-link {
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            width: 0;
+            height: 1px;
+            background: #c9a93c;
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            transform: translateX(-50%);
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Parallax */
+        .parallax-slow {
+            will-change: transform;
+        }
+
+        /* Testimonial card */
+        .testimonial-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(250,248,244,0.97));
+            border: 1px solid rgba(201, 169, 60, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        /* Button styles */
+        .btn-gold {
+            background: linear-gradient(135deg, #c9a93c, #f0cf4e);
+            color: #1a1a1a;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(201, 169, 60, 0.25);
+        }
+        .btn-gold::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #f0cf4e, #c9a93c);
+            opacity: 0;
+            transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .btn-gold:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(201, 169, 60, 0.35);
+        }
+        .btn-gold:hover::before {
+            opacity: 1;
+        }
+        .btn-gold:active {
+            transform: translateY(0) scale(0.98);
+        }
+        .btn-gold span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-outline-gold {
+            border: 1px solid #c9a93c;
+            color: #c9a93c;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .btn-outline-gold:hover {
+            background: #c9a93c;
+            color: #1a1a1a;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(201, 169, 60, 0.2);
+        }
+        .btn-outline-gold:active {
+            transform: translateY(0);
+        }
+
+        /* Service icon hover */
+        .service-icon {
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .group:hover .service-icon {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(201, 169, 60, 0.15);
+        }
+        .group:hover .service-icon i {
+            filter: drop-shadow(0 0 8px rgba(201, 169, 60, 0.4));
+        }
+
+        /* Social icon hover */
+        .social-icon {
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .social-icon:hover {
+            transform: translateY(-3px) scale(1.1);
+        }
+
+        /* Testimonial card hover */
+        .testimonial-card {
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .testimonial-card:hover {
+            border-color: rgba(201, 169, 60, 0.3);
+        }
+
+        /* Stats counter */
+        .stat-number {
+            transition: all 0.3s ease;
+        }
+        .stat-number:hover {
+            transform: scale(1.05);
+            text-shadow: 0 0 20px rgba(240, 207, 78, 0.3);
+        }
+
+        /* Decorative frame animation */
+        .deco-frame {
+            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            animation: pulseGlow 4s ease-in-out infinite;
+        }
+
+        /* Event card */
+        .event-card {
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+        }
+        .event-card:hover {
+            border-color: rgba(201, 169, 60, 0.25);
+            box-shadow: 0 20px 50px rgba(201, 169, 60, 0.1), 0 8px 20px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="bg-cream text-charcoal">
+
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12">
+            <div class="flex items-center justify-between h-20 lg:h-24">
+                <!-- Logo -->
+                <a href="#" class="relative z-10">
+                    <h1 class="font-serif text-2xl lg:text-3xl font-semibold tracking-wide">
+                        <span class="text-gold-500">Elegance</span>
+                        <span class="text-charcoal/60 font-light text-lg lg:text-xl ml-1">by Bem</span>
+                    </h1>
+                </a>
+
+                <!-- Desktop Nav -->
+                <div class="hidden lg:flex items-center gap-10">
+                    <a href="#portfolio" class="nav-link text-sm font-medium tracking-widest uppercase text-charcoal/70 hover:text-gold-500 transition-colors">Portfolio</a>
+                    <a href="#events" class="nav-link text-sm font-medium tracking-widest uppercase text-charcoal/70 hover:text-gold-500 transition-colors">Events</a>
+                    <a href="#services" class="nav-link text-sm font-medium tracking-widest uppercase text-charcoal/70 hover:text-gold-500 transition-colors">Services</a>
+                    <a href="#story" class="nav-link text-sm font-medium tracking-widest uppercase text-charcoal/70 hover:text-gold-500 transition-colors">Our Story</a>
+                    <a href="#contact" class="btn-gold px-7 py-3 rounded-full text-sm font-semibold tracking-wider uppercase">
+                        <span>Book Consultation</span>
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-toggle" class="lg:hidden relative z-50 w-10 h-10 flex items-center justify-center">
+                    <div class="flex flex-col gap-1.5" id="hamburger">
+                        <span class="w-6 h-0.5 bg-charcoal transition-all duration-300 origin-center"></span>
+                        <span class="w-6 h-0.5 bg-charcoal transition-all duration-300"></span>
+                        <span class="w-4 h-0.5 bg-charcoal transition-all duration-300 origin-center"></span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="fixed inset-0 bg-cream z-[100] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500">
+        <button id="mobile-close" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center z-10">
+            <i data-lucide="x" class="w-6 h-6 text-charcoal"></i>
+        </button>
+        <div class="text-center space-y-8">
+            <a href="#portfolio" class="block font-serif text-4xl text-charcoal hover:text-gold-500 transition-colors mobile-link">Portfolio</a>
+            <a href="#events" class="block font-serif text-4xl text-charcoal hover:text-gold-500 transition-colors mobile-link">Events</a>
+            <a href="#services" class="block font-serif text-4xl text-charcoal hover:text-gold-500 transition-colors mobile-link">Services</a>
+            <a href="#story" class="block font-serif text-4xl text-charcoal hover:text-gold-500 transition-colors mobile-link">Our Story</a>
+            <div class="pt-6">
+                <a href="#contact" class="btn-gold px-10 py-4 rounded-full text-sm font-semibold tracking-wider uppercase inline-block mobile-link">
+                    <span>Book Consultation</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center overflow-hidden">
+        <!-- Background -->
+        <div class="absolute inset-0">
+            <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1920&q=80" alt="Luxury Event" class="w-full h-full object-cover opacity-20">
+            <div class="absolute inset-0 bg-gradient-to-br from-cream via-cream/95 to-gold-50/80"></div>
+        </div>
+
+        <!-- Decorative Elements -->
+        <div class="absolute top-20 right-10 w-72 h-72 rounded-full bg-gold-200/20 blur-3xl"></div>
+        <div class="absolute bottom-20 left-10 w-96 h-96 rounded-full bg-gold-100/30 blur-3xl"></div>
+
+        <div class="relative max-w-7xl mx-auto px-6 lg:px-12 py-32 lg:py-0">
+            <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+                <!-- Left Content -->
+                <div class="order-2 lg:order-1">
+                    <div class="observe-hidden" data-animate="fade-up">
+                        <p class="text-gold-500 text-sm font-semibold tracking-[0.3em] uppercase mb-6">Luxury Event Design</p>
+                    </div>
+                    <h2 class="font-serif text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-light leading-[0.95] mb-8 observe-hidden" data-animate="fade-up" data-delay="100">
+                        Creating
+                        <span class="block font-semibold italic text-gold-500">Unforgettable</span>
+                        Moments
+                    </h2>
+                    <div class="gold-divider-wide mb-8 observe-hidden" data-animate="fade-up" data-delay="200"></div>
+                    <p class="text-charcoal/60 text-lg lg:text-xl font-light leading-relaxed max-w-lg mb-10 observe-hidden" data-animate="fade-up" data-delay="300">
+                        Bespoke event styling for weddings, debuts, birthdays, and luxury celebrations that leave lasting impressions.
+                    </p>
+                    <div class="flex flex-wrap gap-4 observe-hidden" data-animate="fade-up" data-delay="400">
+                        <a href="#portfolio" class="btn-gold px-10 py-4 rounded-full text-sm font-semibold tracking-wider uppercase">
+                            <span>View Portfolio</span>
+                        </a>
+                        <a href="#story" class="btn-outline-gold px-10 py-4 rounded-full text-sm font-semibold tracking-wider uppercase">
+                            Our Story
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right Image -->
+                <div class="order-1 lg:order-2 observe-hidden" data-animate="scale-in" data-delay="200">
+                    <div class="relative">
+                        <div class="absolute -inset-4 bg-gradient-to-br from-gold-200/40 to-gold-400/20 rounded-3xl blur-2xl"></div>
+                        <div class="relative rounded-3xl overflow-hidden shadow-2xl">
+                            <img src="https://images.unsplash.com/photo-1478146059778-26028b07395a?w=800&q=80" alt="Luxury Wedding Reception" class="w-full aspect-[3/4] object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-charcoal/30 via-transparent to-transparent"></div>
+                            <!-- Floating badge -->
+                            <div class="absolute bottom-8 left-8 glass rounded-2xl px-6 py-4">
+                                <p class="text-white text-xs font-semibold tracking-widest uppercase">Now Booking</p>
+                                <p class="text-gold-300 font-serif text-xl mt-1">Season 2026</p>
+                            </div>
+                        </div>
+                        <!-- Decorative frame -->
+                        <div class="absolute -top-6 -right-6 w-32 h-32 border border-gold-300/40 rounded-3xl deco-frame"></div>
+                        <div class="absolute -bottom-6 -left-6 w-24 h-24 border border-gold-300/30 rounded-2xl deco-frame" style="animation-delay: 2s;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-float observe-hidden" data-animate="fade-in" data-delay="700">
+            <span class="text-xs tracking-[0.2em] uppercase text-charcoal/40">Scroll</span>
+            <div class="w-px h-12 bg-gradient-to-b from-gold-400 to-transparent"></div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="py-24 lg:py-36 relative">
+        <!-- Subtle background accent -->
+        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gold-100/20 rounded-full blur-3xl -translate-y-1/2"></div>
+        <div class="max-w-7xl mx-auto px-6 lg:px-12">
+            <!-- Section Header -->
+            <div class="text-center mb-20 observe-hidden" data-animate="fade-up">
+                <p class="text-gold-500 text-sm font-semibold tracking-[0.3em] uppercase mb-4">Our Signature Events</p>
+                <h3 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-light">
+                    Featured <span class="italic font-semibold text-gold-600">Portfolio</span>
+                </h3>
+                <div class="gold-divider mx-auto mt-8"></div>
+            </div>
+
+            <!-- Portfolio Grid -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="group hover-lift observe-hidden" data-animate="fade-up" data-delay="100">
+                    <div class="relative rounded-2xl overflow-hidden aspect-[3/4]">
+                        <img src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=600&q=80" alt="Luxury Wedding" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-charcoal/70 via-charcoal/20 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-8">
+                            <p class="text-gold-300 text-xs font-semibold tracking-[0.2em] uppercase mb-2">Weddings</p>
+                            <h4 class="font-serif text-white text-3xl font-medium mb-3">Grand Celebrations</h4>
+                            <p class="text-white/70 text-sm leading-relaxed">Breathtaking wedding designs from intimate ceremonies to lavish receptions.</p>
+                            <div class="mt-5 flex items-center gap-2 text-gold-300 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <span>View Gallery</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="group hover-lift observe-hidden" data-animate="fade-up" data-delay="200">
+                    <div class="relative rounded-2xl overflow-hidden aspect-[3/4]">
+                        <img src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600&q=80" alt="Birthday Celebration" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-charcoal/70 via-charcoal/20 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-8">
+                            <p class="text-gold-300 text-xs font-semibold tracking-[0.2em] uppercase mb-2">Birthdays & Debuts</p>
+                            <h4 class="font-serif text-white text-3xl font-medium mb-3">Milestone Moments</h4>
+                            <p class="text-white/70 text-sm leading-relaxed">Exquisite debut and birthday styling that marks life's most precious milestones.</p>
+                            <div class="mt-5 flex items-center gap-2 text-gold-300 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <span>View Gallery</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="group hover-lift observe-hidden md:col-span-2 lg:col-span-1" data-animate="fade-up" data-delay="300">
+                    <div class="relative rounded-2xl overflow-hidden aspect-[3/4]">
+                        <img src="https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&q=80" alt="Corporate Gala" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-charcoal/70 via-charcoal/20 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-8">
+                            <p class="text-gold-300 text-xs font-semibold tracking-[0.2em] uppercase mb-2">Corporate & Galas</p>
+                            <h4 class="font-serif text-white text-3xl font-medium mb-3">Luxury Gatherings</h4>
+                            <p class="text-white/70 text-sm leading-relaxed">Sophisticated event design for galas, launches, and exclusive private affairs.</p>
+                            <div class="mt-5 flex items-center gap-2 text-gold-300 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <span>View Gallery</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Latest Events Section -->
+    <section id="events" class="py-28 lg:py-40 relative overflow-hidden bg-gradient-to-b from-cream to-gold-50/30">
+        <!-- Background accents -->
+        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gold-100/30 rounded-full blur-3xl translate-y-1/2"></div>
+        <div class="absolute top-20 right-0 w-[300px] h-[300px] bg-gold-200/15 rounded-full blur-3xl"></div>
+
+        <div class="relative max-w-7xl mx-auto px-6 lg:px-12">
+            <!-- Section Header -->
+            <div class="text-center mb-16 lg:mb-20 observe-hidden" data-animate="fade-up">
+                <p class="text-gold-500 text-sm font-semibold tracking-[0.3em] uppercase mb-4">Recently Styled</p>
+                <h3 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-light">
+                    Latest <span class="italic font-semibold text-gold-600">Events</span>
+                </h3>
+                <div class="gold-divider mx-auto mt-8"></div>
+                <p class="text-charcoal/50 text-base mt-6 max-w-xl mx-auto">A glimpse into our most recent celebrations — each one uniquely designed to reflect our clients' dreams.</p>
+            </div>
+
+            <!-- Events Grid -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8" id="events-grid">
+
+                <!-- Event Card 1 -->
+                <article class="event-card group hover-lift rounded-2xl overflow-hidden bg-white border border-gold-100/60 observe-hidden" data-animate="fade-up" data-delay="100" data-event-id="1">
+                    <div class="relative overflow-hidden aspect-[4/3]">
+                        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80" alt="Castillo-Rivera Wedding" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-charcoal/20 via-transparent to-transparent"></div>
+                        <!-- Category Badge -->
+                        <span class="absolute top-4 left-4 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-sm text-xs font-semibold tracking-wider uppercase text-gold-700 border border-gold-200/50 shadow-sm">Wedding</span>
+                    </div>
+                    <div class="p-6 lg:p-7">
+                        <h4 class="font-serif text-xl lg:text-2xl font-semibold text-charcoal mb-3 group-hover:text-gold-600 transition-colors">Castillo–Rivera Grand Wedding</h4>
+                        <div class="flex flex-wrap items-center gap-4 text-charcoal/50 text-xs mb-4">
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-gold-500"></i>
+                                The Peninsula Manila
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5 text-gold-500"></i>
+                                June 14, 2026
+                            </span>
+                        </div>
+                        <p class="text-charcoal/55 text-sm leading-relaxed mb-5">An opulent garden ceremony with cascading ivory roses, gold candelabras, and 300 guests under a canopy of fairy lights.</p>
+                        <a href="#" class="inline-flex items-center gap-2 text-sm font-semibold text-gold-600 hover:text-gold-700 transition-colors group/btn">
+                            <span>View Gallery</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1"></i>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Event Card 2 -->
+                <article class="event-card group hover-lift rounded-2xl overflow-hidden bg-white border border-gold-100/60 observe-hidden" data-animate="fade-up" data-delay="200" data-event-id="2">
+                    <div class="relative overflow-hidden aspect-[4/3]">
+                        <img src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600&q=80" alt="Isabelle's 18th Birthday" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-charcoal/20 via-transparent to-transparent"></div>
+                        <span class="absolute top-4 left-4 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-sm text-xs font-semibold tracking-wider uppercase text-gold-700 border border-gold-200/50 shadow-sm">Debut</span>
+                    </div>
+                    <div class="p-6 lg:p-7">
+                        <h4 class="font-serif text-xl lg:text-2xl font-semibold text-charcoal mb-3 group-hover:text-gold-600 transition-colors">Isabelle's Enchanted Debut</h4>
+                        <div class="flex flex-wrap items-center gap-4 text-charcoal/50 text-xs mb-4">
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-gold-500"></i>
+                                Shangri-La Ballroom
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5 text-gold-500"></i>
+                                May 22, 2026
+                            </span>
+                        </div>
+                        <p class="text-charcoal/55 text-sm leading-relaxed mb-5">A whimsical enchanted-garden theme with blush peonies, crystal chandeliers, and an ethereal fog-lit dance floor.</p>
+                        <a href="#" class="inline-flex items-center gap-2 text-sm font-semibold text-gold-600 hover:text-gold-700 transition-colors group/btn">
+                            <span>View Gallery</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1"></i>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Event Card 3 -->
+                <article class="event-card group hover-lift rounded-2xl overflow-hidden bg-white border border-gold-100/60 observe-hidden" data-animate="fade-up" data-delay="300" data-event-id="3">
+                    <div class="relative overflow-hidden aspect-[4/3]">
+                        <img src="https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&q=80" alt="Santos Corporate Gala" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-charcoal/20 via-transparent to-transparent"></div>
+                        <span class="absolute top-4 left-4 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-sm text-xs font-semibold tracking-wider uppercase text-gold-700 border border-gold-200/50 shadow-sm">Corporate</span>
+                    </div>
+                    <div class="p-6 lg:p-7">
+                        <h4 class="font-serif text-xl lg:text-2xl font-semibold text-charcoal mb-3 group-hover:text-gold-600 transition-colors">Santos Group Annual Gala</h4>
+                        <div class="flex flex-wrap items-center gap-4 text-charcoal/50 text-xs mb-4">
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-gold-500"></i>
+                                Grand Hyatt, BGC
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5 text-gold-500"></i>
+                                April 30, 2026
+                            </span>
+                        </div>
+                        <p class="text-charcoal/55 text-sm leading-relaxed mb-5">A black-tie celebration with dramatic gold draping, geometric installations, and a live jazz ensemble.</p>
+                        <a href="#" class="inline-flex items-center gap-2 text-sm font-semibold text-gold-600 hover:text-gold-700 transition-colors group/btn">
+                            <span>View Gallery</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1"></i>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Event Card 4 -->
+                <article class="event-card group hover-lift rounded-2xl overflow-hidden bg-white border border-gold-100/60 observe-hidden" data-animate="fade-up" data-delay="100" data-event-id="4">
+                    <div class="relative overflow-hidden aspect-[4/3]">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80" alt="De Leon Golden Anniversary" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-charcoal/20 via-transparent to-transparent"></div>
+                        <span class="absolute top-4 left-4 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-sm text-xs font-semibold tracking-wider uppercase text-gold-700 border border-gold-200/50 shadow-sm">Anniversary</span>
+                    </div>
+                    <div class="p-6 lg:p-7">
+                        <h4 class="font-serif text-xl lg:text-2xl font-semibold text-charcoal mb-3 group-hover:text-gold-600 transition-colors">De Leon Golden Anniversary</h4>
+                        <div class="flex flex-wrap items-center gap-4 text-charcoal/50 text-xs mb-4">
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-gold-500"></i>
+                                Solaire Resort
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5 text-gold-500"></i>
+                                March 18, 2026
+                            </span>
+                        </div>
+                        <p class="text-charcoal/55 text-sm leading-relaxed mb-5">A golden 50th anniversary dinner with heritage tablescapes, monogrammed linens, and an intimate 80-person gathering.</p>
+                        <a href="#" class="inline-flex items-center gap-2 text-sm font-semibold text-gold-600 hover:text-gold-700 transition-colors group/btn">
+                            <span>View Gallery</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1"></i>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Event Card 5 -->
+                <article class="event-card group hover-lift rounded-2xl overflow-hidden bg-white border border-gold-100/60 observe-hidden" data-animate="fade-up" data-delay="200" data-event-id="5">
+                    <div class="relative overflow-hidden aspect-[4/3]">
+                        <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=600&q=80" alt="Reyes-Tan Wedding" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-charcoal/20 via-transparent to-transparent"></div>
+                        <span class="absolute top-4 left-4 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-sm text-xs font-semibold tracking-wider uppercase text-gold-700 border border-gold-200/50 shadow-sm">Wedding</span>
+                    </div>
+                    <div class="p-6 lg:p-7">
+                        <h4 class="font-serif text-xl lg:text-2xl font-semibold text-charcoal mb-3 group-hover:text-gold-600 transition-colors">Reyes–Tan Sunset Ceremony</h4>
+                        <div class="flex flex-wrap items-center gap-4 text-charcoal/50 text-xs mb-4">
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-gold-500"></i>
+                                Balesin Island Club
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5 text-gold-500"></i>
+                                February 8, 2026
+                            </span>
+                        </div>
+                        <p class="text-charcoal/55 text-sm leading-relaxed mb-5">A beachfront sunset wedding with flowing white drapery, tropical blooms, and barefoot elegance for 150 guests.</p>
+                        <a href="#" class="inline-flex items-center gap-2 text-sm font-semibold text-gold-600 hover:text-gold-700 transition-colors group/btn">
+                            <span>View Gallery</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1"></i>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Event Card 6 -->
+                <article class="event-card group hover-lift rounded-2xl overflow-hidden bg-white border border-gold-100/60 observe-hidden" data-animate="fade-up" data-delay="300" data-event-id="6">
+                    <div class="relative overflow-hidden aspect-[4/3]">
+                        <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&q=80" alt="Maxine's 7th Birthday" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-charcoal/20 via-transparent to-transparent"></div>
+                        <span class="absolute top-4 left-4 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-sm text-xs font-semibold tracking-wider uppercase text-gold-700 border border-gold-200/50 shadow-sm">Birthday</span>
+                    </div>
+                    <div class="p-6 lg:p-7">
+                        <h4 class="font-serif text-xl lg:text-2xl font-semibold text-charcoal mb-3 group-hover:text-gold-600 transition-colors">Maxine's Wonderland Party</h4>
+                        <div class="flex flex-wrap items-center gap-4 text-charcoal/50 text-xs mb-4">
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-gold-500"></i>
+                                Ayala Alabang Village
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5 text-gold-500"></i>
+                                January 12, 2026
+                            </span>
+                        </div>
+                        <p class="text-charcoal/55 text-sm leading-relaxed mb-5">A pastel wonderland birthday with balloon sculptures, custom dessert displays, and interactive play zones for little guests.</p>
+                        <a href="#" class="inline-flex items-center gap-2 text-sm font-semibold text-gold-600 hover:text-gold-700 transition-colors group/btn">
+                            <span>View Gallery</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1"></i>
+                        </a>
+                    </div>
+                </article>
+
+            </div>
+
+            <!-- View All Button -->
+            <div class="text-center mt-14 observe-hidden" data-animate="fade-up" data-delay="400">
+                <a href="#" class="btn-outline-gold px-10 py-4 rounded-full text-sm font-semibold tracking-wider uppercase inline-block">
+                    View All Events
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-28 lg:py-40 bg-charcoal relative overflow-hidden">
+        <!-- Background texture -->
+        <div class="absolute inset-0 opacity-5">
+            <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, rgba(201,169,60,0.3) 1px, transparent 0); background-size: 40px 40px;"></div>
+        </div>
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-gold-500/5 rounded-full blur-3xl"></div>
+
+        <div class="relative max-w-7xl mx-auto px-6 lg:px-12">
+            <!-- Header -->
+            <div class="text-center mb-20 observe-hidden" data-animate="fade-up">
+                <p class="text-gold-400 text-sm font-semibold tracking-[0.3em] uppercase mb-4">What We Do</p>
+                <h3 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-light text-white">
+                    Our <span class="italic font-semibold text-gold-400">Services</span>
+                </h3>
+                <div class="gold-divider mx-auto mt-8"></div>
+            </div>
+
+            <!-- Services Grid -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Service 1 -->
+                <div class="text-center group observe-hidden" data-animate="fade-up" data-delay="100">
+                    <div class="service-icon w-20 h-20 mx-auto mb-6 rounded-2xl glass flex items-center justify-center group-hover:bg-gold-500/20">
+                        <i data-lucide="heart" class="w-8 h-8 text-gold-400 transition-all duration-300"></i>
+                    </div>
+                    <h4 class="font-serif text-xl text-white mb-3">Wedding Design</h4>
+                    <p class="text-white/50 text-sm leading-relaxed">Full-service wedding styling from ceremony to reception, crafted to your love story.</p>
+                </div>
+
+                <!-- Service 2 -->
+                <div class="text-center group observe-hidden" data-animate="fade-up" data-delay="200">
+                    <div class="service-icon w-20 h-20 mx-auto mb-6 rounded-2xl glass flex items-center justify-center group-hover:bg-gold-500/20">
+                        <i data-lucide="sparkles" class="w-8 h-8 text-gold-400 transition-all duration-300"></i>
+                    </div>
+                    <h4 class="font-serif text-xl text-white mb-3">Debut & Birthday</h4>
+                    <p class="text-white/50 text-sm leading-relaxed">Stunning celebrations for life's milestones — debuts, sweet sixteens, and grand birthdays.</p>
+                </div>
+
+                <!-- Service 3 -->
+                <div class="text-center group observe-hidden" data-animate="fade-up" data-delay="300">
+                    <div class="service-icon w-20 h-20 mx-auto mb-6 rounded-2xl glass flex items-center justify-center group-hover:bg-gold-500/20">
+                        <i data-lucide="palette" class="w-8 h-8 text-gold-400 transition-all duration-300"></i>
+                    </div>
+                    <h4 class="font-serif text-xl text-white mb-3">Floral & Décor</h4>
+                    <p class="text-white/50 text-sm leading-relaxed">Bespoke floral arrangements and décor installations that transform any space.</p>
+                </div>
+
+                <!-- Service 4 -->
+                <div class="text-center group observe-hidden" data-animate="fade-up" data-delay="400">
+                    <div class="service-icon w-20 h-20 mx-auto mb-6 rounded-2xl glass flex items-center justify-center group-hover:bg-gold-500/20">
+                        <i data-lucide="crown" class="w-8 h-8 text-gold-400 transition-all duration-300"></i>
+                    </div>
+                    <h4 class="font-serif text-xl text-white mb-3">Full Coordination</h4>
+                    <p class="text-white/50 text-sm leading-relaxed">End-to-end event management ensuring every detail unfolds flawlessly.</p>
+                </div>
+            </div>
+
+            <!-- Feature highlight -->
+            <div class="mt-24 grid lg:grid-cols-2 gap-16 items-center">
+                <div class="observe-hidden" data-animate="slide-left">
+                    <div class="relative rounded-2xl overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&q=80" alt="Event Styling" class="w-full aspect-[4/3] object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-r from-charcoal/40 to-transparent"></div>
+                    </div>
+                </div>
+                <div class="observe-hidden" data-animate="slide-right">
+                    <p class="text-gold-400 text-sm font-semibold tracking-[0.2em] uppercase mb-4">Our Approach</p>
+                    <h4 class="font-serif text-3xl lg:text-4xl text-white font-light leading-snug mb-6">
+                        Every detail tells a story of <span class="text-gold-400 italic">intention</span> and beauty
+                    </h4>
+                    <p class="text-white/50 leading-relaxed mb-8">
+                        We approach each event as a blank canvas. From concept to execution, we weave together florals, lighting, textiles, and architecture to create immersive experiences that captivate every guest.
+                    </p>
+                    <div class="flex gap-12">
+                        <div>
+                            <p class="stat-number font-serif text-4xl text-gold-400 font-semibold cursor-default">500+</p>
+                            <p class="text-white/40 text-sm mt-1">Events Styled</p>
+                        </div>
+                        <div>
+                            <p class="stat-number font-serif text-4xl text-gold-400 font-semibold cursor-default">12+</p>
+                            <p class="text-white/40 text-sm mt-1">Years of Artistry</p>
+                        </div>
+                        <div>
+                            <p class="stat-number font-serif text-4xl text-gold-400 font-semibold cursor-default">100%</p>
+                            <p class="text-white/40 text-sm mt-1">Bespoke Design</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Story / About Section -->
+    <section id="story" class="py-28 lg:py-40 relative overflow-hidden">
+        <div class="absolute top-1/2 left-0 w-[400px] h-[400px] bg-gold-100/40 rounded-full blur-3xl -translate-y-1/2"></div>
+
+        <div class="relative max-w-7xl mx-auto px-6 lg:px-12">
+            <div class="grid lg:grid-cols-5 gap-16 items-center">
+                <!-- Text -->
+                <div class="lg:col-span-3 observe-hidden" data-animate="fade-up">
+                    <p class="text-gold-500 text-sm font-semibold tracking-[0.3em] uppercase mb-4">The Philosophy</p>
+                    <h3 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-light leading-tight mb-8">
+                        Born from a passion for <span class="italic font-semibold text-gold-600">extraordinary moments</span>
+                    </h3>
+                    <div class="gold-divider mb-8"></div>
+                    <p class="text-charcoal/60 text-lg leading-relaxed mb-6">
+                        Elegance by Bem was founded on a singular belief: that every celebration deserves to be a masterpiece. We transform spaces into living works of art — immersive, emotional, and utterly unforgettable.
+                    </p>
+                    <p class="text-charcoal/60 leading-relaxed mb-10">
+                        We don't follow trends — we set them. Our designs blend timeless sophistication with modern luxury, creating environments where every flower, every light, and every texture is placed with purpose. Your vision becomes our obsession.
+                    </p>
+                    <div class="flex items-center gap-6">
+                        <div class="w-16 h-16 rounded-full bg-gold-100 flex items-center justify-center">
+                            <span class="font-serif text-2xl font-bold text-gold-600">B</span>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-charcoal">Bem</p>
+                            <p class="text-sm text-charcoal/50">Founder & Lead Event Designer</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Images -->
+                <div class="lg:col-span-2 observe-hidden" data-animate="scale-in" data-delay="200">
+                    <div class="relative">
+                        <div class="rounded-2xl overflow-hidden shadow-xl">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80" alt="Event Design Process" class="w-full aspect-[3/4] object-cover">
+                        </div>
+                        <!-- Floating accent -->
+                        <div class="absolute -bottom-8 -left-8 bg-white rounded-2xl p-6 shadow-xl border border-gold-100">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gold-100 rounded-full flex items-center justify-center">
+                                    <i data-lucide="award" class="w-5 h-5 text-gold-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-sm">Award Winning</p>
+                                    <p class="text-xs text-charcoal/50">Best Event Stylist '25</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section id="testimonials" class="py-28 lg:py-40 bg-gradient-to-b from-gold-50/50 to-cream relative">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12">
+            <!-- Header -->
+            <div class="text-center mb-20 observe-hidden" data-animate="fade-up">
+                <p class="text-gold-500 text-sm font-semibold tracking-[0.3em] uppercase mb-4">Love Letters</p>
+                <h3 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-light">
+                    Our <span class="italic font-semibold text-gold-600">Happy Clients</span>
+                </h3>
+                <div class="gold-divider mx-auto mt-8"></div>
+            </div>
+
+            <!-- Testimonials Grid -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="testimonial-card rounded-2xl p-8 hover-lift observe-hidden" data-animate="fade-up" data-delay="100">
+                    <div class="flex gap-1 mb-6">
+                        <i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i>
+                        <i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i>
+                        <i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i>
+                        <i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i>
+                        <i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i>
+                    </div>
+                    <p class="text-charcoal/70 leading-relaxed mb-8 italic">
+                        "Our wedding was an absolute dream. Bem transformed the venue into something out of a fairytale. Every guest was speechless. Pure magic."
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-gold-100 flex items-center justify-center">
+                            <span class="font-serif text-gold-600 font-semibold">A</span>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-sm">Amara & David</p>
+                            <p class="text-xs text-charcoal/50">Wedding, March 2026</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 2 -->
+                <div class="testimonial-card rounded-2xl p-8 hover-lift observe-hidden" data-animate="fade-up" data-delay="200">
+                    <div class="flex gap-1 mb-6">
+                        <i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i>
+                        <i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i>
+                        <i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i>
+                        <i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i>
+                        <i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i>
+                    </div>
+                    <p class="text-charcoal/70 leading-relaxed mb-8 italic">
+                        "My daughter's debut was beyond anything we imagined. The florals, the lighting, the details — Elegance by Bem made her feel like a princess."
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-gold-100 flex items-center justify-center">
+                            <span class="font-serif text-gold-600 font-semibold">S</span>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-sm">Sofia Reyes</p>
+                            <p class="text-xs text-charcoal/50">Debut Celebration</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 3 -->
+                <div class="testimonial-card rounded-2xl p-8 hover-lift observe-hidden md:col-span-2 lg:col-span-1" data-animate="fade-up" data-delay="300">
+                    <div class="flex gap-1 mb-6">
+                        <i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i>
+                        <i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i>
+                        <i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i>
+                        <i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i>
+                        <i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i>
+                    </div>
+                    <p class="text-charcoal/70 leading-relaxed mb-8 italic">
+                        "We hired Bem for our 50th anniversary gala and it was perfection. The gold and ivory palette, the cascading florals — an evening we'll cherish forever."
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-gold-100 flex items-center justify-center">
+                            <span class="font-serif text-gold-600 font-semibold">V</span>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-sm">Victoria & James</p>
+                            <p class="text-xs text-charcoal/50">Anniversary Gala</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section id="contact" class="py-28 lg:py-40 relative overflow-hidden">
+        <div class="absolute inset-0 bg-charcoal">
+            <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1920&q=80" alt="" class="w-full h-full object-cover opacity-10">
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-br from-charcoal via-charcoal/95 to-charcoal/90"></div>
+
+        <!-- Gold accent orbs -->
+        <div class="absolute top-10 left-1/4 w-64 h-64 bg-gold-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-10 right-1/4 w-48 h-48 bg-gold-400/10 rounded-full blur-3xl"></div>
+
+        <div class="relative max-w-4xl mx-auto px-6 lg:px-12 text-center">
+            <div class="observe-hidden" data-animate="fade-up">
+                <p class="text-gold-400 text-sm font-semibold tracking-[0.3em] uppercase mb-6">Let's Create Together</p>
+                <h3 class="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-7xl text-white font-light leading-tight mb-8">
+                    Ready to bring your <br class="hidden sm:block"><span class="italic font-semibold gold-shimmer">dream event</span> to life?
+                </h3>
+                <p class="text-white/50 text-lg max-w-2xl mx-auto mb-12">
+                    Book a complimentary consultation and let us design an experience that exceeds every expectation. Your celebration deserves nothing less than extraordinary.
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="#" class="btn-gold px-12 py-5 rounded-full text-sm font-semibold tracking-wider uppercase">
+                        <span>Schedule Consultation</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-3 text-white/70 hover:text-gold-400 transition-colors group">
+                        <div class="w-12 h-12 rounded-full border border-white/20 group-hover:border-gold-400 flex items-center justify-center transition-colors">
+                            <i data-lucide="phone" class="w-5 h-5"></i>
+                        </div>
+                        <span class="text-sm font-medium">+1 (555) 123-4567</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-charcoal border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 py-16 lg:py-20">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
+                <!-- Brand -->
+                <div class="lg:col-span-2">
+                    <h2 class="font-serif text-2xl text-white mb-2">
+                        <span class="text-gold-400">Elegance</span>
+                        <span class="text-white/50 font-light text-lg ml-1">by Bem</span>
+                    </h2>
+                    <p class="text-white/40 text-sm leading-relaxed max-w-sm mt-4">
+                        Luxury event styling and design for weddings, debuts, birthdays, and exclusive celebrations. Every event, a masterpiece.
+                    </p>
+                    <div class="flex gap-4 mt-8">
+                        <a href="#" class="social-icon w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:border-gold-400 hover:bg-gold-400/10">
+                            <i data-lucide="instagram" class="w-4 h-4 text-white/60"></i>
+                        </a>
+                        <a href="#" class="social-icon w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:border-gold-400 hover:bg-gold-400/10">
+                            <i data-lucide="facebook" class="w-4 h-4 text-white/60"></i>
+                        </a>
+                        <a href="#" class="social-icon w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:border-gold-400 hover:bg-gold-400/10">
+                            <i data-lucide="twitter" class="w-4 h-4 text-white/60"></i>
+                        </a>
+                        <a href="#" class="social-icon w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:border-gold-400 hover:bg-gold-400/10">
+                            <i data-lucide="linkedin" class="w-4 h-4 text-white/60"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h5 class="text-white text-sm font-semibold tracking-widest uppercase mb-6">Explore</h5>
+                    <ul class="space-y-3">
+                        <li><a href="#portfolio" class="text-white/40 text-sm hover:text-gold-400 transition-colors">Portfolio</a></li>
+                        <li><a href="#events" class="text-white/40 text-sm hover:text-gold-400 transition-colors">Latest Events</a></li>
+                        <li><a href="#services" class="text-white/40 text-sm hover:text-gold-400 transition-colors">Services</a></li>
+                        <li><a href="#story" class="text-white/40 text-sm hover:text-gold-400 transition-colors">Our Story</a></li>
+                        <li><a href="#testimonials" class="text-white/40 text-sm hover:text-gold-400 transition-colors">Client Love</a></li>
+                        <li><a href="#contact" class="text-white/40 text-sm hover:text-gold-400 transition-colors">Book Consultation</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div>
+                    <h5 class="text-white text-sm font-semibold tracking-widest uppercase mb-6">Get In Touch</h5>
+                    <ul class="space-y-3">
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="map-pin" class="w-4 h-4 text-gold-400 mt-0.5 flex-shrink-0"></i>
+                            <span class="text-white/40 text-sm">Cagayan de Oro,<br>Philippines, 9000</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i data-lucide="clock" class="w-4 h-4 text-gold-400 flex-shrink-0"></i>
+                            <span class="text-white/40 text-sm">Mon–Sat: 9AM – 6PM</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i data-lucide="mail" class="w-4 h-4 text-gold-400 flex-shrink-0"></i>
+                            <span class="text-white/40 text-sm">hello@elegancebybem.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom -->
+            <div class="border-t border-white/5 mt-16 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                <p class="text-white/30 text-xs">&copy; 2026 Elegance by Bem. All rights reserved.</p>
+                <p class="text-white/30 text-xs">Crafted by <span class="text-gold-400">♥</span> AliAmz Digital</p>
+                <div class="flex gap-6">
+                    <a href="#" class="text-white/30 text-xs hover:text-gold-400 transition-colors">Privacy Policy</a>
+                    <a href="#" class="text-white/30 text-xs hover:text-gold-400 transition-colors">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('nav-scrolled');
+            } else {
+                navbar.classList.remove('nav-scrolled');
+            }
+        });
+
+        // Mobile menu toggle
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const mobileClose = document.getElementById('mobile-close');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburger = document.getElementById('hamburger');
+        let menuOpen = false;
+
+        function openMenu() {
+            menuOpen = true;
+            mobileMenu.classList.remove('opacity-0', 'pointer-events-none');
+            mobileMenu.classList.add('opacity-100', 'pointer-events-auto');
+            hamburger.children[0].style.transform = 'rotate(45deg) translate(4px, 4px)';
+            hamburger.children[1].style.opacity = '0';
+            hamburger.children[2].style.transform = 'rotate(-45deg) translate(4px, -4px)';
+            hamburger.children[2].style.width = '1.5rem';
+        }
+
+        function closeMenu() {
+            menuOpen = false;
+            mobileMenu.classList.add('opacity-0', 'pointer-events-none');
+            mobileMenu.classList.remove('opacity-100', 'pointer-events-auto');
+            hamburger.children[0].style.transform = '';
+            hamburger.children[1].style.opacity = '1';
+            hamburger.children[2].style.transform = '';
+            hamburger.children[2].style.width = '1rem';
+        }
+
+        mobileToggle.addEventListener('click', () => {
+            menuOpen ? closeMenu() : openMenu();
+        });
+
+        mobileClose.addEventListener('click', closeMenu);
+
+        // Close mobile menu on link click
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.addEventListener('click', closeMenu);
+        });
+
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px 0px -80px 0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    const animationType = el.dataset.animate;
+                    const delay = el.dataset.delay || 0;
+
+                    setTimeout(() => {
+                        el.classList.remove('observe-hidden');
+                        switch(animationType) {
+                            case 'fade-up':
+                                el.classList.add('animate-fade-up');
+                                break;
+                            case 'fade-in':
+                                el.classList.add('animate-fade-in');
+                                break;
+                            case 'scale-in':
+                                el.classList.add('animate-scale-in');
+                                break;
+                            case 'slide-left':
+                                el.classList.add('animate-slide-left');
+                                break;
+                            case 'slide-right':
+                                el.classList.add('animate-slide-right');
+                                break;
+                        }
+                    }, parseInt(delay));
+
+                    observer.unobserve(el);
+                }
+            });
+        }, observerOptions);
+
+        // Observe all elements with data-animate
+        document.querySelectorAll('[data-animate]').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

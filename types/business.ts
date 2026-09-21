@@ -447,6 +447,98 @@ export interface RetreatSections {
   bookingImage: string;
 }
 
+/**
+ * One styled event in the showcase grid.
+ *
+ * `category` is the filter key AND the badge text, deliberately the same
+ * string: a grid whose chips and badges can disagree is a grid where filtering
+ * silently hides rows. The filter list is derived from the items themselves
+ * (see the Showcase section), so adding an event in a new category adds the
+ * chip — an owner never edits two places to add one event.
+ */
+export interface EventShowcaseItem {
+  /** "Wedding", "Debut", "Corporate" … Free text, matched case-sensitively. */
+  category: string;
+  title: string;
+  /** Where it was held, printed beside the pin glyph. */
+  venue: string;
+  /**
+   * The day it happened, printed as written.
+   *
+   * A display string rather than an ISO date, unlike `JournalEntry.date`:
+   * nothing sorts or filters on it, and an owner writing "June 2026" for an
+   * event whose exact day is nobody's business should not be forced to invent
+   * one.
+   */
+  date: string;
+  description: string;
+  image: string;
+  /** What the photograph shows. Falls back to the title when blank. */
+  alt?: string;
+}
+
+/** One large category card in the portfolio strip. */
+export interface EventCategoryCard {
+  /** The small gold line above the title, e.g. "Weddings". */
+  label: string;
+  title: string;
+  description: string;
+  image: string;
+  alt?: string;
+  /** Scrolls to the showcase pre-filtered to this category when set. */
+  filter?: string;
+}
+
+/**
+ * The event template's own sections.
+ *
+ * Namespaced for the same reason `PatisserieSections` and `RetreatSections`
+ * are: these shapes have no analogue on another trade, and putting a venue or
+ * a guest count on the shared profile would offer every template fields it can
+ * never render.
+ */
+export interface EventsSections {
+  /** The three large category cards under the hero. */
+  portfolio: {
+    heading: SectionHeading;
+    items: EventCategoryCard[];
+  };
+  /** The filterable grid of events actually styled. */
+  showcase: {
+    heading: SectionHeading;
+    /** Chip shown first, before the derived category chips. */
+    allLabel: string;
+    items: EventShowcaseItem[];
+    /** Optional button under the grid. Omitted renders nothing. */
+    cta?: CtaButton;
+  };
+  /** The image-and-stats panel below the service cards. */
+  approach: {
+    label: string;
+    titleLines: string[];
+    text: string;
+    image: string;
+    imageAlt: string;
+    stats: HeroStat[];
+  };
+  /** The enquiry form beneath the closing invitation. */
+  inquiry: {
+    title: string;
+    intro: string;
+    /** Choices for "what kind of event". */
+    eventTypes: BookingOption[];
+    /** Choices for the budget select. Omitted hides the field. */
+    budgetRanges: BookingOption[];
+    /** Checkbox list under "services needed". */
+    serviceNeeds: BookingOption[];
+    /** Shown above the form's reference number after a successful submit. */
+    successTitle: string;
+    successText: string;
+    /** Where "continue on Messenger" points. Omitted hides the button. */
+    messengerCta?: CtaButton;
+  };
+}
+
 export interface PatisserieSections {
   customCakes: CustomCakes;
   /** The "still deciding?" panel beside the questions. */
@@ -556,4 +648,6 @@ export interface BusinessProfile {
   patisserie?: PatisserieSections;
   /** Present only on the retreat template. See `RetreatSections`. */
   retreat?: RetreatSections;
+  /** Present only on the events template. See `EventsSections`. */
+  events?: EventsSections;
 }

@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { bem } from "@/lib/businesses/bem";
 import { gloria } from "@/lib/businesses/gloria";
 import { arah } from "@/lib/businesses/arah";
 import { ronies } from "@/lib/businesses/ronies";
@@ -76,9 +77,10 @@ describe("retreat/lodge registration", () => {
       const result = sectionSchema(section, fields).safeParse(
         defaultFor(section),
       );
-      expect(result.success, `${section}: ${JSON.stringify(result.error)}`).toBe(
-        true,
-      );
+      expect(
+        result.success,
+        `${section}: ${JSON.stringify(result.error)}`,
+      ).toBe(true);
     }
   });
 
@@ -91,8 +93,9 @@ describe("retreat/lodge registration", () => {
    * though they had written it.
    */
   it("saves a stay card with no price, and a story with no button or badge", () => {
-    expect(sectionSchema("services", fields).safeParse(gloria.services).success)
-      .toBe(true);
+    expect(
+      sectionSchema("services", fields).safeParse(gloria.services).success,
+    ).toBe(true);
     expect(sectionSchema("about", fields).safeParse(gloria.about).success).toBe(
       true,
     );
@@ -102,8 +105,9 @@ describe("retreat/lodge registration", () => {
     // The relaxation follows the declaration, so it must NOT leak: the same
     // content is refused under the barber's rules.
     const strict = templateFields("barber-luxury");
-    expect(sectionSchema("services", strict).safeParse(gloria.services).success)
-      .toBe(false);
+    expect(
+      sectionSchema("services", strict).safeParse(gloria.services).success,
+    ).toBe(false);
     expect(sectionSchema("about", strict).safeParse(gloria.about).success).toBe(
       false,
     );
@@ -138,15 +142,17 @@ describe("retreat/lodge registration", () => {
    * and pressed save without typing anything would lose it.
    */
   it("round-trips every rendered field through its schema untouched", () => {
-    const hero = sectionSchema("hero", fields).parse(gloria.hero) as
-      BusinessProfile["hero"];
+    const hero = sectionSchema("hero", fields).parse(
+      gloria.hero,
+    ) as BusinessProfile["hero"];
     expect(hero.image).toBe(gloria.hero.image);
     expect(hero.imageAlt).toBe(gloria.hero.imageAlt);
     // The emphasised closing line, which this design sets in italic.
     expect(hero.titleLines.at(-1)?.stroke).toBe(true);
 
-    const about = sectionSchema("about", fields).parse(gloria.about) as
-      BusinessProfile["about"];
+    const about = sectionSchema("about", fields).parse(
+      gloria.about,
+    ) as BusinessProfile["about"];
     expect(about.paragraphs).toHaveLength(1);
     expect(about.features).toEqual(gloria.about.features);
 
@@ -156,8 +162,9 @@ describe("retreat/lodge registration", () => {
     expect(services.items).toHaveLength(gloria.services.items.length);
     expect(services.heading.subtitle).toBe(gloria.services.heading.subtitle);
 
-    const gallery = sectionSchema("gallery", fields).parse(gloria.gallery) as
-      BusinessProfile["gallery"];
+    const gallery = sectionSchema("gallery", fields).parse(
+      gloria.gallery,
+    ) as BusinessProfile["gallery"];
     expect(gallery.items.at(-1)?.wide).toBe(true);
     expect(gallery.items[0]!.caption).toBe(gloria.gallery.items[0]!.caption);
   });
@@ -174,6 +181,7 @@ describe("retreat/lodge registration", () => {
       "barber-luxury": ronies,
       "patisserie-boutique": arah,
       "retreat-lodge": gloria,
+      "events-elegance": bem,
     };
 
     for (const { code } of TEMPLATES) {
@@ -213,12 +221,15 @@ describe("retreat/lodge registration", () => {
        * nobody.
        */
       if (!declared.bookingOptions) {
-        expect(profile!.contact.serviceOptions, `${code} service options`)
-          .toEqual([]);
+        expect(
+          profile!.contact.serviceOptions,
+          `${code} service options`,
+        ).toEqual([]);
       }
       if (!declared.staffOptions) {
-        expect(profile!.contact.barberOptions, `${code} staff options`)
-          .toEqual([]);
+        expect(profile!.contact.barberOptions, `${code} staff options`).toEqual(
+          [],
+        );
       }
       if (!declared.galleryCredit) {
         for (const item of profile!.gallery.items) {
@@ -405,9 +416,9 @@ describe("retreat/lodge own blocks", () => {
    * opened the form and pressed save without typing would lose it.
    */
   it("round-trips every block the page renders", () => {
-    const parsed = SECTION_SCHEMA.retreat.parse(
-      gloria.retreat,
-    ) as NonNullable<typeof gloria.retreat>;
+    const parsed = SECTION_SCHEMA.retreat.parse(gloria.retreat) as NonNullable<
+      typeof gloria.retreat
+    >;
 
     expect(parsed.place.locality).toBe(gloria.retreat!.place.locality);
     expect(parsed.introCaption).toBe(gloria.retreat!.introCaption);

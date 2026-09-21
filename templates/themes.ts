@@ -89,11 +89,32 @@ const IVORY_AND_FOREST: ThemePalette = {
   border: "#ded5c5",
 };
 
+/**
+ * Cream and gold — the events/elegance theme.
+ *
+ * `accent` is gold-700 rather than the template's gold-500: on the card the
+ * accent is a hairline rule and a single initial drawn on cream, and 500
+ * measures 2.3:1 there. Same reasoning as the template's own tokens.
+ *
+ * Values are from the `@theme` block in app/globals.css:
+ *   cream #faf8f4 (scoped) · gold-50 #fefdf8 · gold-200 #fbf0c4
+ *   gold-700 #866a23 · charcoal #1a1a1a (scoped)
+ */
+const CREAM_AND_GOLD: ThemePalette = {
+  background: "#faf8f4",
+  foreground: "#1a1a1a",
+  muted: "#6b6660",
+  accent: "#866a23",
+  surface: "#fefdf8",
+  border: "#fbf0c4",
+};
+
 /** `${templateCode}:${themeCode}` → palette. */
 const PALETTES: Record<string, ThemePalette> = {
   "barber-luxury:default": GOLD_ON_BLACK,
   "patisserie-boutique:default": PAPER_AND_MINT,
   "retreat-lodge:default": IVORY_AND_FOREST,
+  "events-elegance:default": CREAM_AND_GOLD,
 };
 
 /**
@@ -107,9 +128,7 @@ export function themePalette(
   templateCode: string | null | undefined,
   themeCode: string | null | undefined,
 ): ThemePalette {
-  return (
-    PALETTES[`${templateCode ?? ""}:${themeCode ?? ""}`] ?? GOLD_ON_BLACK
-  );
+  return PALETTES[`${templateCode ?? ""}:${themeCode ?? ""}`] ?? GOLD_ON_BLACK;
 }
 
 /** Exported for the test that proves every registered template has a palette. */
@@ -131,6 +150,7 @@ const HEADING_FONTS: Record<string, string> = {
   "barber-luxury:default": "var(--font-bebas)",
   "patisserie-boutique:default": "var(--font-playfair)",
   "retreat-lodge:default": "var(--font-cormorant)",
+  "events-elegance:default": "var(--font-cormorant)",
 };
 
 export const DEFAULT_HEADING_FONT = "var(--font-bebas)";
