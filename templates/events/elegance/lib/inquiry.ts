@@ -96,6 +96,26 @@ export function composeMessage(inquiry: EventInquiry): string {
  * its own Zod schema; this exists so the common mistakes are answered in place
  * instead of by a round trip that returns the server's wording.
  */
+/**
+ * Today, as the visitor's own calendar reads it.
+ *
+ * NOT `new Date(day) < new Date()`. A date-only string like "2026-09-23" is
+ * parsed as UTC midnight by specification, while a Date built from the clock
+ * is local — so the two are compared across a timezone offset. West of UTC
+ * that rejects TODAY: a visitor in New York picking the current day sends
+ * 2026-09-23T00:00Z, which is five hours before their own local midnight, and
+ * the form tells them to choose a future date.
+ *
+ * Comparing the strings sidesteps the whole problem. ISO dates sort
+ * lexicographically, `<input type="date">` submits one in the visitor's own
+ * calendar, and no Date is constructed on either side.
+ */
+function todayLocal(): string {
+  const now = new Date();
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
 export function validateInquiry(inquiry: EventInquiry): string | null {
   if (!inquiry.name.trim()) return "Please tell us your name.";
   if (!inquiry.phone.trim() && !inquiry.email.trim()) {
@@ -105,12 +125,12 @@ export function validateInquiry(inquiry: EventInquiry): string | null {
   }
   if (!inquiry.eventType.trim()) return "Please choose the kind of event.";
 
-  if (inquiry.eventDate.trim()) {
-    const chosen = new Date(inquiry.eventDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (Number.isNaN(chosen.getTime())) return "Please check the event date.";
-    if (chosen < today) return "Please choose today or a future date.";
+  const day = inquiry.eventDate.trim();
+  if (day) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) {
+      return "Please check the event date.";
+    }
+    if (day < todayLocal()) return "Please choose today or a future date.";
   }
 
   /*

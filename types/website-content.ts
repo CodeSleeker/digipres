@@ -8,10 +8,14 @@ import type {
   JournalEntry,
   RetreatSections,
   EventsSections,
+  EnquirySection,
+  BookingSection,
   Product,
   BookingOption,
   FaqItem,
   FooterColumn,
+  NavLink,
+  BusinessProfile,
 } from "./business";
 
 /**
@@ -29,6 +33,8 @@ export type AboutContent = About;
 export interface ServicesContent {
   heading: SectionHeading;
   items: Service[];
+  /** The panel under the cards. Only a template that draws one asks for it. */
+  approach?: BusinessProfile["services"]["approach"];
 }
 
 export interface GalleryContent {
@@ -78,6 +84,16 @@ export type RetreatContent = RetreatSections;
  * sees it in their navigation nor may write it.
  */
 export type EventsContent = EventsSections;
+
+/**
+ * The two forms, one section each (migration 0044).
+ *
+ * They were one key inside the events content, edited from a menu that also
+ * held the portfolio and the event grid. Identical to the rendered shapes,
+ * because nothing here is derived.
+ */
+export type EnquiryContent = EnquirySection;
+export type BookingContent = BookingSection;
 
 /**
  * One team member as STORED. Deliberately not `Barber`: the rendered type
@@ -144,6 +160,8 @@ export interface FooterContent {
   columns: FooterColumn[];
   copyright: string;
   credit: string;
+  /** Small print on the bottom rule. Only a footer that draws one asks for it. */
+  legal?: NavLink[];
   /** Sign-up copy. Stored, but only rendered for a verified sender. */
   newsletter?: FooterNewsletter;
 }
@@ -172,6 +190,14 @@ export interface WebsiteContent {
   retreat: RetreatContent | null;
   /** Events-only blocks. `null` = the template default, like every section. */
   events: EventsContent | null;
+  /** The enquiry form. */
+  enquiry: EnquiryContent | null;
+  /**
+   * The consultation form. `null` means "not customized" as usual — a site
+   * that takes no bookings clears the heading instead, which the schema reads
+   * as the whole block being absent.
+   */
+  booking: BookingContent | null;
   products: ProductsContent | null;
   testimonials: TestimonialsContent | null;
   /**
@@ -204,6 +230,11 @@ export const WEBSITE_SECTIONS: WebsiteSection[] = [
   // this template's own, sitting where they fall on the page — the portfolio
   // and the event grid come immediately after the hero.
   "events",
+  // Beside the contact section they belong to: both are forms a visitor fills
+  // in, and an owner looking for "what my booking form asks" looks near
+  // Contact rather than near the photographs.
+  "enquiry",
+  "booking",
   "products",
   "testimonials",
   // Between testimonials and contact: objections get answered immediately
@@ -223,6 +254,8 @@ export const SECTION_COLUMN: Record<WebsiteSection, string> = {
   journal: "journal_content",
   retreat: "retreat_content",
   events: "events_content",
+  enquiry: "enquiry_content",
+  booking: "booking_content",
   products: "products_content",
   testimonials: "testimonials_content",
   faq: "faq_content",

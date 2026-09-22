@@ -22,6 +22,8 @@ import { GalleryForm } from "../_forms/gallery-form";
 import { JournalForm } from "../_forms/journal-form";
 import { RetreatForm } from "../_forms/retreat-form";
 import { EventsForm } from "../_forms/events-form";
+import { EnquiryForm } from "../_forms/enquiry-form";
+import { BookingForm } from "../_forms/booking-form";
 import { ProductsForm } from "../_forms/products-form";
 import { FaqForm } from "../_forms/faq-form";
 import { ContactForm } from "../_forms/contact-form";
@@ -209,6 +211,26 @@ function renderForm(
           This section isn&rsquo;t part of your website template.
         </p>
       );
+    case "enquiry":
+      /* Guarded like the other template-specific sections: a template that
+         declared it without shipping a default would blank every input. */
+      return base.enquiry ? (
+        <EnquiryForm defaultValues={content?.enquiry ?? base.enquiry} />
+      ) : (
+        <p className="text-sm text-admin-muted">
+          This section isn&rsquo;t part of your website template.
+        </p>
+      );
+    case "booking":
+      /*
+       * No guard on a default here, and no "not part of your template"
+       * message: an EMPTY booking section is the legitimate state for a site
+       * that takes enquiries only, and an owner turning it back on needs the
+       * form to be reachable and blank.
+       */
+      return (
+        <BookingForm defaultValues={content?.booking ?? base.booking ?? {}} />
+      );
     case "products":
       return (
         <ProductsForm
@@ -267,12 +289,14 @@ function renderForm(
                 columns: base.footer.columns,
                 copyright: base.footer.copyright,
                 credit: base.footer.credit,
+                legal: base.footer.legal,
                 newsletter: base.footer.newsletter,
               }
             }
             /* Both halves: may they send, and does their footer
                draw the box. See the prop's own note. */
             showNewsletter={newsletterEnabled && Boolean(fields.footerNewsletter)}
+            fields={fields}
           />
           {/* Social links live on the business record, not in footer_content —
               the contact card and JSON-LD `sameAs` read the same values. */}

@@ -138,6 +138,28 @@ export const bem: BusinessProfile = {
         unit: "",
       },
     ],
+    /*
+     * The mockup's "Our Approach" panel, carrying the brief's "how it works".
+     *
+     * The approved design has no separate process strip, and adding one would
+     * have meant inventing a section rather than converting the template. The
+     * three steps are told here instead, beside the photograph and above the
+     * figures that back them up — which is where a reader already looks for
+     * "so how does this work".
+     */
+    approach: {
+      label: "How It Works",
+      titleLines: ["Every detail tells a story of", "intention and beauty"],
+      text: "It starts with a conversation about the day you have in mind, the room and the budget. We come back with a concept — palette, florals, lighting, layout — and refine it with you until it is right. On the day, we install, style and stay until the last detail is in place, so you can be a guest at your own celebration.",
+      image: `${UNSPLASH}/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=800&h=600&q=80`,
+      imageAlt:
+        "A long dining table set with glassware and a bright floral centrepiece",
+      stats: [
+        { value: "500+", label: "Events Styled" },
+        { value: "12+", label: "Years of Artistry" },
+        { value: "100%", label: "Bespoke Design" },
+      ],
+    },
   },
   about: {
     label: "The Philosophy",
@@ -311,6 +333,7 @@ export const bem: BusinessProfile = {
         ],
       },
     ],
+    legal: [{ label: "Privacy Policy", href: "/privacy" }],
     copyright: "Elegance by Bem. All rights reserved.",
     credit: "Crafted by AliAmz Digital",
     socials: [
@@ -327,6 +350,68 @@ export const bem: BusinessProfile = {
         ariaLabel: "Elegance by Bem on Facebook",
       },
     ],
+  },
+  /*
+   * The two forms, a section each since migration 0044. They used to be one
+   * key inside `events`, which put "what my booking form asks" under a menu
+   * about photographs.
+   */
+  enquiry: {
+    title: "Tell us about your\ncelebration",
+    intro:
+      "The more you can tell us, the more useful our first reply will be. Nothing here is fixed — it is a starting point for the conversation.",
+    eventTypes: [
+      { label: "Wedding" },
+      { label: "Debut" },
+      { label: "Birthday" },
+      { label: "Anniversary" },
+      { label: "Corporate event" },
+      { label: "Intimate celebration" },
+      { label: "Something else" },
+    ],
+    budgetRanges: [
+      { label: "Under ₱100,000" },
+      { label: "₱100,000 – ₱250,000" },
+      { label: "₱250,000 – ₱500,000" },
+      { label: "₱500,000 – ₱1,000,000" },
+      { label: "Over ₱1,000,000" },
+      { label: "Still working it out" },
+    ],
+    serviceNeeds: [
+      { label: "Full event styling" },
+      { label: "Florals and décor" },
+      { label: "Coordination on the day" },
+      { label: "Venue sourcing" },
+      { label: "Lighting and installations" },
+      { label: "Not sure yet" },
+    ],
+    successTitle: "Your enquiry is with us",
+    successText:
+      "We will reply within one working day with ideas and availability. Keep the reference below — quote it and we will pick up exactly where you left off.",
+    // TODO(bem): point this at the studio's real Messenger page. Frontend
+    // only: it opens a chat, it does not carry the enquiry with it. When the
+    // intake lands, submitInquiry sends the enquiry and this stays a link.
+    messengerCta: {
+      label: "Continue on Messenger",
+      href: "https://m.me/elegancebybem",
+    },
+  },
+  booking: {
+    enquiryLabel: "About an event",
+    bookingLabel: "Book a consultation",
+    title: "Let's find a\ntime to talk",
+    intro:
+      "Pick a day and a time that suit you. We will confirm before anything is booked in, and the first conversation is free.",
+    topics: [
+      { label: "Wedding" },
+      { label: "Debut" },
+      { label: "Birthday" },
+      { label: "Corporate event" },
+      { label: "Something else" },
+    ],
+    successTitle: "Your slot is requested",
+    successText:
+      "We have it, and we will come back to you shortly to confirm the time. You will get a text and an email either way.",
   },
   floatingCta: { label: "Enquire", href: "#inquiry" },
   events: {
@@ -456,92 +541,6 @@ export const bem: BusinessProfile = {
        * a gallery page and it renders again — an off-site link opens in a new
        * tab (see the Showcase section).
        */
-    },
-    /*
-     * The mockup's "Our Approach" panel, carrying the brief's "how it works".
-     *
-     * The approved design has no separate process strip, and adding one would
-     * have meant inventing a section rather than converting the template. The
-     * three steps are told here instead, beside the photograph and above the
-     * figures that back them up — which is where a reader already looks for
-     * "so how does this work".
-     */
-    approach: {
-      label: "How It Works",
-      titleLines: ["Every detail tells a story of", "intention and beauty"],
-      text: "It starts with a conversation about the day you have in mind, the room and the budget. We come back with a concept — palette, florals, lighting, layout — and refine it with you until it is right. On the day, we install, style and stay until the last detail is in place, so you can be a guest at your own celebration.",
-      image: `${UNSPLASH}/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=800&h=600&q=80`,
-      imageAlt:
-        "A long dining table set with glassware and a bright floral centrepiece",
-      stats: [
-        { value: "500+", label: "Events Styled" },
-        { value: "12+", label: "Years of Artistry" },
-        { value: "100%", label: "Bespoke Design" },
-      ],
-    },
-    footerLegal: [{ label: "Privacy Policy", href: "/privacy" }],
-    inquiry: {
-      title: "Tell us about your\ncelebration",
-      intro:
-        "The more you can tell us, the more useful our first reply will be. Nothing here is fixed — it is a starting point for the conversation.",
-      eventTypes: [
-        { label: "Wedding" },
-        { label: "Debut" },
-        { label: "Birthday" },
-        { label: "Anniversary" },
-        { label: "Corporate event" },
-        { label: "Intimate celebration" },
-        { label: "Something else" },
-      ],
-      budgetRanges: [
-        { label: "Under ₱100,000" },
-        { label: "₱100,000 – ₱250,000" },
-        { label: "₱250,000 – ₱500,000" },
-        { label: "₱500,000 – ₱1,000,000" },
-        { label: "Over ₱1,000,000" },
-        { label: "Still working it out" },
-      ],
-      serviceNeeds: [
-        { label: "Full event styling" },
-        { label: "Florals and décor" },
-        { label: "Coordination on the day" },
-        { label: "Venue sourcing" },
-        { label: "Lighting and installations" },
-        { label: "Not sure yet" },
-      ],
-      successTitle: "Your enquiry is with us",
-      successText:
-        "We will reply within one working day with ideas and availability. Keep the reference below — quote it and we will pick up exactly where you left off.",
-      // TODO(bem): point this at the studio's real Messenger page. Frontend
-      // only: it opens a chat, it does not carry the enquiry with it. When the
-      // intake lands, submitInquiry sends the enquiry and this stays a link.
-      messengerCta: {
-        label: "Continue on Messenger",
-        href: "https://m.me/elegancebybem",
-      },
-      /*
-       * The consultation half. Present, so the section offers both: a
-       * consultation has a day and a time and becomes a real appointment,
-       * while an enquiry has neither and stays a question. Clearing the title
-       * in the CMS removes the switch and leaves a pure enquiry form.
-       */
-      consultation: {
-        enquiryLabel: "About an event",
-        bookingLabel: "Book a consultation",
-        title: "Let's find a\ntime to talk",
-        intro:
-          "Pick a day and a time that suit you. We will confirm before anything is booked in, and the first conversation is free.",
-        topics: [
-          { label: "Wedding" },
-          { label: "Debut" },
-          { label: "Birthday" },
-          { label: "Corporate event" },
-          { label: "Something else" },
-        ],
-        successTitle: "Your slot is requested",
-        successText:
-          "We have it, and we will come back to you shortly to confirm the time. You will get a text and an email either way.",
-      },
     },
   },
 };

@@ -4,6 +4,7 @@ import { useForm, useFieldArray, type UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { footerSchema, type FooterFormValues } from "@/schemas/website-content";
 import { saveFooter } from "@/features/website-cms/actions";
+import type { TemplateFields } from "@/templates/registry";
 import {
   AddButton,
   RepeatableRow,
@@ -22,6 +23,7 @@ import {
 export function FooterForm({
   defaultValues,
   showNewsletter,
+  fields,
 }: {
   defaultValues: FooterFormValues;
   /**
@@ -36,6 +38,7 @@ export function FooterForm({
    * there?"
    */
   showNewsletter: boolean;
+  fields: TemplateFields;
 }) {
   const form = useForm<FooterFormValues>({
     resolver: zodResolver(footerSchema),
@@ -43,6 +46,7 @@ export function FooterForm({
   });
   const { result, pending, submit } = useCmsSubmit(saveFooter);
   const columns = useFieldArray({ control: form.control, name: "columns" });
+  const legal = useFieldArray({ control: form.control, name: "legal" });
 
   return (
     <form onSubmit={form.handleSubmit(submit)} className="grid max-w-2xl gap-6">
@@ -72,6 +76,41 @@ export function FooterForm({
           Add column
         </AddButton>
       </div>
+
+      {fields.footerLegalLinks && (
+        <div className="grid gap-3">
+          <SubHeading>Small print</SubHeading>
+          <p className="text-xs leading-relaxed text-admin-muted">
+            The links beside your copyright at the very bottom of the page — a
+            privacy policy, terms. Remove them all to show nothing there.
+          </p>
+          {legal.fields.map((field, i) => (
+            <RepeatableRow
+              key={field.id}
+              title={`Link ${i + 1}`}
+              onRemove={() => legal.remove(i)}
+            >
+              <div className="grid gap-3 sm:grid-cols-2">
+                <TextField
+                  form={form}
+                  name={`legal.${i}.label`}
+                  label="Link text"
+                  placeholder="Privacy Policy"
+                />
+                <TextField
+                  form={form}
+                  name={`legal.${i}.href`}
+                  label="Where it goes"
+                  placeholder="/privacy"
+                />
+              </div>
+            </RepeatableRow>
+          ))}
+          <AddButton onClick={() => legal.append({ label: "", href: "" })}>
+            Add link
+          </AddButton>
+        </div>
+      )}
 
       {showNewsletter && (
         <div className="grid gap-3">

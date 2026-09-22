@@ -25,9 +25,10 @@ export function SiteFooter({ business }: { business: BusinessProfile }) {
 
   // The mockup sets Privacy Policy and Terms apart from the link columns, on
   // the bottom rule. They live in the events content under their own name, so
-  // the CMS can label the field for what it is — this used to match a column
-  // TITLED "Legal", which meant renaming it moved the links with no warning.
-  const legal = business.events?.footerLegal ?? [];
+  // the CMS can label the field for what it is, under Footer where an owner
+  // is already editing — this used to match a column TITLED "Legal", which
+  // meant renaming it moved the links with no warning.
+  const legal = footer.legal ?? [];
   const columns = footer.columns;
 
   /*

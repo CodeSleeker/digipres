@@ -45,6 +45,8 @@ vi.mock("@/features/website-cms/actions", () => ({
   saveBarbers: capture("barbers"),
   saveSocialLinks: capture("socials"),
   saveEvents: capture("events"),
+  saveEnquirySection: capture("enquiry"),
+  saveBookingSection: capture("booking"),
 }));
 
 import { HeroForm } from "@/app/admin/website/_forms/hero-form";
@@ -54,6 +56,8 @@ import { ProductsForm } from "@/app/admin/website/_forms/products-form";
 import { GalleryForm } from "@/app/admin/website/_forms/gallery-form";
 import { EventsForm } from "@/app/admin/website/_forms/events-form";
 import { ContactForm } from "@/app/admin/website/_forms/contact-form";
+import { EnquiryForm } from "@/app/admin/website/_forms/enquiry-form";
+import { BookingForm } from "@/app/admin/website/_forms/booking-form";
 import { FooterForm } from "@/app/admin/website/_forms/footer-form";
 import { arah } from "@/lib/businesses/arah";
 import { bem } from "@/lib/businesses/bem";
@@ -263,13 +267,12 @@ describe("CMS forms — an edit still lands", () => {
 
 describe("CMS forms — the events template's own blocks", () => {
   /**
-   * The riskiest form in the CMS to get wrong, because it is the only one
-   * holding FOUR unrelated blocks — the portfolio cards, the event grid, the
-   * approach panel and the enquiry form's three dropdowns. A missing input
-   * anywhere in it blanks part of a live page on the owner's first save, and
-   * the section is the one they will open most often.
+   * What is left in this menu after the split: the hero extras, the portfolio
+   * cards and the event grid. A missing input anywhere in it blanks part of a
+   * live page on the owner's first save, and this is the section they will
+   * open most often.
    */
-  it("keeps all four blocks through an untouched save", async () => {
+  it("keeps every block through an untouched save", async () => {
     render(<EventsForm defaultValues={bem.events!} businessId={null} />);
     const stored = (await save("events")) as typeof bem.events;
 
@@ -282,12 +285,6 @@ describe("CMS forms — the events template's own blocks", () => {
     );
     expect(stored!.showcase.items).toHaveLength(
       bem.events!.showcase.items.length,
-    );
-    expect(stored!.inquiry.eventTypes).toHaveLength(
-      bem.events!.inquiry.eventTypes.length,
-    );
-    expect(stored!.inquiry.serviceNeeds).toHaveLength(
-      bem.events!.inquiry.serviceNeeds.length,
     );
   });
 
@@ -350,7 +347,13 @@ describe("CMS forms — the inputs a template is NOT offered", () => {
   it("keeps newsletter copy it never shows a footer without the box", async () => {
     // A verified sender on a template whose footer has no column for the
     // sign-up. The copy stays stored, ready for the day they move template.
-    render(<FooterForm defaultValues={footer} showNewsletter={false} />);
+    render(
+      <FooterForm
+        defaultValues={footer}
+        showNewsletter={false}
+        fields={events}
+      />,
+    );
     expect(screen.queryByText(/mailing list sign-up/i)).toBeNull();
     expectNoLoss(await save("footer"), footer);
   });
@@ -408,5 +411,42 @@ describe("CMS forms — the hero a template actually draws", () => {
 
     render(<HeroForm defaultValues={hero} fields={events} businessId={null} />);
     expectNoLoss(await save("hero"), hero);
+  });
+});
+
+describe("CMS forms — the two form sections", () => {
+  /**
+   * Split out of the Events menu by migration 0044, and into a COLUMN each:
+   * the CMS writes a whole section value back, so two menus on one column
+   * would have saving the enquiry form wipe the booking form's copy.
+   */
+  it("keeps the enquiry form through an untouched save", async () => {
+    render(<EnquiryForm defaultValues={bem.enquiry!} />);
+    const stored = (await save("enquiry")) as typeof bem.enquiry;
+
+    expectNoLoss(stored, bem.enquiry);
+    expect(stored!.eventTypes).toHaveLength(bem.enquiry!.eventTypes.length);
+    expect(stored!.serviceNeeds).toHaveLength(bem.enquiry!.serviceNeeds.length);
+    expect(stored!.budgetRanges).toHaveLength(bem.enquiry!.budgetRanges.length);
+  });
+
+  it("keeps the booking form through an untouched save", async () => {
+    render(<BookingForm defaultValues={bem.booking!} />);
+    const stored = (await save("booking")) as typeof bem.booking;
+
+    expectNoLoss(stored, bem.booking);
+    expect(stored!.topics).toHaveLength(bem.booking!.topics.length);
+  });
+
+  it("lets a studio turn bookings off by clearing the heading", async () => {
+    /*
+     * The whole section is optional, and this is how it is switched off. The
+     * template checks the same field, so an empty heading means no mode
+     * switch and a pure enquiry form — right for a studio that only ever
+     * quotes after a conversation.
+     */
+    render(<BookingForm defaultValues={{ ...bem.booking!, title: "" }} />);
+    const stored = (await save("booking")) as { title?: string };
+    expect(stored.title ?? "").toBe("");
   });
 });

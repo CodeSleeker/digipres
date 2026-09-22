@@ -68,10 +68,17 @@ function HeadlineLine({ text }: { text: string }) {
  * conversation moves to Messenger.
  */
 export function Inquiry({ business }: { business: BusinessProfile }) {
-  const { ctaBanner, contact, events } = business;
-  const form = events?.inquiry;
+  const { ctaBanner, contact } = business;
+  // Their own sections since migration 0044 — no longer a key inside the
+  // events content, which is where "what the form asks" used to hide.
+  const form = business.enquiry;
 
-  const consultation = form?.consultation;
+  /*
+   * The booking half, and ABSENT IS MEANINGFUL: no heading means no mode
+   * switch and a pure enquiry form, which is right for a studio that only
+   * ever quotes after a conversation.
+   */
+  const consultation = business.booking?.title ? business.booking : null;
   /*
    * Which of the two the reader is filling in.
    *
@@ -205,9 +212,15 @@ export function Inquiry({ business }: { business: BusinessProfile }) {
   return (
     <section id="contact" className="relative overflow-hidden py-28 lg:py-40">
       <div aria-hidden="true" className="absolute inset-0 bg-charcoal">
-        {events?.approach.image && (
+        {/* The same photograph as the approach panel, at a tenth — wash
+            rather than picture, which is why it carries no alt text. */}
+        {business.services.approach?.image && (
           <div className="absolute inset-0 opacity-10">
-            <TenantImage src={events.approach.image} alt="" sizes="100vw" />
+            <TenantImage
+              src={business.services.approach.image}
+              alt=""
+              sizes="100vw"
+            />
           </div>
         )}
       </div>

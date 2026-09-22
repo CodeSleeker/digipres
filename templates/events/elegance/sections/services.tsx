@@ -18,8 +18,15 @@ import { delay, reveal } from "../lib/reveal";
  * never asks an owner for a figure they would have to invent.
  */
 export function Services({ business }: { business: BusinessProfile }) {
-  const { services, events } = business;
-  const approach = events?.approach;
+  const { services } = business;
+  // On the services section now, not in the events namespace: an owner editing
+  // "how we work" is editing this band of the page.
+  /*
+   * Every field of the panel is optional — clearing the eyebrow is how an
+   * owner removes it — so the whole block is skipped unless there is a
+   * photograph to hang it on, and each part is guarded below.
+   */
+  const approach = services.approach?.image ? services.approach : null;
 
   return (
     <section
@@ -73,8 +80,8 @@ export function Services({ business }: { business: BusinessProfile }) {
             <div className={cn(reveal("left"))}>
               <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
                 <TenantImage
-                  src={approach.image}
-                  alt={approach.imageAlt}
+                  src={approach.image!}
+                  alt={approach.imageAlt ?? ""}
                   sizes="(max-width: 1024px) 92vw, 45vw"
                 />
                 <div
@@ -89,14 +96,14 @@ export function Services({ business }: { business: BusinessProfile }) {
                 {approach.label}
               </p>
               <h3 className="mb-6 font-serif text-3xl font-light leading-snug text-white lg:text-4xl">
-                <SplitTitle text={approach.titleLines.join("\n")} onDark />
+                <SplitTitle text={(approach.titleLines ?? []).join("\n")} onDark />
               </h3>
               <p className="mb-8 leading-relaxed text-white/50">
                 {approach.text}
               </p>
-              {approach.stats.length > 0 && (
+              {(approach.stats?.length ?? 0) > 0 && (
                 <dl className="flex flex-wrap gap-12">
-                  {approach.stats.map((stat) => (
+                  {approach.stats!.map((stat) => (
                     <div key={stat.label}>
                       <dt className="sr-only">{stat.label}</dt>
                       <dd>

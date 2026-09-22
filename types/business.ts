@@ -531,63 +531,48 @@ export interface EventsSections {
     /** Optional button under the grid. Omitted renders nothing. */
     cta?: CtaButton;
   };
-  /** The image-and-stats panel below the service cards. */
-  approach: {
-    label: string;
-    titleLines: string[];
-    text: string;
-    image: string;
-    imageAlt: string;
-    stats: HeroStat[];
-  };
-  /**
-   * The small print on the footer's bottom rule, beside the copyright.
-   *
-   * Its own field rather than a footer COLUMN titled "Legal", which is what
-   * this was: the section lifted that column out of the grid by matching its
-   * title, so renaming it in the CMS silently moved the links somewhere else
-   * and nothing in the form said so. A named field is a thing the form can
-   * label.
-   */
-  footerLegal: NavLink[];
-  /** The enquiry form beneath the closing invitation. */
-  inquiry: {
-    title: string;
-    intro: string;
-    /** Choices for "what kind of event". */
-    eventTypes: BookingOption[];
-    /** Choices for the budget select. Omitted hides the field. */
-    budgetRanges: BookingOption[];
-    /** Checkbox list under "services needed". */
-    serviceNeeds: BookingOption[];
-    /** Shown above the form's reference number after a successful submit. */
-    successTitle: string;
-    successText: string;
-    /** Where "continue on Messenger" points. Omitted hides the button. */
-    messengerCta?: CtaButton;
-    /**
-     * The consultation half of the form, if the studio takes appointments.
-     *
-     * Absent renders no mode switch at all and the section stays a pure
-     * enquiry form — which is right for a stylist who only ever quotes after a
-     * conversation. Present turns the same section into two modes, the way the
-     * retreat's form switches between a stay and a question.
-     *
-     * An enquiry has no date and a consultation does: filing one as the other
-     * is exactly what migration 0036 exists to prevent.
-     */
-    consultation?: {
-      /** The two mode chips. */
-      enquiryLabel: string;
-      bookingLabel: string;
-      title: string;
-      intro: string;
-      /** The dropdown of what the consultation is about. */
-      topics: BookingOption[];
-      successTitle: string;
-      successText: string;
-    };
-  };
+}
+
+/**
+ * The enquiry form beneath the closing invitation.
+ *
+ * Its own section, and its own column (migration 0044), rather than a key
+ * inside the events content: an owner changing what their form asks for was
+ * having to find it under a menu about their photographs.
+ */
+export interface EnquirySection {
+  title: string;
+  intro: string;
+  /** Choices for "what kind of event". */
+  eventTypes: BookingOption[];
+  /** Choices for the budget select. Empty hides the field. */
+  budgetRanges: BookingOption[];
+  /** Checkbox list under "services needed". */
+  serviceNeeds: BookingOption[];
+  successTitle: string;
+  successText: string;
+  /** Where "continue on Messenger" points. Omitted hides the button. */
+  messengerCta?: CtaButton;
+}
+
+/**
+ * Booking a consultation — the other half of the same form.
+ *
+ * ABSENT IS MEANINGFUL: no mode switch renders and the section stays a pure
+ * enquiry form, which is right for a studio that only ever quotes after a
+ * conversation. An enquiry has no date and a consultation does, and filing one
+ * as the other is what migration 0036 exists to prevent.
+ */
+export interface BookingSection {
+  /** The two mode chips. */
+  enquiryLabel: string;
+  bookingLabel: string;
+  title: string;
+  intro: string;
+  /** The dropdown of what the consultation is about. */
+  topics: BookingOption[];
+  successTitle: string;
+  successText: string;
 }
 
 export interface PatisserieSections {
@@ -634,6 +619,23 @@ export interface BusinessProfile {
   services: {
     heading: SectionHeading;
     items: Service[];
+    /**
+     * The image-and-figures panel under the service cards.
+     *
+     * Optional, and only the events template draws one — but it lives HERE
+     * rather than in that template's own namespace because an owner editing
+     * "how we work" is editing the same band of their page as the service
+     * cards above it. Splitting them put half a section in one CMS menu and
+     * half in another.
+     */
+    approach?: {
+      label?: string;
+      titleLines?: string[];
+      text?: string;
+      image?: string;
+      imageAlt?: string;
+      stats?: HeroStat[];
+    };
   };
   /**
    * The barber template's process strip. Optional because it is the one section
@@ -690,6 +692,17 @@ export interface BusinessProfile {
     columns: FooterColumn[];
     copyright: string;
     credit: string;
+    /**
+     * The small print beside the copyright on the bottom rule — a privacy
+     * policy, terms.
+     *
+     * Its own field rather than a column titled "Legal", which is what this
+     * was: the section lifted that column out of the grid by matching its
+     * title, so renaming it in the CMS silently moved the links and nothing
+     * said so. And on the footer rather than in the events namespace, because
+     * it is the footer an owner is editing.
+     */
+    legal?: NavLink[];
     socials: SocialLink[];
     /** Absent, or the tenant hasn't been cleared to send — either way, no box. */
     newsletter?: FooterNewsletter;
@@ -701,4 +714,8 @@ export interface BusinessProfile {
   retreat?: RetreatSections;
   /** Present only on the events template. See `EventsSections`. */
   events?: EventsSections;
+  /** The enquiry form. Its own CMS section since migration 0044. */
+  enquiry?: EnquirySection;
+  /** The consultation form. Absent means the site takes enquiries only. */
+  booking?: BookingSection;
 }

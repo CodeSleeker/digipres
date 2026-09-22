@@ -112,7 +112,7 @@ describe("the events default content", () => {
   it("offers both modes", () => {
     // Absent `consultation` renders no switch at all, which is the right
     // shape for a studio that only ever quotes after a conversation.
-    expect(bem.events!.inquiry.consultation).toBeDefined();
-    expect(bem.events!.inquiry.consultation!.topics.length).toBeGreaterThan(0);
+    expect(bem.booking).toBeDefined();
+    expect(bem.booking!.topics.length).toBeGreaterThan(0);
   });
 });

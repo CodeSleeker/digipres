@@ -12,6 +12,7 @@ import type { TemplateFields } from "@/templates/registry";
 import {
   AddButton,
   RepeatableRow,
+  StringListField,
   SubHeading,
   SubmitBar,
   TextAreaField,
@@ -44,6 +45,7 @@ export function ServicesForm({
     defaultValues,
   });
   const { result, pending, submit } = useCmsSubmit(saveServices);
+  const stats = useFieldArray({ control: form.control, name: "approach.stats" });
   const items = useFieldArray({ control: form.control, name: "items" });
 
   const noun = fields.itemPhotos ? "Item" : "Service";
@@ -149,6 +151,73 @@ export function ServicesForm({
           Add {noun.toLowerCase()}
         </AddButton>
       </div>
+
+      {fields.servicesApproach && (
+        <section className="grid gap-3">
+          <SubHeading>How you work</SubHeading>
+          <p className="text-xs leading-relaxed text-admin-muted">
+            The photograph and figures under your service cards. This is where
+            someone finds out what actually happens after they get in touch.
+            Clearing the eyebrow label removes the whole panel.
+          </p>
+          <ImageField
+            form={form}
+            name="approach.image"
+            label="Photograph"
+            businessId={businessId}
+          />
+          <TextField
+            form={form}
+            name="approach.imageAlt"
+            label="Describe the photograph"
+          />
+          <TextField
+            form={form}
+            name="approach.label"
+            label="Eyebrow label"
+            placeholder="How It Works"
+            hint="Clearing this removes the panel."
+          />
+          <StringListField
+            form={form}
+            name="approach.titleLines"
+            label="Heading"
+            hint="One line per row. The last line is emphasised."
+          />
+          <TextAreaField
+            form={form}
+            name="approach.text"
+            label="How you work"
+            hint="A short paragraph. Walking through it step by step reads well here."
+          />
+
+          {stats.fields.map((field, i) => (
+            <RepeatableRow
+              key={field.id}
+              title={`Figure ${i + 1}`}
+              onRemove={() => stats.remove(i)}
+            >
+              <div className="grid gap-3 sm:grid-cols-2">
+                <TextField
+                  form={form}
+                  name={`approach.stats.${i}.value`}
+                  label="Figure"
+                  placeholder="500+"
+                />
+                <TextField
+                  form={form}
+                  name={`approach.stats.${i}.label`}
+                  label="What it counts"
+                  placeholder="Events Styled"
+                />
+              </div>
+            </RepeatableRow>
+          ))}
+          <AddButton onClick={() => stats.append({ value: "", label: "" })}>
+            Add figure
+          </AddButton>
+        </section>
+      )}
 
       <SubmitBar pending={pending} result={result} />
     </form>

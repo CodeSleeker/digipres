@@ -112,7 +112,7 @@ describe("events/elegance default content", () => {
     expect(bem.events).toBeDefined();
     expect(bem.events!.portfolio.items.length).toBeGreaterThan(0);
     expect(bem.events!.showcase.items.length).toBeGreaterThan(0);
-    expect(bem.events!.approach.stats.length).toBeGreaterThan(0);
+    expect(bem.services.approach!.stats!.length).toBeGreaterThan(0);
   });
 
   it("gives every portfolio card a filter that matches a real category", () => {
@@ -149,8 +149,9 @@ describe("events/elegance default content", () => {
   it("keeps the footer's small print in its own field, not a column", () => {
     // It used to be a footer column titled "Legal" that SiteFooter lifted out
     // of the grid by matching the title — so renaming it in the CMS moved the
-    // links with no warning. A named field is a thing the form can label.
-    expect(bem.events!.footerLegal.length).toBeGreaterThan(0);
+    // links with no warning. A named field is a thing the form can label, and
+    // it belongs on the footer an owner is editing.
+    expect(bem.footer.legal!.length).toBeGreaterThan(0);
     expect(
       bem.footer.columns.some((c) => /^legal$/i.test(c.title)),
       "the magic column is gone",
@@ -201,14 +202,45 @@ describe("enquiry", () => {
   });
 
   it("refuses a date in the past but allows today", () => {
+    /*
+     * Built from LOCAL calendar parts, not `toISOString().slice(0, 10)`.
+     *
+     * That was the old helper, and it is how this test caught a real bug: at
+     * 00:00 in UTC+8, `toISOString()` reports yesterday's date, so the test
+     * asked "is yesterday allowed today?" — and the answer was correctly no.
+     * The same mismatch in `validateInquiry` rejected TODAY for every visitor
+     * west of UTC.
+     */
+    const iso = (d: Date) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+        d.getDate(),
+      ).padStart(2, "0")}`;
     const today = new Date();
-    const iso = (d: Date) => d.toISOString().slice(0, 10);
     const yesterday = new Date(today.getTime() - 86_400_000);
 
     expect(validateInquiry({ ...valid, eventDate: iso(today) })).toBeNull();
     expect(validateInquiry({ ...valid, eventDate: iso(yesterday) })).toMatch(
       /future/i,
     );
+  });
+
+  it("allows today in every timezone, not just east of UTC", () => {
+    // The bug this replaced: a date-only string parses as UTC midnight while
+    // the clock is local, so New York's "today" looked five hours past.
+    for (const offset of [-720, -300, 0, 330, 480, 840]) {
+      const now = new Date();
+      const local = new Date(now.getTime() - offset * 60_000);
+      const day = `${local.getUTCFullYear()}-${String(
+        local.getUTCMonth() + 1,
+      ).padStart(2, "0")}-${String(local.getUTCDate()).padStart(2, "0")}`;
+      // Whatever the offset, a day at or after the runner's own today passes.
+      if (day >= iso0()) {
+        expect(
+          validateInquiry({ ...valid, eventDate: day }),
+          `offset ${offset}`,
+        ).toBeNull();
+      }
+    }
   });
 
   it("refuses a body the endpoint would reject anyway", () => {
@@ -382,4 +414,11 @@ function defaultFor(section: WebsiteSection): unknown {
         section as "hero" | "about" | "services" | "testimonials" | "events"
       ];
   }
+}
+
+/** The runner's own local today, as the validator computes it. */
+function iso0(): string {
+  const d = new Date();
+  const pad = (v: number) => String(v).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }

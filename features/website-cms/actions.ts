@@ -133,6 +133,12 @@ export async function saveRetreat(formData: FormData) {
 export async function saveEvents(formData: FormData) {
   return saveSection("events", formData);
 }
+export async function saveEnquirySection(formData: FormData) {
+  return saveSection("enquiry", formData);
+}
+export async function saveBookingSection(formData: FormData) {
+  return saveSection("booking", formData);
+}
 export async function saveProducts(formData: FormData) {
   return saveSection("products", formData);
 }

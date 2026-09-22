@@ -370,6 +370,43 @@ export const servicesSchemaFor = (rules: SectionRules) =>
       }),
     )
     .min(1, "Add at least one service."),
+  /**
+   * The panel under the cards. `optionalBlock` on the eyebrow, so clearing it
+   * removes the whole thing — which is how a template that draws one turns it
+   * off without emptying six fields.
+   */
+  /*
+   * Every field defaulted, which is what makes the block genuinely optional.
+   *
+   * The form registers a field array for `approach.stats`, and react-hook-form
+   * materialises the PARENT object to hold it — so a template that draws no
+   * panel still submits `approach: { stats: [] }`. Without defaults that
+   * half-object fails on five missing strings, and the save silently never
+   * fires. Optional — not `.default()` — because a default makes the schema's
+   * input and output types differ, and zodResolver then refuses the form.
+   *
+   * A blank label collapses the whole block to undefined, so nothing is
+   * stored for a template that draws no panel.
+   */
+  approach: optionalBlock(
+    {
+      label: text.max(80).optional(),
+      titleLines: optionalStringList(4).optional(),
+      text: text.max(1200).optional(),
+      image: optionalImageRef,
+      imageAlt: altText,
+      stats: z
+        .array(
+          z.object({
+            value: requiredText("Figure is required.").max(20),
+            label: requiredText("Label is required.").max(60),
+          }),
+        )
+        .max(4, "Add at most 4 figures.")
+        .optional(),
+    },
+    "label",
+  ),
   });
 
 export const servicesSchema = servicesSchemaFor(STRICT);
@@ -749,72 +786,57 @@ export const eventsSchema = z.object({
       })
       .optional(),
   }),
-  approach: z.object({
-    label: requiredText("Eyebrow label is required.").max(80),
-    titleLines: requiredStringList("Add at least one heading line."),
-    text: requiredText("Tell people how you work.").max(1200),
-    image: imageRef,
-    imageAlt: altText,
-    stats: z
-      .array(
-        z.object({
-          value: requiredText("Figure is required.").max(20),
-          label: requiredText("Label is required.").max(60),
-        }),
-      )
-      .max(4, "Add at most 4 figures."),
-  }),
-  /** Empty renders nothing on the bottom rule, which is a legitimate choice. */
-  footerLegal: z
-    .array(
-      z.object({
-        label: requiredText("Link text is required.").max(60),
-        href: link,
-      }),
-    )
-    .max(4, "Add at most 4."),
-  inquiry: z.object({
-    title: requiredText("Form heading is required.").max(120),
-    intro: requiredText("Intro is required.").max(400),
-    eventTypes: z
-      .array(eventsOptionSchema)
-      .min(1, "The form needs at least one kind of event.")
-      .max(16, "Add at most 16."),
-    /** Empty hides the field entirely — which is how a studio declines to ask. */
-    budgetRanges: z.array(eventsOptionSchema).max(12, "Add at most 12."),
-    serviceNeeds: z.array(eventsOptionSchema).max(16, "Add at most 16."),
-    successTitle: requiredText("Say something after they press send.").max(120),
-    successText: requiredText("Say what happens next.").max(600),
-    /**
-     * Where "continue on Messenger" points. Blank removes the button, which is
-     * right for a studio without a Page — a dead link on a confirmation
-     * screen is worse than no link.
-     */
-    messengerCta: z
-      .object({
-        label: text.max(80),
-        href: text.max(2048),
-        arrow: z.boolean().optional(),
-      })
-      .optional(),
-    /**
-     * The consultation mode. `optionalBlock` on the title, so clearing it
-     * removes the whole switch and leaves a pure enquiry form — which is how
-     * a studio that does not take appointments turns it off.
-     */
-    consultation: optionalBlock(
-      {
-        enquiryLabel: text.max(40),
-        bookingLabel: text.max(40),
-        title: text.max(120),
-        intro: text.max(400),
-        topics: z.array(eventsOptionSchema).max(12, "Add at most 12."),
-        successTitle: text.max(120),
-        successText: text.max(600),
-      },
-      "title",
-    ),
-  }),
+});
+
+
+// ── The two forms, a section each (migration 0044) ────────────────────
+/**
+ * They were one key inside the events content, edited from a menu that also
+ * held the portfolio cards and the event grid. Two menus need two columns:
+ * the CMS writes a whole section value back, so a shared column would have
+ * saving one form wipe the other.
+ */
+export const enquirySectionSchema = z.object({
+  title: requiredText("Form heading is required.").max(120),
+  intro: requiredText("Intro is required.").max(400),
+  eventTypes: z
+    .array(eventsOptionSchema)
+    .min(1, "The form needs at least one kind of event.")
+    .max(16, "Add at most 16."),
+  /** Empty hides the field entirely — which is how a studio declines to ask. */
+  budgetRanges: z.array(eventsOptionSchema).max(12, "Add at most 12."),
+  serviceNeeds: z.array(eventsOptionSchema).max(16, "Add at most 16."),
+  successTitle: requiredText("Say something after they press send.").max(120),
+  successText: requiredText("Say what happens next.").max(600),
+  /**
+   * Where "continue on Messenger" points. Blank removes the button, which is
+   * right for a studio without a Page — a dead link on a confirmation screen
+   * is worse than no link.
+   */
+  messengerCta: z
+    .object({
+      label: text.max(80),
+      href: text.max(2048),
+      arrow: z.boolean().optional(),
+    })
+    .optional(),
+});
+
+/**
+ * Every field optional, because the WHOLE SECTION is.
+ *
+ * Clearing the heading is how a studio that does not take appointments turns
+ * the mode switch off and leaves a pure enquiry form. The template checks the
+ * heading, so the two agree.
+ */
+export const bookingSectionSchema = z.object({
+  enquiryLabel: text.max(40).optional(),
+  bookingLabel: text.max(40).optional(),
+  title: text.max(120).optional(),
+  intro: text.max(400).optional(),
+  topics: z.array(eventsOptionSchema).max(12, "Add at most 12.").optional(),
+  successTitle: text.max(120).optional(),
+  successText: text.max(600).optional(),
 });
 
 // ── Contact (section-specific extras only) ───────────────────────────────────
@@ -860,6 +882,16 @@ export const footerSchema = z.object({
    * `consent` is stored verbatim against every subscriber who signs up under
    * it, so it is capped generously and never rewritten.
    */
+  /** Empty renders nothing on the bottom rule, which is a legitimate choice. */
+  legal: z
+    .array(
+      z.object({
+        label: requiredText("Link text is required.").max(60),
+        href: link,
+      }),
+    )
+    .max(4, "Add at most 4.")
+    .optional(),
   newsletter: optionalBlock(
     {
       title: text.max(80),
@@ -888,6 +920,8 @@ export const SECTION_SCHEMA = {
   journal: journalSchema,
   retreat: retreatSchema,
   events: eventsSchema,
+  enquiry: enquirySectionSchema,
+  booking: bookingSectionSchema,
   products: productsSchema,
   testimonials: testimonialsSchema,
   faq: faqSchema,
@@ -925,6 +959,8 @@ export type GalleryFormValues = z.infer<typeof gallerySchema>;
 export type JournalFormValues = z.infer<typeof journalSchema>;
 export type RetreatFormValues = z.infer<typeof retreatSchema>;
 export type EventsFormValues = z.infer<typeof eventsSchema>;
+export type EnquiryFormValues = z.infer<typeof enquirySectionSchema>;
+export type BookingFormValues = z.infer<typeof bookingSectionSchema>;
 export type ProductsFormValues = z.infer<typeof productsSchema>;
 export type TestimonialsFormValues = z.infer<typeof testimonialsSchema>;
 export type FaqFormValues = z.infer<typeof faqSchema>;

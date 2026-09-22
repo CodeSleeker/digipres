@@ -21,6 +21,8 @@ import {
   type JournalContent,
   type RetreatContent,
   type EventsContent,
+  type EnquiryContent,
+  type BookingContent,
   type ProductsContent,
   type TestimonialsContent,
   type FaqContent,
@@ -406,6 +408,8 @@ function toDomain(row: BusinessRow): Business {
       journal: (row.journal_content as unknown as JournalContent) ?? null,
       retreat: (row.retreat_content as unknown as RetreatContent) ?? null,
       events: (row.events_content as unknown as EventsContent) ?? null,
+      enquiry: (row.enquiry_content as unknown as EnquiryContent) ?? null,
+      booking: (row.booking_content as unknown as BookingContent) ?? null,
       products: (row.products_content as unknown as ProductsContent) ?? null,
       testimonials:
         (row.testimonials_content as unknown as TestimonialsContent) ?? null,

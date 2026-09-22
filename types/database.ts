@@ -125,6 +125,8 @@ export interface Database {
           journal_content: Json | null;
           retreat_content: Json | null;
           events_content: Json | null;
+          enquiry_content: Json | null;
+          booking_content: Json | null;
           sender_domain: string | null;
           sender_verified: boolean;
           sender_verified_at: string | null;
@@ -190,6 +192,8 @@ export interface Database {
           journal_content?: Json | null;
           retreat_content?: Json | null;
           events_content?: Json | null;
+          enquiry_content?: Json | null;
+          booking_content?: Json | null;
           sender_domain?: string | null;
           sender_verified?: boolean;
           sender_verified_at?: string | null;
@@ -255,6 +259,8 @@ export interface Database {
           journal_content?: Json | null;
           retreat_content?: Json | null;
           events_content?: Json | null;
+          enquiry_content?: Json | null;
+          booking_content?: Json | null;
           sender_domain?: string | null;
           sender_verified?: boolean;
           sender_verified_at?: string | null;

@@ -99,6 +99,9 @@ export function buildBusinessProfile(
      * events tenant is already showing, so nothing changes until they edit.
      */
     events: content.events ?? base.events,
+    /* The two forms, each its own section since migration 0044. */
+    enquiry: content.enquiry ?? base.enquiry,
+    booking: content.booking ?? base.booking,
     products: content.products ?? base.products,
     testimonials: buildTestimonials(base, business),
     faq,
@@ -383,6 +386,7 @@ function buildFooter(base: BusinessProfile, business: Business) {
     columns: f?.columns ?? base.footer.columns,
     copyright: f?.copyright ?? base.footer.copyright,
     credit: f?.credit ?? base.footer.credit,
+    legal: f?.legal ?? base.footer.legal,
     socials: deriveFooterSocials(business),
     /*
      * The sign-up block, and the gate on it.

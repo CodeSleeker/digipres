@@ -136,6 +136,24 @@ export interface TemplateFields {
    * the very thing the verification gate exists to prevent.
    */
   footerNewsletter?: boolean;
+  /**
+   * The image-and-figures panel under the service cards.
+   *
+   * Lives on the shared services section rather than a template namespace,
+   * because an owner editing "how we work" is editing the same band of their
+   * page as the cards above it — splitting them put half a section in one CMS
+   * menu and half in another.
+   */
+  servicesApproach?: boolean;
+  /**
+   * The small print beside the copyright on the footer's bottom rule.
+   *
+   * Only a footer that draws a bottom rule has anywhere to put it. It used to
+   * be a footer COLUMN titled "Legal" that the section lifted out of the grid
+   * by matching the title — rename it and the links moved, with nothing
+   * saying so.
+   */
+  footerLegalLinks?: boolean;
   /** A link set opposite a section heading ("See the full menu →"). */
   headingLinks?: boolean;
   /** A credit line on each gallery photograph ("By Ronie"). */
@@ -189,6 +207,9 @@ export const TEMPLATES: TemplateOption[] = [
       "products",
       "testimonials",
       "faq",
+      // Beside Contact, which is what they are: two forms a visitor fills in.
+      "enquiry",
+      "booking",
       "contact",
       "footer",
     ],
@@ -366,6 +387,11 @@ export const TEMPLATES: TemplateOption[] = [
        */
       /* A glyph on each service card, and no price — an event is quoted. */
       itemIcons: true,
+      /* The "How it works" panel under the cards, and the small print on the
+         footer's bottom rule. Both used to live in this template's own CMS
+         menu; they belong with the sections they are part of. */
+      servicesApproach: true,
+      footerLegalLinks: true,
       /* The story's second paragraph, figures row and sign-off. */
       aboutEditorial: true,
       aboutBadge: true,
