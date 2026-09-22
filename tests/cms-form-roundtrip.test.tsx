@@ -44,6 +44,7 @@ vi.mock("@/features/website-cms/actions", () => ({
   saveFooter: capture("footer"),
   saveBarbers: capture("barbers"),
   saveSocialLinks: capture("socials"),
+  saveEvents: capture("events"),
 }));
 
 import { HeroForm } from "@/app/admin/website/_forms/hero-form";
@@ -51,7 +52,9 @@ import { AboutForm } from "@/app/admin/website/_forms/about-form";
 import { ServicesForm } from "@/app/admin/website/_forms/services-form";
 import { ProductsForm } from "@/app/admin/website/_forms/products-form";
 import { GalleryForm } from "@/app/admin/website/_forms/gallery-form";
+import { EventsForm } from "@/app/admin/website/_forms/events-form";
 import { arah } from "@/lib/businesses/arah";
+import { bem } from "@/lib/businesses/bem";
 import { ronies } from "@/lib/businesses/ronies";
 import { templateFields } from "@/templates/registry";
 import type { BusinessProfile } from "@/types/business";
@@ -103,7 +106,11 @@ describe("CMS forms — an untouched save changes nothing", () => {
   ] as const)("%s", (code, profile: BusinessProfile, fields) => {
     it("hero", async () => {
       render(
-        <HeroForm defaultValues={profile.hero} fields={fields} businessId={null} />,
+        <HeroForm
+          defaultValues={profile.hero}
+          fields={fields}
+          businessId={null}
+        />,
       );
       expectNoLoss(await save("hero"), profile.hero);
     });
@@ -182,7 +189,11 @@ describe("CMS forms — the per-template inputs", () => {
 
   it("offers the proof strip and availability card only to a photo hero", () => {
     const { unmount } = render(
-      <HeroForm defaultValues={arah.hero} fields={patisserie} businessId={null} />,
+      <HeroForm
+        defaultValues={arah.hero}
+        fields={patisserie}
+        businessId={null}
+      />,
     );
     expect(screen.getByText(/proof strip/i)).toBeTruthy();
     expect(screen.getByText(/availability card/i)).toBeTruthy();
@@ -191,7 +202,11 @@ describe("CMS forms — the per-template inputs", () => {
     unmount();
 
     render(
-      <HeroForm defaultValues={ronies.hero} fields={barber} businessId={null} />,
+      <HeroForm
+        defaultValues={ronies.hero}
+        fields={barber}
+        businessId={null}
+      />,
     );
     expect(screen.getByText(/stats/i)).toBeTruthy();
     expect(screen.queryByText(/proof strip/i)).toBeNull();
@@ -239,5 +254,44 @@ describe("CMS forms — an edit still lands", () => {
     // Everything the form never showed is still there.
     expect(stored.items[0]!.image).toBe(arah.services.items[0]!.image);
     expect(stored.heading.link?.label).toBe("See the full menu");
+  });
+});
+
+describe("CMS forms — the events template's own blocks", () => {
+  /**
+   * The riskiest form in the CMS to get wrong, because it is the only one
+   * holding FOUR unrelated blocks — the portfolio cards, the event grid, the
+   * approach panel and the enquiry form's three dropdowns. A missing input
+   * anywhere in it blanks part of a live page on the owner's first save, and
+   * the section is the one they will open most often.
+   */
+  it("keeps all four blocks through an untouched save", async () => {
+    render(<EventsForm defaultValues={bem.events!} businessId={null} />);
+    const stored = (await save("events")) as typeof bem.events;
+
+    expectNoLoss(stored, bem.events);
+
+    // Spelled out as well, because `toMatchObject` on a deep object is easy to
+    // satisfy accidentally and these are the counts that matter.
+    expect(stored!.portfolio.items).toHaveLength(
+      bem.events!.portfolio.items.length,
+    );
+    expect(stored!.showcase.items).toHaveLength(
+      bem.events!.showcase.items.length,
+    );
+    expect(stored!.inquiry.eventTypes).toHaveLength(
+      bem.events!.inquiry.eventTypes.length,
+    );
+    expect(stored!.inquiry.serviceNeeds).toHaveLength(
+      bem.events!.inquiry.serviceNeeds.length,
+    );
+  });
+
+  it("offers an input for the filter that links a card to the grid", async () => {
+    // `filter` is the one field with no visible consequence on the card
+    // itself, which makes it the one most likely to be left out of the form —
+    // and a card whose filter is dropped silently stops narrowing the grid.
+    render(<EventsForm defaultValues={bem.events!} businessId={null} />);
+    expect(screen.getAllByLabelText(/jumps to/i).length).toBeGreaterThan(0);
   });
 });

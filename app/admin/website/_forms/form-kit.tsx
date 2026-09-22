@@ -56,11 +56,19 @@ export function Field({
   label,
   error,
   htmlFor,
+  hint,
   children,
 }: {
   label: string;
   error?: string;
   htmlFor?: string;
+  /**
+   * The one thing about this field an owner cannot work out by looking at it
+   * — that the last line is set in italics, that a word has to match a
+   * category exactly, that clearing it removes the block. Rendered under the
+   * input, after the error, because an error is the more urgent of the two.
+   */
+  hint?: string;
   children: ReactNode;
 }) {
   return (
@@ -73,6 +81,11 @@ export function Field({
       </Label>
       {children}
       {error && <p className="text-xs text-destructive">{error}</p>}
+      {hint && (
+        <span className="text-[0.65rem] leading-relaxed text-admin-muted">
+          {hint}
+        </span>
+      )}
     </div>
   );
 }
@@ -82,14 +95,21 @@ export function TextField<T extends FieldValues>({
   name,
   label,
   placeholder,
+  hint,
 }: {
   form: UseFormReturn<T>;
   name: Path<T>;
   label: string;
   placeholder?: string;
+  hint?: string;
 }) {
   return (
-    <Field label={label} error={fieldError(form, name)} htmlFor={name}>
+    <Field
+      label={label}
+      error={fieldError(form, name)}
+      htmlFor={name}
+      hint={hint}
+    >
       <Input
         id={name}
         placeholder={placeholder}
@@ -120,7 +140,12 @@ export function DateField<T extends FieldValues>({
 }) {
   return (
     <Field label={label} error={fieldError(form, name)} htmlFor={name}>
-      <Input id={name} type="date" className={fieldClass} {...form.register(name)} />
+      <Input
+        id={name}
+        type="date"
+        className={fieldClass}
+        {...form.register(name)}
+      />
     </Field>
   );
 }
@@ -130,14 +155,21 @@ export function TextAreaField<T extends FieldValues>({
   name,
   label,
   placeholder,
+  hint,
 }: {
   form: UseFormReturn<T>;
   name: Path<T>;
   label: string;
   placeholder?: string;
+  hint?: string;
 }) {
   return (
-    <Field label={label} error={fieldError(form, name)} htmlFor={name}>
+    <Field
+      label={label}
+      error={fieldError(form, name)}
+      htmlFor={name}
+      hint={hint}
+    >
       <Textarea
         id={name}
         placeholder={placeholder}
@@ -169,14 +201,13 @@ export function StringListField<T extends FieldValues>({
       control={form.control}
       name={name}
       render={({ field, fieldState }) => (
-        <Field label={label} error={fieldState.error?.message}>
+        <Field label={label} error={fieldState.error?.message} hint={hint}>
           <Textarea
             className={cn(fieldClass, "min-h-24 resize-y")}
             value={Array.isArray(field.value) ? field.value.join("\n") : ""}
             onChange={(e) => field.onChange(e.target.value.split("\n"))}
             onBlur={field.onBlur}
           />
-          {hint && <span className="text-[0.65rem] text-admin-muted">{hint}</span>}
         </Field>
       )}
     />
@@ -250,7 +281,11 @@ export function CheckField<T extends FieldValues>({
 }) {
   return (
     <label className="flex items-center gap-2 text-sm text-admin-fg/80">
-      <input type="checkbox" className="accent-admin-accent" {...form.register(name)} />
+      <input
+        type="checkbox"
+        className="accent-admin-accent"
+        {...form.register(name)}
+      />
       {label}
     </label>
   );

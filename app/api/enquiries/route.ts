@@ -6,6 +6,7 @@ import { ipFromHeaders, rateLimit } from "@/lib/security/rate-limit";
 import { tenantSlugForRequest } from "@/lib/tenant/request-tenant";
 import { enquiryRequestSchema } from "@/schemas/enquiry";
 import { notifyOwnerOfEnquiry } from "@/lib/notifications/enquiry-notice";
+import { enquiryReference } from "@/lib/enquiries/reference";
 
 /**
  * Public enquiry endpoint — a question asked of a tenant, as opposed to a
@@ -82,7 +83,10 @@ export async function POST(request: NextRequest) {
   if (!byBusiness.ok) {
     return NextResponse.json(
       { error: "Too many messages right now. Please call us instead." },
-      { status: 429, headers: { "Retry-After": String(byBusiness.retryAfter) } },
+      {
+        status: 429,
+        headers: { "Retry-After": String(byBusiness.retryAfter) },
+      },
     );
   }
 
@@ -111,7 +115,18 @@ export async function POST(request: NextRequest) {
       message: saved.message,
     });
 
-    return NextResponse.json({ ok: true, notified }, { status: 201 });
+    /*
+     * `reference` is additive: callers that don't use it are unaffected.
+     *
+     * It is minted HERE rather than in the browser because a code the server
+     * has never seen is decoration — the sender quotes it, the owner searches
+     * their inbox for it and finds nothing. Derived from the saved row's id,
+     * so the confirmation and the owner's inbox card cannot disagree.
+     */
+    return NextResponse.json(
+      { ok: true, notified, reference: enquiryReference(saved.id) },
+      { status: 201 },
+    );
   } catch (error) {
     // Never surface the database's own message to a stranger.
     console.error("[enquiries]", error);

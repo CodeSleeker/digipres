@@ -92,6 +92,12 @@ export function buildBusinessProfile(
      * retreat tenant is already showing, so nothing changes until they edit.
      */
     retreat: content.retreat ?? base.retreat,
+    /*
+     * The events template's own blocks (migration 0041). Falls back to the
+     * template default like every other section — which is what the first
+     * events tenant is already showing, so nothing changes until they edit.
+     */
+    events: content.events ?? base.events,
     products: content.products ?? base.products,
     testimonials: buildTestimonials(base, business),
     faq,

@@ -123,6 +123,7 @@ export interface Database {
           gallery_content: Json | null;
           journal_content: Json | null;
           retreat_content: Json | null;
+          events_content: Json | null;
           products_content: Json | null;
           testimonials_content: Json | null;
           faq_content: Json | null;
@@ -180,6 +181,7 @@ export interface Database {
           gallery_content?: Json | null;
           journal_content?: Json | null;
           retreat_content?: Json | null;
+          events_content?: Json | null;
           products_content?: Json | null;
           testimonials_content?: Json | null;
           faq_content?: Json | null;
@@ -237,6 +239,7 @@ export interface Database {
           gallery_content?: Json | null;
           journal_content?: Json | null;
           retreat_content?: Json | null;
+          events_content?: Json | null;
           products_content?: Json | null;
           testimonials_content?: Json | null;
           faq_content?: Json | null;

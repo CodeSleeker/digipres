@@ -471,6 +471,7 @@ function baselineChecks(): VisibilityCheck[] {
       gallery: null,
       journal: null,
       retreat: null,
+      events: null,
       products: null,
       testimonials: null,
       faq: null,

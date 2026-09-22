@@ -1,5 +1,6 @@
 import { getEnquiries } from "@/features/enquiries/queries";
 import { contactLine } from "@/lib/website/contact-line";
+import { enquiryReference } from "@/lib/enquiries/reference";
 import type { Enquiry } from "@/types/enquiry";
 import { EnquiryActions } from "./_components/enquiry-actions";
 
@@ -30,9 +31,9 @@ export default async function EnquiriesPage() {
       </div>
 
       <p className="max-w-2xl text-xs leading-relaxed text-admin-muted">
-        Questions people asked through your website — about what you offer,
-        how to get there, anything that isn&rsquo;t a booking. Replying happens
-        in your own email or phone; this is the record that they asked.
+        Questions people asked through your website — about what you offer, how
+        to get there, anything that isn&rsquo;t a booking. Replying happens in
+        your own email or phone; this is the record that they asked.
       </p>
 
       {enquiries.length === 0 ? (
@@ -100,12 +101,26 @@ function EnquiryCard({ enquiry }: { enquiry: Enquiry }) {
           </p>
         </div>
 
-        <time
-          dateTime={enquiry.createdAt}
-          className="shrink-0 text-xs text-admin-muted"
-        >
-          {enquiry.createdAt.slice(0, 10)}
-        </time>
+        <div className="shrink-0 text-right">
+          <time
+            dateTime={enquiry.createdAt}
+            className="block text-xs text-admin-muted"
+          >
+            {enquiry.createdAt.slice(0, 10)}
+          </time>
+          {/*
+           * The code the sender was shown when they pressed send.
+           *
+           * Some templates invite them to carry on the conversation elsewhere
+           * — Messenger, a phone call — quoting this. Without it on the card
+           * the owner is handed a reference that appears nowhere they can
+           * look. `select-all` because matching it is done by eye, and a
+           * mis-dragged selection is the usual way that goes wrong.
+           */}
+          <span className="mt-1 block select-all font-mono text-[0.65rem] tracking-wide text-admin-muted/70">
+            {enquiryReference(enquiry.id)}
+          </span>
+        </div>
       </div>
 
       {/* `whitespace-pre-line` so the paragraphs someone typed survive. */}

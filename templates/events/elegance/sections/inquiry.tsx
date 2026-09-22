@@ -70,6 +70,13 @@ export function Inquiry({ business }: { business: BusinessProfile }) {
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(
     null,
   );
+  /*
+   * `sent` rather than "we have a reference": a successful post can return
+   * none (see InquiryResult), and keying the confirmation off the reference
+   * would drop the client back onto a blank form after an enquiry that
+   * actually arrived.
+   */
+  const [sent, setSent] = useState(false);
   const [reference, setReference] = useState<string | null>(null);
   const successRef = useRef<HTMLDivElement>(null);
 
@@ -109,15 +116,25 @@ export function Inquiry({ business }: { business: BusinessProfile }) {
     setSending(true);
     setMessage(null);
     try {
-      const result = await submitInquiry(inquiry);
+      const result = await submitInquiry(inquiry, business.slug);
       setReference(result.reference);
+      setSent(true);
       // Focus follows the content: the form this replaces is gone, so without
       // moving focus a keyboard user is left on a detached element and never
       // hears the confirmation.
       requestAnimationFrame(() => successRef.current?.focus());
-    } catch {
+    } catch (error) {
+      /*
+       * The endpoint writes its refusals for the visitor — "Too many
+       * messages. Please try again shortly." — so its wording is preferred
+       * over ours. The generic line is for a dropped connection, where there
+       * is no server message at all.
+       */
       setMessage({
-        text: "That did not send. Please try again in a moment, or message us directly.",
+        text:
+          error instanceof Error && error.message !== "Server error"
+            ? error.message
+            : "That did not send. Please try again in a moment, or message us directly.",
         ok: false,
       });
     } finally {
@@ -191,7 +208,7 @@ export function Inquiry({ business }: { business: BusinessProfile }) {
             )}
             style={delay(150)}
           >
-            {reference ? (
+            {sent ? (
               <div
                 ref={successRef}
                 tabIndex={-1}
@@ -210,17 +227,32 @@ export function Inquiry({ business }: { business: BusinessProfile }) {
                   {form.successText}
                 </p>
 
-                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
-                  Your reference
-                </p>
-                {/* select-all because this gets copied into a chat window, and
-                    letter-spaced because it also gets read down a phone. */}
-                <p className="mb-10 select-all font-mono text-2xl tracking-[0.15em] text-gold-300">
-                  {reference}
-                </p>
+                {/* Omitted rather than left blank when the server didn't
+                    send one — a heading over an empty code reads as a page
+                    that failed halfway. */}
+                {reference && (
+                  <>
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
+                      Your reference
+                    </p>
+                    {/* select-all because this gets copied into a chat
+                        window, and letter-spaced because it also gets read
+                        down a phone. */}
+                    <p className="mb-10 select-all font-mono text-2xl tracking-[0.15em] text-gold-300">
+                      {reference}
+                    </p>
+                  </>
+                )}
 
                 <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                  {form.messengerCta && (
+                  {/*
+                   * `?.label`, not just `?.`: clearing the label in the CMS
+                   * leaves an object with empty strings, not nothing at all,
+                   * and a truthiness check on the object would render an
+                   * unlabelled button pointing nowhere. The empty label IS
+                   * how an owner removes the button.
+                   */}
+                  {form.messengerCta?.label && form.messengerCta.href && (
                     <BtnGold
                       href={form.messengerCta.href}
                       className="px-10 py-4"

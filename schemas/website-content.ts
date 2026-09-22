@@ -663,6 +663,129 @@ export const retreatSchema = z.object({
   bookingImage: optionalImageRef,
 });
 
+// ── Events-only blocks ───────────────────────────────────────────────────────
+/**
+ * The events template's own sections (migration 0041).
+ *
+ * THE PHOTOGRAPHS ARE REQUIRED, unlike the retreat's. That design hides a
+ * block whose picture is missing; this one is photography-first — a category
+ * card or an event card IS its photograph, and one without leaves a hole in a
+ * grid rather than removing a row from it. An owner removes an event by
+ * deleting the entry.
+ *
+ * `venue` and `date` may be blank. The card prints each only when it has one,
+ * and a client who would rather not name the house they were married in
+ * should not be made to.
+ *
+ * `date` is free text, not a date input. Nothing sorts or filters on it, and
+ * an owner writing "June 2026" for an event whose exact day is nobody's
+ * business should not have to invent one.
+ */
+const eventsHeadingSchema = z.object({
+  label: requiredText("Eyebrow label is required."),
+  title: requiredText("Title is required."),
+  subtitle: text.max(400).optional(),
+});
+
+const eventsOptionSchema = z.object({
+  label: requiredText("Option label is required.").max(80),
+  value: text.max(80).optional(),
+});
+
+export const eventsSchema = z.object({
+  portfolio: z.object({
+    heading: eventsHeadingSchema,
+    items: z
+      .array(
+        z.object({
+          label: requiredText("Category label is required.").max(60),
+          title: requiredText("Title is required.").max(80),
+          description: requiredText("Description is required.").max(400),
+          image: imageRef,
+          alt: altText,
+          /*
+           * Must match a category used by an event below, or the card scrolls
+           * to the grid and narrows nothing. Not enforced here: the two lists
+           * are edited in one form, so a cross-field rule would block a save
+           * mid-edit — and the template already ignores a filter it cannot
+           * honour. The form shows the working categories as a hint instead.
+           */
+          filter: text.max(60).optional(),
+        }),
+      )
+      .max(6, "Add at most 6 cards."),
+  }),
+  showcase: z.object({
+    heading: eventsHeadingSchema,
+    allLabel: requiredText("The first chip needs a label.").max(40),
+    items: z
+      .array(
+        z.object({
+          category: requiredText("Category is required.").max(60),
+          title: requiredText("Title is required.").max(120),
+          venue: text.max(120),
+          date: text.max(60),
+          description: requiredText("Description is required.").max(600),
+          image: imageRef,
+          alt: altText,
+        }),
+      )
+      /*
+       * MAY BE EMPTY, like the FAQ and the journal: a studio that has not
+       * photographed anything yet renders no grid, and emptying the list is
+       * how an owner takes it down.
+       */
+      .max(48, "Add at most 48 events."),
+    cta: z
+      .object({
+        label: text.max(80),
+        href: text.max(2048),
+        arrow: z.boolean().optional(),
+      })
+      .optional(),
+  }),
+  approach: z.object({
+    label: requiredText("Eyebrow label is required.").max(80),
+    titleLines: requiredStringList("Add at least one heading line."),
+    text: requiredText("Tell people how you work.").max(1200),
+    image: imageRef,
+    imageAlt: altText,
+    stats: z
+      .array(
+        z.object({
+          value: requiredText("Figure is required.").max(20),
+          label: requiredText("Label is required.").max(60),
+        }),
+      )
+      .max(4, "Add at most 4 figures."),
+  }),
+  inquiry: z.object({
+    title: requiredText("Form heading is required.").max(120),
+    intro: requiredText("Intro is required.").max(400),
+    eventTypes: z
+      .array(eventsOptionSchema)
+      .min(1, "The form needs at least one kind of event.")
+      .max(16, "Add at most 16."),
+    /** Empty hides the field entirely — which is how a studio declines to ask. */
+    budgetRanges: z.array(eventsOptionSchema).max(12, "Add at most 12."),
+    serviceNeeds: z.array(eventsOptionSchema).max(16, "Add at most 16."),
+    successTitle: requiredText("Say something after they press send.").max(120),
+    successText: requiredText("Say what happens next.").max(600),
+    /**
+     * Where "continue on Messenger" points. Blank removes the button, which is
+     * right for a studio without a Page — a dead link on a confirmation
+     * screen is worse than no link.
+     */
+    messengerCta: z
+      .object({
+        label: text.max(80),
+        href: text.max(2048),
+        arrow: z.boolean().optional(),
+      })
+      .optional(),
+  }),
+});
+
 // ── Contact (section-specific extras only) ───────────────────────────────────
 const bookingOptionSchema = z.object({
   label: requiredText("Option label is required."),
@@ -733,6 +856,7 @@ export const SECTION_SCHEMA = {
   gallery: gallerySchema,
   journal: journalSchema,
   retreat: retreatSchema,
+  events: eventsSchema,
   products: productsSchema,
   testimonials: testimonialsSchema,
   faq: faqSchema,
@@ -769,6 +893,7 @@ export type BarbersFormValues = z.infer<typeof barbersSchema>;
 export type GalleryFormValues = z.infer<typeof gallerySchema>;
 export type JournalFormValues = z.infer<typeof journalSchema>;
 export type RetreatFormValues = z.infer<typeof retreatSchema>;
+export type EventsFormValues = z.infer<typeof eventsSchema>;
 export type ProductsFormValues = z.infer<typeof productsSchema>;
 export type TestimonialsFormValues = z.infer<typeof testimonialsSchema>;
 export type FaqFormValues = z.infer<typeof faqSchema>;

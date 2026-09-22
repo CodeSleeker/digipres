@@ -20,6 +20,7 @@ import {
   type GalleryContent,
   type JournalContent,
   type RetreatContent,
+  type EventsContent,
   type ProductsContent,
   type TestimonialsContent,
   type FaqContent,
@@ -215,8 +216,7 @@ export class BusinessRepository {
     if (input.latitude !== undefined) patch.latitude = input.latitude;
     if (input.longitude !== undefined) patch.longitude = input.longitude;
     if (input.logoUrl !== undefined) patch.logo_url = input.logoUrl;
-    if (input.wordmarkUrl !== undefined)
-      patch.wordmark_url = input.wordmarkUrl;
+    if (input.wordmarkUrl !== undefined) patch.wordmark_url = input.wordmarkUrl;
     if (input.faviconUrl !== undefined) patch.favicon_url = input.faviconUrl;
     if (input.coverImageUrl !== undefined)
       patch.cover_image_url = input.coverImageUrl;
@@ -380,6 +380,7 @@ function toDomain(row: BusinessRow): Business {
       gallery: (row.gallery_content as unknown as GalleryContent) ?? null,
       journal: (row.journal_content as unknown as JournalContent) ?? null,
       retreat: (row.retreat_content as unknown as RetreatContent) ?? null,
+      events: (row.events_content as unknown as EventsContent) ?? null,
       products: (row.products_content as unknown as ProductsContent) ?? null,
       testimonials:
         (row.testimonials_content as unknown as TestimonialsContent) ?? null,

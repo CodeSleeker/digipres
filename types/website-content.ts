@@ -7,6 +7,7 @@ import type {
   GalleryItem,
   JournalEntry,
   RetreatSections,
+  EventsSections,
   Product,
   BookingOption,
   FaqItem,
@@ -59,6 +60,24 @@ export interface JournalContent {
  * it in their navigation nor may write it.
  */
 export type RetreatContent = RetreatSections;
+
+/**
+ * The events template's own blocks (migration 0041).
+ *
+ * The SECOND section in this catalogue belonging to a single template, and it
+ * earns the exception more plainly than the first: the category cards and the
+ * event grid are the part of an event stylist's site that changes most often,
+ * and without this they could not add the wedding they styled last month.
+ *
+ * It also carries the enquiry form's own dropdowns. Those are per-studio
+ * choices, not presentation — a stylist who does not take corporate work
+ * should not have "Corporate event" in their own form.
+ *
+ * Identical to the rendered shape (`EventsSections`), because nothing here is
+ * derived. Only `events-elegance` declares it; every other template neither
+ * sees it in their navigation nor may write it.
+ */
+export type EventsContent = EventsSections;
 
 /**
  * One team member as STORED. Deliberately not `Barber`: the rendered type
@@ -151,6 +170,8 @@ export interface WebsiteContent {
   journal: JournalContent | null;
   /** Retreat-only blocks. `null` = the template default, like every section. */
   retreat: RetreatContent | null;
+  /** Events-only blocks. `null` = the template default, like every section. */
+  events: EventsContent | null;
   products: ProductsContent | null;
   testimonials: TestimonialsContent | null;
   /**
@@ -179,6 +200,10 @@ export const WEBSITE_SECTIONS: WebsiteSection[] = [
   // with, before the shop. An owner scanning the nav meets it where they meet
   // it on their own site.
   "retreat",
+  // Directly after the retreat's, for the same reason: the blocks that are
+  // this template's own, sitting where they fall on the page — the portfolio
+  // and the event grid come immediately after the hero.
+  "events",
   "products",
   "testimonials",
   // Between testimonials and contact: objections get answered immediately
@@ -197,6 +222,7 @@ export const SECTION_COLUMN: Record<WebsiteSection, string> = {
   gallery: "gallery_content",
   journal: "journal_content",
   retreat: "retreat_content",
+  events: "events_content",
   products: "products_content",
   testimonials: "testimonials_content",
   faq: "faq_content",

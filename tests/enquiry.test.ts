@@ -6,6 +6,7 @@ import {
   enquiryEmailText,
 } from "@/lib/notifications/enquiry-notice";
 import { isGsm7, smsSegments } from "@/lib/sms/gsm7";
+import { enquiryReference } from "@/lib/enquiries/reference";
 
 /**
  * A question asked of a tenant.
@@ -63,8 +64,9 @@ describe("enquiry request schema", () => {
   });
 
   it("requires something to have been asked", () => {
-    expect(enquiryRequestSchema.safeParse(payload({ message: "   " })).success)
-      .toBe(false);
+    expect(
+      enquiryRequestSchema.safeParse(payload({ message: "   " })).success,
+    ).toBe(false);
   });
 
   it("refuses a malformed email rather than storing a dead reply route", () => {
@@ -77,7 +79,10 @@ describe("enquiry request schema", () => {
     // Both are set server-side. An enquiry always arrives unread, and its
     // tenant comes from the request host.
     const parsed = enquiryRequestSchema.parse(
-      payload({ business_id: "someone-else", read_at: new Date().toISOString() }),
+      payload({
+        business_id: "someone-else",
+        read_at: new Date().toISOString(),
+      }),
     );
     expect(parsed).not.toHaveProperty("business_id");
     expect(parsed).not.toHaveProperty("read_at");
@@ -89,6 +94,32 @@ describe("enquiry request schema", () => {
  * credit. The same three rules that keep the booking alert to one segment apply
  * here, and the test is what stops a well-meaning edit undoing them.
  */
+describe("enquiry reference", () => {
+  const id = "3f7a92c1-4b2e-4d8a-9f10-aabbccddeeff";
+
+  it("is the same code every time it is derived", () => {
+    // The whole reason it is derived rather than stored: the confirmation the
+    // sender saw and the owner's inbox card compute it independently, and a
+    // reference that disagrees with itself is worse than none.
+    expect(enquiryReference(id)).toBe(enquiryReference(id));
+    expect(enquiryReference(id)).toBe("ENQ-3F7A-92C1");
+  });
+
+  it("stays greppable against the row it names", () => {
+    // `select * from enquiries where id like '3f7a92c1%'` has to find it, so
+    // the code is the id's own leading hex and not a hash of it.
+    const hex = enquiryReference(id).replace("ENQ-", "").replace("-", "");
+    expect(id.startsWith(hex.toLowerCase())).toBe(true);
+  });
+
+  it("renders a placeholder instead of throwing on a malformed id", () => {
+    // It is drawn on an inbox card and a confirmation screen. Neither should
+    // 500 because a row's id was not the shape this expected.
+    expect(enquiryReference("")).toBe("ENQ-????-????");
+    expect(enquiryReference("nope")).toBe("ENQ-????-????");
+  });
+});
+
 describe("enquiry SMS", () => {
   const notice = {
     enquiryId: "e1",
@@ -119,9 +150,9 @@ describe("enquiry SMS", () => {
 
   it("carries a way to reply, preferring the number", () => {
     expect(enquirySmsBody("Gloria's", notice)).toContain("0917 123 4567");
-    expect(
-      enquirySmsBody("Gloria's", { ...notice, phone: null }),
-    ).toContain("ana@example.ph");
+    expect(enquirySmsBody("Gloria's", { ...notice, phone: null })).toContain(
+      "ana@example.ph",
+    );
   });
 
   it("uses no em dash — the character that tripled the booking alert", () => {

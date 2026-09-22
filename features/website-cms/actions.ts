@@ -130,6 +130,9 @@ export async function saveJournal(formData: FormData) {
 export async function saveRetreat(formData: FormData) {
   return saveSection("retreat", formData);
 }
+export async function saveEvents(formData: FormData) {
+  return saveSection("events", formData);
+}
 export async function saveProducts(formData: FormData) {
   return saveSection("products", formData);
 }

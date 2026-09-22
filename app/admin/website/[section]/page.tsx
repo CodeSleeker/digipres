@@ -21,6 +21,7 @@ import { BarbersForm } from "../_forms/barbers-form";
 import { GalleryForm } from "../_forms/gallery-form";
 import { JournalForm } from "../_forms/journal-form";
 import { RetreatForm } from "../_forms/retreat-form";
+import { EventsForm } from "../_forms/events-form";
 import { ProductsForm } from "../_forms/products-form";
 import { FaqForm } from "../_forms/faq-form";
 import { ContactForm } from "../_forms/contact-form";
@@ -184,6 +185,23 @@ function renderForm(
       return base.retreat ? (
         <RetreatForm
           defaultValues={content?.retreat ?? base.retreat}
+          businessId={businessId}
+        />
+      ) : (
+        <p className="text-sm text-admin-muted">
+          This section isn&rsquo;t part of your website template.
+        </p>
+      );
+    case "events":
+      /*
+       * `base.events` is optional on the profile — only one template has
+       * these blocks. Guarded for the same reason as `retreat` above: a
+       * template that declared the section without shipping a default would
+       * hand the form `undefined` and blank every input.
+       */
+      return base.events ? (
+        <EventsForm
+          defaultValues={content?.events ?? base.events}
           businessId={businessId}
         />
       ) : (

@@ -278,6 +278,13 @@ export const TEMPLATES: TemplateOption[] = [
      * them — the same route PatisserieSections and RetreatSections took.
      */
     sections: [
+      /*
+       * FIRST, beside Branding — the same placement the retreat's own blocks
+       * get, and for the same reason: this is not an ordinary page section.
+       * It carries the portfolio cards, the event grid, the approach panel
+       * and the enquiry form's dropdowns (migration 0041).
+       */
+      "events",
       "hero",
       "services",
       "about",
