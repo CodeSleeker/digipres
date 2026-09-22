@@ -22,6 +22,11 @@ import {
   validateInquiry,
   type EventInquiry,
 } from "../lib/inquiry";
+import {
+  submitConsultation,
+  validateConsultation,
+  type ConsultationRequest,
+} from "../lib/consultation";
 
 /**
  * One line of the closing headline, with its emphasised phrase.
@@ -66,6 +71,17 @@ export function Inquiry({ business }: { business: BusinessProfile }) {
   const { ctaBanner, contact, events } = business;
   const form = events?.inquiry;
 
+  const consultation = form?.consultation;
+  /*
+   * Which of the two the reader is filling in.
+   *
+   * A mode switch rather than a second section, which is what the retreat's
+   * form does for the same reason: one call to action reads better than two
+   * competing ones, and the approved design has room for a form here, not for
+   * a form and a half. Absent consultation content leaves a pure enquiry form
+   * and no switch at all.
+   */
+  const [mode, setMode] = useState<"enquiry" | "booking">("enquiry");
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(
     null,
@@ -92,6 +108,8 @@ export function Inquiry({ business }: { business: BusinessProfile }) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const value = (key: string) => (data.get(key)?.toString() ?? "").trim();
+
+    if (mode === "booking") return handleBooking(value);
 
     const inquiry: EventInquiry = {
       name: value("name"),
@@ -130,6 +148,48 @@ export function Inquiry({ business }: { business: BusinessProfile }) {
        * over ours. The generic line is for a dropped connection, where there
        * is no server message at all.
        */
+      setMessage({
+        text:
+          error instanceof Error && error.message !== "Server error"
+            ? error.message
+            : "That did not send. Please try again in a moment, or message us directly.",
+        ok: false,
+      });
+    } finally {
+      setSending(false);
+    }
+  }
+
+  /**
+   * The consultation path. A different endpoint, a different success state,
+   * and no reference — /api/bookings mints none, because an appointment is
+   * identified by its slot rather than by a code.
+   */
+  async function handleBooking(value: (key: string) => string) {
+    const request: ConsultationRequest = {
+      name: value("name"),
+      phone: value("phone"),
+      email: value("email"),
+      topic: value("topic"),
+      date: value("slot_date"),
+      time: value("slot_time"),
+      notes: value("details"),
+    };
+
+    const problem = validateConsultation(request);
+    if (problem) {
+      setMessage({ text: problem, ok: false });
+      return;
+    }
+
+    setSending(true);
+    setMessage(null);
+    try {
+      await submitConsultation(request, business.slug);
+      setReference(null);
+      setSent(true);
+      requestAnimationFrame(() => successRef.current?.focus());
+    } catch (error) {
       setMessage({
         text:
           error instanceof Error && error.message !== "Server error"
@@ -221,10 +281,14 @@ export function Inquiry({ business }: { business: BusinessProfile }) {
                   <CheckCircle2 className="h-8 w-8 text-gold-400" />
                 </span>
                 <h3 className="mb-3 font-serif text-3xl font-light text-white">
-                  {form.successTitle}
+                  {mode === "booking" && consultation
+                    ? consultation.successTitle
+                    : form.successTitle}
                 </h3>
                 <p className="mx-auto mb-8 max-w-md text-white/50">
-                  {form.successText}
+                  {mode === "booking" && consultation
+                    ? consultation.successText
+                    : form.successText}
                 </p>
 
                 {/* Omitted rather than left blank when the server didn't
@@ -269,12 +333,68 @@ export function Inquiry({ business }: { business: BusinessProfile }) {
               </div>
             ) : (
               <>
+                {/*
+                 * The mode switch, as radios in a fieldset.
+                 *
+                 * Radios rather than styled buttons: this is a choice between
+                 * two options with one selected, which is what a radio group
+                 * IS — so the arrow keys, the announced group name and the
+                 * selected state all come from the browser. Same treatment the
+                 * retreat's form uses.
+                 */}
+                {consultation && (
+                  <fieldset className="mb-8">
+                    <legend className="sr-only">What can we help with</legend>
+                    <div className="flex flex-wrap justify-center gap-3">
+                      {(
+                        [
+                          ["enquiry", consultation.enquiryLabel],
+                          ["booking", consultation.bookingLabel],
+                        ] as const
+                      ).map(([value, label]) => (
+                        <label
+                          key={value}
+                          className={cn(
+                            "cursor-pointer rounded-full border px-6 py-2.5 text-xs font-semibold uppercase tracking-wider transition-all duration-300",
+                            "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-gold-400",
+                            mode === value
+                              ? "border-gold-400 bg-gold-400 text-charcoal"
+                              : "border-white/20 text-white/60 hover:border-gold-400/50 hover:text-white",
+                          )}
+                        >
+                          <input
+                            type="radio"
+                            name="mode"
+                            value={value}
+                            checked={mode === value}
+                            onChange={() => {
+                              setMode(value);
+                              setMessage(null);
+                            }}
+                            className="sr-only"
+                          />
+                          {label}
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                )}
+
                 <div className="mb-8 text-center">
                   <h3 className="mb-3 font-serif text-3xl font-light text-white">
-                    <SplitTitle text={form.title} onDark />
+                    <SplitTitle
+                      text={
+                        mode === "booking" && consultation
+                          ? consultation.title
+                          : form.title
+                      }
+                      onDark
+                    />
                   </h3>
                   <p className="mx-auto max-w-lg text-sm text-white/50">
-                    {form.intro}
+                    {mode === "booking" && consultation
+                      ? consultation.intro
+                      : form.intro}
                   </p>
                 </div>
 
@@ -298,12 +418,20 @@ export function Inquiry({ business }: { business: BusinessProfile }) {
                     />
                   </Field>
 
-                  <Field id="inq-phone" label="Contact number">
+                  <Field
+                    id="inq-phone"
+                    label="Contact number"
+                    required={mode === "booking"}
+                  >
+                    {/* Required for a consultation and not for an enquiry: the
+                        confirmation is a text, and the owner rings to agree
+                        the time. */}
                     <input
                       id="inq-phone"
                       name="phone"
                       type="tel"
                       autoComplete="tel"
+                      required={mode === "booking"}
                       className={fieldClass}
                     />
                   </Field>
@@ -318,6 +446,14 @@ export function Inquiry({ business }: { business: BusinessProfile }) {
                     />
                   </Field>
 
+                  {/*
+                   * The enquiry-only fields, UNMOUNTED in booking mode
+                   * rather than hidden — so nothing stale is submitted and a
+                   * keyboard user does not tab through a venue and a guest
+                   * count that do not apply to a consultation.
+                   */}
+                  {mode === "enquiry" && (
+                    <>
                   <Field id="inq-type" label="Kind of event" required>
                     <select
                       id="inq-type"
@@ -427,6 +563,59 @@ export function Inquiry({ business }: { business: BusinessProfile }) {
                       className={fieldClass}
                     />
                   </Field>
+                    </>
+                  )}
+
+                  {mode === "booking" && consultation && (
+                    <>
+                      {consultation.topics.length > 0 && (
+                        <Field id="inq-topic" label="What it is about">
+                          <select
+                            id="inq-topic"
+                            name="topic"
+                            defaultValue=""
+                            className={selectClass}
+                          >
+                            <option value="">A first conversation</option>
+                            {consultation.topics.map((option) => (
+                              <option
+                                key={option.label}
+                                value={option.value ?? option.label}
+                              >
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </Field>
+                      )}
+
+                      <Field
+                        id="inq-slot-date"
+                        label="Day"
+                        required
+                        hint="We will confirm before it is booked in."
+                      >
+                        <input
+                          id="inq-slot-date"
+                          name="slot_date"
+                          type="date"
+                          required
+                          aria-describedby="inq-slot-date-hint"
+                          className={fieldClass}
+                        />
+                      </Field>
+
+                      <Field id="inq-slot-time" label="Time" required>
+                        <input
+                          id="inq-slot-time"
+                          name="slot_time"
+                          type="time"
+                          required
+                          className={fieldClass}
+                        />
+                      </Field>
+                    </>
+                  )}
 
                   <Field
                     id="inq-details"
@@ -447,12 +636,17 @@ export function Inquiry({ business }: { business: BusinessProfile }) {
                       aria-busy={sending}
                       className="w-full px-10 py-4 sm:w-auto"
                     >
-                      {sending ? "Sending" : "Send enquiry"}
+                      {sending
+                        ? "Sending"
+                        : mode === "booking"
+                          ? "Request consultation"
+                          : "Send enquiry"}
                     </BtnGoldSubmit>
                     <FormMessage message={message} />
                     <p className="mt-4 text-xs text-white/55">
-                      This is an enquiry, not a confirmed booking. We will come
-                      back to you to talk it through.
+                      {mode === "booking"
+                        ? "We will confirm your slot before it is booked in."
+                        : "This is an enquiry, not a confirmed booking. We will come back to you to talk it through."}
                     </p>
                   </div>
                 </form>

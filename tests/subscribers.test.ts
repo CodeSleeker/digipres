@@ -23,9 +23,10 @@ const business = (over: Partial<Business> = {}): Business =>
     name: "Desserts by Arah",
     slug: "arah",
     status: "active",
-    newsletterFromEmail: "news@arah.ph",
-    newsletterFromName: "Desserts by Arah",
-    newsletterVerified: true,
+    senderDomain: "arah.ph",
+    senderNewsletterEmail: "news@arah.ph",
+    senderFromName: "Desserts by Arah",
+    senderVerified: true,
     ...over,
   }) as Business;
 
@@ -46,8 +47,8 @@ describe("canSend", () => {
   it("requires an active business, a sender and verification", () => {
     expect(canSend(business())).toBe(true);
     // Each condition alone is enough to refuse.
-    expect(canSend(business({ newsletterVerified: false }))).toBe(false);
-    expect(canSend(business({ newsletterFromEmail: null }))).toBe(false);
+    expect(canSend(business({ senderVerified: false }))).toBe(false);
+    expect(canSend(business({ senderNewsletterEmail: null }))).toBe(false);
     expect(canSend(business({ status: "suspended" }))).toBe(false);
     expect(canSend(business({ status: "draft" }))).toBe(false);
   });

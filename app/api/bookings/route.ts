@@ -9,7 +9,10 @@ import {
   isPastDate,
 } from "@/schemas/booking";
 import { notifyOwnerOfBooking } from "@/lib/notifications/booking-notice";
-import { notifyCustomerBookingReceived } from "@/lib/notifications/customer-notice";
+import {
+  emailCustomerBookingReceived,
+  notifyCustomerBookingReceived,
+} from "@/lib/notifications/customer-notice";
 import { toE164 } from "@/lib/sms/phone";
 import { revalidateTenantSite } from "@/lib/tenant/revalidate";
 
@@ -133,26 +136,39 @@ export async function POST(request: NextRequest) {
     // The customer's own acknowledgement. Separate from the owner's alert
     // because it can be skipped independently — an opted-out number still
     // produces a booking the owner must be told about.
-    const acknowledged = await notifyCustomerBookingReceived(
-      business,
-      { mobile: customer.mobile, smsStatus: customer.smsStatus },
-      {
-        businessName: business.name,
-        smsSenderId: business.smsSenderId,
-        customerName: booking.name,
-        service: booking.service,
-        date: booking.date,
-        time: booking.time,
-      },
-    );
+    const customerNotice = {
+      businessName: business.name,
+      smsSenderId: business.smsSenderId,
+      customerName: booking.name,
+      service: booking.service,
+      date: booking.date,
+      time: booking.time,
+    };
+    /*
+     * Both channels, independently. A number that replied STOP still gets the
+     * mail; someone who gave no address still gets the text. Neither throws.
+     */
+    const [acknowledged, acknowledgedEmail] = await Promise.all([
+      notifyCustomerBookingReceived(
+        business,
+        { mobile: customer.mobile, smsStatus: customer.smsStatus },
+        customerNotice,
+      ),
+      emailCustomerBookingReceived(
+        business,
+        { email: customer.email },
+        customerNotice,
+      ),
+    ]);
 
     console.info(
-      "[booking] business=%s appointment=%s owner-sms=%s owner-email=%s customer-sms=%s",
+      "[booking] business=%s appointment=%s owner-sms=%s owner-email=%s customer-sms=%s customer-email=%s",
       business.slug,
       appointment.id,
       notified.sms,
       notified.email,
       acknowledged,
+      acknowledgedEmail,
     );
 
     // The public page is ISR-cached; nothing on it shows bookings today, but
@@ -198,34 +214,60 @@ function appointmentNotes(
 async function upsertCustomer(
   supabase: ReturnType<typeof createServiceClient>,
   businessId: string,
-  booking: { name: string; phone: string },
-): Promise<{ id: string | null; mobile: string; smsStatus: string | null }> {
+  booking: { name: string; phone: string; email?: string },
+): Promise<{
+  id: string | null;
+  mobile: string;
+  smsStatus: string | null;
+  email: string | null;
+}> {
   const mobile = toE164(booking.phone) ?? booking.phone.trim();
+  const email = booking.email?.trim().toLowerCase() || null;
 
   // `sms_status` comes back too: a returning customer may have replied STOP,
   // and that has to be honoured before texting them a confirmation.
   const { data: existing } = await supabase
     .from("customers")
-    .select("id,sms_status")
+    .select("id,sms_status,email")
     .eq("business_id", businessId)
     .eq("mobile", mobile)
     .is("deleted_at", null)
     .limit(1)
     .maybeSingle();
   if (existing) {
-    return { id: existing.id, mobile, smsStatus: existing.sms_status };
+    /*
+     * Fill a gap, never overwrite.
+     *
+     * A returning customer's stored address may have been corrected by the
+     * owner, and a typo in today's form must not silently replace it. But a
+     * record with no address at all should take one — that is how a customer
+     * who booked by phone last time gains an email this time.
+     */
+    if (email && !existing.email) {
+      await supabase
+        .from("customers")
+        .update({ email })
+        .eq("id", existing.id)
+        .is("deleted_at", null);
+    }
+    return {
+      id: existing.id,
+      mobile,
+      smsStatus: existing.sms_status,
+      email: existing.email ?? email,
+    };
   }
 
   const { data, error } = await supabase
     .from("customers")
-    .insert({ business_id: businessId, name: booking.name, mobile })
-    .select("id,sms_status")
+    .insert({ business_id: businessId, name: booking.name, mobile, email })
+    .select("id,sms_status,email")
     .single();
   if (error) {
     // A customer row is a convenience, not the booking. Losing it must not
     // lose the appointment, which can stand on its own with the notes.
     console.error("[booking:customer]", error);
-    return { id: null, mobile, smsStatus: null };
+    return { id: null, mobile, smsStatus: null, email };
   }
-  return { id: data.id, mobile, smsStatus: data.sms_status };
+  return { id: data.id, mobile, smsStatus: data.sms_status, email: data.email ?? email };
 }

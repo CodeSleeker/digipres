@@ -117,7 +117,7 @@ export default async function AdminLayout({
           {/* Shown only to a tenant whose newsletter is actually set up —
               otherwise it is a section that can do nothing, and its first
               screen would have to explain why. */}
-          {business?.newsletterVerified && (
+          {business?.senderVerified && (
             <NavLink href="/admin/creations">New Creations</NavLink>
           )}
           {features.ai_messages && (

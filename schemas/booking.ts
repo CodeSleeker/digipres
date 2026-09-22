@@ -21,6 +21,27 @@ const optional = (max: number) =>
 export const bookingRequestSchema = z.object({
   name: trimmed(120).min(1, "Please enter your name."),
   phone: trimmed(40).min(1, "Please enter a contact number."),
+  /**
+   * Optional, and the asymmetry with `phone` is deliberate.
+   *
+   * A booking needs ONE reliable way to reach someone and the SMS
+   * confirmation is it — demanding an address as well would turn people away
+   * at the last field. Given one, they also get the confirmation in writing,
+   * which is the copy they still have when the text has scrolled away.
+   *
+   * Validated as an address rather than accepted as free text: it is stored on
+   * the customer record and mailed to, so a typo that parses is a dead reply
+   * route the owner will never know about.
+   */
+  email: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+    z
+      .string()
+      .trim()
+      .max(254)
+      .email("Please enter a valid email address.")
+      .optional(),
+  ),
   service: trimmed(160).min(1, "Please choose a service."),
   /** <input type="date"> → YYYY-MM-DD. */
   date: z

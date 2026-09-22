@@ -67,6 +67,10 @@ export function EventsForm({
     name: "inquiry.serviceNeeds",
   });
   const legal = useFieldArray({ control: form.control, name: "footerLegal" });
+  const topics = useFieldArray({
+    control: form.control,
+    name: "inquiry.consultation.topics",
+  });
 
   /*
    * `useWatch`, not the `watch()` returned by useForm: the latter hands back
@@ -477,6 +481,75 @@ export function EventsForm({
             placeholder="https://m.me/yourpage"
           />
         </div>
+      </section>
+
+      <section className="grid gap-3">
+        <SubHeading>Booking a consultation</SubHeading>
+        <p className="text-xs leading-relaxed text-admin-muted">
+          Turns your enquiry form into two: one for questions about an event,
+          one for booking a time to talk. A consultation goes in your
+          appointments; an enquiry does not. Clear the heading to remove the
+          choice and keep the enquiry form on its own.
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <TextField
+            form={form}
+            name="inquiry.consultation.enquiryLabel"
+            label="First option"
+            placeholder="About an event"
+          />
+          <TextField
+            form={form}
+            name="inquiry.consultation.bookingLabel"
+            label="Second option"
+            placeholder="Book a consultation"
+          />
+        </div>
+        <TextField
+          form={form}
+          name="inquiry.consultation.title"
+          label="Heading"
+          placeholder="Let's find a time to talk"
+          hint="Clearing this removes the whole choice. The last word is shown in gold italics."
+        />
+        <TextAreaField
+          form={form}
+          name="inquiry.consultation.intro"
+          label="Intro text"
+        />
+
+        <SubHeading>What a consultation is about</SubHeading>
+        {topics.fields.map((field, i) => (
+          <RepeatableRow
+            key={field.id}
+            title={`Topic ${i + 1}`}
+            onRemove={() => topics.remove(i)}
+          >
+            <TextField
+              form={form}
+              name={`inquiry.consultation.topics.${i}.label`}
+              label="Label"
+              placeholder="Wedding"
+            />
+          </RepeatableRow>
+        ))}
+        <AddButton onClick={() => topics.append({ label: "" })}>
+          Add topic
+        </AddButton>
+
+        <SubHeading>After they request a slot</SubHeading>
+        <TextField
+          form={form}
+          name="inquiry.consultation.successTitle"
+          label="Heading"
+          placeholder="Your slot is requested"
+        />
+        <TextAreaField
+          form={form}
+          name="inquiry.consultation.successText"
+          label="What happens next"
+          hint="Say that you will confirm — nothing is booked in until you do."
+        />
       </section>
 
       <section className="grid gap-3">

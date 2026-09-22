@@ -71,11 +71,19 @@ const cormorantGaramond = Cormorant_Garamond({
   display: "swap",
 });
 
-/** The events template's body face. */
+/**
+ * The events template's body face.
+ *
+ * 300–600 and no 700: every weight listed here is a file downloaded during
+ * the BUILD, not merely one the browser may request, and the template's only
+ * bold is on the serif. Fetching a face nothing references is build time spent
+ * and one more request that can fail — which is how a Turbopack font build
+ * breaks, on whichever font happens to be unlucky.
+ */
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600"],
   display: "swap",
 });
 

@@ -34,6 +34,7 @@ export default async function SettingsPage() {
         <ContactDetailsForm
           defaults={{
             name: business.name,
+            hours: business.hours ?? [],
             phone: business.phone ?? "",
             email: business.email ?? "",
             address: business.address ?? "",

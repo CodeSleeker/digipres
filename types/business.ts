@@ -546,6 +546,28 @@ export interface EventsSections {
     successText: string;
     /** Where "continue on Messenger" points. Omitted hides the button. */
     messengerCta?: CtaButton;
+    /**
+     * The consultation half of the form, if the studio takes appointments.
+     *
+     * Absent renders no mode switch at all and the section stays a pure
+     * enquiry form — which is right for a stylist who only ever quotes after a
+     * conversation. Present turns the same section into two modes, the way the
+     * retreat's form switches between a stay and a question.
+     *
+     * An enquiry has no date and a consultation does: filing one as the other
+     * is exactly what migration 0036 exists to prevent.
+     */
+    consultation?: {
+      /** The two mode chips. */
+      enquiryLabel: string;
+      bookingLabel: string;
+      title: string;
+      intro: string;
+      /** The dropdown of what the consultation is about. */
+      topics: BookingOption[];
+      successTitle: string;
+      successText: string;
+    };
   };
 }
 

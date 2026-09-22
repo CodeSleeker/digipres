@@ -1,6 +1,11 @@
 import { getSmsSender } from "@/lib/sms/sender";
 import { isE164 } from "@/lib/sms/phone";
 import { clipForSms } from "@/lib/sms/gsm7";
+import { getEmailSender } from "@/lib/email/sender";
+import {
+  tenantSenderAddress,
+  tenantSenderName,
+} from "@/lib/email/tenant-sender";
 
 /**
  * Texts to the CUSTOMER about their own booking — distinct from
@@ -143,6 +148,147 @@ export function notifyCustomerBookingConfirmed(
     customer,
     notice,
     bookingConfirmedSms(notice),
+    "booking-confirmed",
+  );
+}
+
+/* ── The same two moments, in writing ──────────────────────────────────────
+ *
+ * Email was added after the texts, and it is a SECOND channel rather than a
+ * replacement: the SMS is what reaches someone standing in a queue, the email
+ * is the copy they still have next week when the text has scrolled away. Both
+ * are best-effort and independent — an opted-out number still gets the mail,
+ * and someone who gave no address still gets the text.
+ *
+ * The address is optional on a booking (see schemas/booking.ts), so "no email
+ * given" is the ordinary case and reports `skipped`, not a failure.
+ */
+
+/** What the customer is reachable at, beyond their phone. */
+export interface MailableCustomer {
+  email: string | null;
+}
+
+function when(notice: CustomerBookingNotice): string {
+  return `${notice.date} at ${notice.time}`;
+}
+
+export function bookingReceivedEmailSubject(
+  notice: CustomerBookingNotice,
+): string {
+  return `We have your request - ${notice.businessName}`;
+}
+
+export function bookingConfirmedEmailSubject(
+  notice: CustomerBookingNotice,
+): string {
+  return `Confirmed: ${when(notice)} - ${notice.businessName}`;
+}
+
+/**
+ * Received, not confirmed \u2014 and the copy has to be honest about that.
+ *
+ * The owner has not accepted anything yet. A mail that reads like a
+ * confirmation at this stage is the one that makes someone turn up to a slot
+ * nobody kept for them.
+ */
+export function bookingReceivedEmailText(notice: CustomerBookingNotice): string {
+  return [
+    `Hi ${firstName(notice.customerName)},`,
+    "",
+    `Thanks for your request with ${notice.businessName}. We have it, and we will confirm shortly.`,
+    "",
+    `What:  ${notice.service ?? "Appointment"}`,
+    `When:  ${when(notice)}`,
+    "",
+    "This is a request, not a confirmed booking yet. We will be in touch to confirm the time.",
+    "",
+    `- ${notice.businessName}`,
+  ].join("\n");
+}
+
+export function bookingConfirmedEmailText(
+  notice: CustomerBookingNotice,
+): string {
+  return [
+    `Hi ${firstName(notice.customerName)},`,
+    "",
+    `Your booking with ${notice.businessName} is confirmed.`,
+    "",
+    `What:  ${notice.service ?? "Appointment"}`,
+    `When:  ${when(notice)}`,
+    "",
+    "If you need to change or cancel, just reply to this email.",
+    "",
+    `- ${notice.businessName}`,
+  ].join("\n");
+}
+
+async function sendMail(
+  business: MailSettings,
+  customer: MailableCustomer,
+  notice: CustomerBookingNotice,
+  subject: string,
+  text: string,
+  label: string,
+): Promise<CustomerNotifyResult> {
+  if (!customer.email) return "skipped";
+
+  try {
+    const result = await getEmailSender().send({
+      to: customer.email,
+      subject,
+      text,
+      fromName: tenantSenderName(business),
+      /*
+       * The tenant's own booking address when they have a verified domain.
+       * A confirmation arriving from an agency domain the customer has never
+       * heard of reads as phishing, which is the whole reason this exists.
+       */
+      fromAddress: tenantSenderAddress(business, "booking"),
+      // "Reply to change or cancel" is only true if a reply reaches the owner.
+      replyTo: business.notifyEmail ?? business.email ?? undefined,
+    });
+    return result.success ? "sent" : "failed";
+  } catch (error) {
+    console.error(`[customer:${label}:email]`, error);
+    return "failed";
+  }
+}
+
+/** What `sendMail` needs off the business, and nothing more. */
+export type MailSettings = Parameters<typeof tenantSenderName>[0] &
+  Parameters<typeof tenantSenderAddress>[0] & {
+    notifyEmail: string | null;
+    email: string | null;
+  };
+
+export function emailCustomerBookingReceived(
+  business: MailSettings,
+  customer: MailableCustomer,
+  notice: CustomerBookingNotice,
+): Promise<CustomerNotifyResult> {
+  return sendMail(
+    business,
+    customer,
+    notice,
+    bookingReceivedEmailSubject(notice),
+    bookingReceivedEmailText(notice),
+    "booking-received",
+  );
+}
+
+export function emailCustomerBookingConfirmed(
+  business: MailSettings,
+  customer: MailableCustomer,
+  notice: CustomerBookingNotice,
+): Promise<CustomerNotifyResult> {
+  return sendMail(
+    business,
+    customer,
+    notice,
+    bookingConfirmedEmailSubject(notice),
+    bookingConfirmedEmailText(notice),
     "booking-confirmed",
   );
 }

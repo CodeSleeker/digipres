@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { fieldClass } from "../../website/_forms/form-kit";
 import { SavedNotice } from "@/components/ui/saved-notice";
 import { Spinner } from "@/components/ui/submit-button";
+import { OpeningHoursFields } from "./opening-hours-fields";
+import type { DayHours } from "@/types/business-entity";
 
 /**
  * The business's contact details, in two groups the owner has to be able to
@@ -39,6 +41,7 @@ interface Defaults {
   notifyPhone: string;
   notifyEmail: string;
   notifyCustomerSms: boolean;
+  hours: DayHours[];
 }
 
 export function ContactDetailsForm({ defaults }: { defaults: Defaults }) {
@@ -248,6 +251,19 @@ export function ContactDetailsForm({ defaults }: { defaults: Defaults }) {
           />
           Text customers about their bookings
         </label>
+      </section>
+
+      <section className="grid gap-4 border-t border-admin-line pt-5">
+        <div>
+          <h2 className="font-admin-heading text-sm tracking-[2px] text-admin-fg">
+            Opening hours
+          </h2>
+          <p className="mt-1 text-xs leading-relaxed text-admin-muted">
+            When you are open. These appear on your website and are published
+            to search engines, so they are worth keeping current.
+          </p>
+        </div>
+        <OpeningHoursFields defaults={defaults.hours} />
       </section>
 
       <div className="flex flex-wrap items-center gap-4 border-t border-admin-line pt-5">

@@ -3,6 +3,10 @@ import type { Database } from "@/types/database";
 import type { Business } from "@/types/business-entity";
 import { SubscriberRepository } from "@/repositories/subscriber-repository";
 import { getEmailSender } from "@/lib/email/sender";
+import {
+  tenantSenderAddress,
+  tenantSenderName,
+} from "@/lib/email/tenant-sender";
 import { siteBaseUrl } from "@/lib/tenant/urls";
 import { logError } from "@/lib/observability/logger";
 
@@ -114,12 +118,12 @@ export class SubscriberService {
     token: string,
   ): Promise<void> {
     const url = `${siteBaseUrl()}/subscribe/confirm?token=${encodeURIComponent(token)}`;
-    const name = business.newsletterFromName || business.name;
+    const name = tenantSenderName(business);
 
     try {
       await getEmailSender().send({
         to: email,
-        fromAddress: business.newsletterFromEmail ?? undefined,
+        fromAddress: tenantSenderAddress(business, "newsletter"),
         fromName: name,
         subject: `Confirm your subscription to ${name}`,
         text: [
@@ -149,8 +153,8 @@ export class SubscriberService {
 export function canSend(business: Business): boolean {
   return (
     business.status === "active" &&
-    business.newsletterVerified &&
-    Boolean(business.newsletterFromEmail)
+    business.senderVerified &&
+    Boolean(business.senderNewsletterEmail)
   );
 }
 

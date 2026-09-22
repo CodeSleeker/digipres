@@ -223,6 +223,40 @@ export const newsletterSenderSchema = z.preprocess(
     .optional(),
 );
 
+/**
+ * The tenant's verified sending DOMAIN (migration 0043).
+ *
+ * A bare hostname, not an address: DKIM and SPF authenticate the domain, and
+ * every local part on it inherits that. Asking for "hello@theirdomain.com"
+ * here would be asking for a fact the DNS records do not carry.
+ *
+ * Blank clears it, which un-verifies and takes every purpose address with it.
+ */
+export const senderDomainSchema = z.preprocess(
+  emptyToNull,
+  z
+    .string()
+    .trim()
+    .toLowerCase()
+    // A pasted "https://x.ph/" or "news@x.ph" is the obvious slip; take the
+    // host out of it rather than refusing something whose meaning is clear.
+    .transform((v) => v.replace(/^https?:\/\//, "").replace(/^.*@/, "").replace(/\/.*$/, ""))
+    .pipe(
+      z
+        .string()
+        .max(253)
+        .regex(
+          /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$/,
+          "Enter a domain, e.g. elegancebybem.com.",
+        ),
+    )
+    .nullable()
+    .optional(),
+);
+
+/** One purpose address. Held to `senderDomain` by the check below and by the database. */
+export const senderAddressSchema = newsletterSenderSchema;
+
 export const smsSenderIdSchema = z.preprocess(
   emptyToNull,
   z
@@ -283,6 +317,17 @@ export const createBusinessSchema = z.object({
    * tries, so this is the convenience, not the control.
    */
   newsletterVerified: checkboxBoolean.optional(),
+  /*
+   * The sender model that supersedes the three fields above (migration 0043):
+   * one verified domain, one address per purpose on it.
+   */
+  senderDomain: senderDomainSchema,
+  senderFromName: optionalShortText,
+  senderEnquiryEmail: senderAddressSchema,
+  senderBookingEmail: senderAddressSchema,
+  senderNewsletterEmail: senderAddressSchema,
+  /** See `newsletterVerified` — platform-only, and the database enforces it. */
+  senderVerified: checkboxBoolean.optional(),
   /** Street line only; the components below carry the rest. */
   address: optionalText,
   addressLocality: optionalShortText,

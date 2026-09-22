@@ -49,6 +49,34 @@ const PLATFORM_ONLY = new Map([
       "as a domain they merely typed in — refused by the database too (migration 0033), " +
       "so this list is the convenience and not the control.",
   ],
+  [
+    "senderDomain",
+    "The domain every one of a tenant's own sending addresses hangs off. Requires SPF/DKIM " +
+      "records the platform verifies, so an owner-editable field would look configurable " +
+      "while sending their mail to spam. Set at /platform/businesses/<id> (migration 0043).",
+  ],
+  [
+    "senderFromName",
+    "Travels with the sending domain above, and is meaningless without it.",
+  ],
+  [
+    "senderEnquiryEmail",
+    "One of the purpose addresses on the verified domain. Held to that domain by a check " +
+      "constraint, so letting an owner type one would mean rejecting most of what they typed.",
+  ],
+  [
+    "senderBookingEmail",
+    "As senderEnquiryEmail — the address booking confirmations go out as.",
+  ],
+  [
+    "senderNewsletterEmail",
+    "As senderEnquiryEmail — the address the weekly digest goes out as.",
+  ],
+  [
+    "senderVerified",
+    "Authorises mail to be sent AS that domain, exactly like newsletterVerified above and " +
+      "refused by the database for the same reason (migration 0043).",
+  ],
 ]);
 
 describe("business form allow-list", () => {

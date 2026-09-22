@@ -109,6 +109,38 @@ export interface Business {
   newsletterVerified: boolean;
   newsletterVerifiedAt: string | null;
   /**
+   * ── The tenant's own sending identity (migration 0043) ──
+   *
+   * The DOMAIN is the unit, because that is what a provider verifies: DKIM and
+   * SPF authenticate theirdomain.com, and every local part on it inherits
+   * that. Verifying one ADDRESS, as the newsletter fields above do, was always
+   * a fiction — the DNS records say nothing about the part before the @.
+   *
+   * These supersede `newsletterFromEmail` and friends, which remain only until
+   * the follow-up migration drops them.
+   */
+  senderDomain: string | null;
+  /**
+   * Whether the platform has checked this domain's DNS.
+   *
+   * Set by the platform, never by the owner — otherwise anyone could send as a
+   * domain they merely typed in. Enforced by a database trigger, not just
+   * here. Changing the DOMAIN clears it; changing a purpose address below does
+   * not, because the constraint already holds it on the verified domain.
+   */
+  senderVerified: boolean;
+  senderVerifiedAt: string | null;
+  /** Display name on tenant-sent mail. Falls back to the business name. */
+  senderFromName: string | null;
+  /*
+   * One address per purpose, each on `senderDomain`. Null falls back to the
+   * platform's own address, which is the correct behaviour for a tenant who
+   * has not brought a domain — not an error.
+   */
+  senderNewsletterEmail: string | null;
+  senderEnquiryEmail: string | null;
+  senderBookingEmail: string | null;
+  /**
    * Street line ONLY. The remaining components are the fields below.
    *
    * Rows created before migration 0027 hold a whole address here; that still

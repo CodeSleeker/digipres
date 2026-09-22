@@ -449,6 +449,29 @@ export const bem: BusinessProfile = {
         label: "Continue on Messenger",
         href: "https://m.me/elegancebybem",
       },
+      /*
+       * The consultation half. Present, so the section offers both: a
+       * consultation has a day and a time and becomes a real appointment,
+       * while an enquiry has neither and stays a question. Clearing the title
+       * in the CMS removes the switch and leaves a pure enquiry form.
+       */
+      consultation: {
+        enquiryLabel: "About an event",
+        bookingLabel: "Book a consultation",
+        title: "Let's find a\ntime to talk",
+        intro:
+          "Pick a day and a time that suit you. We will confirm before anything is booked in, and the first conversation is free.",
+        topics: [
+          { label: "Wedding" },
+          { label: "Debut" },
+          { label: "Birthday" },
+          { label: "Corporate event" },
+          { label: "Something else" },
+        ],
+        successTitle: "Your slot is requested",
+        successText:
+          "We have it, and we will come back to you shortly to confirm the time. You will get a text and an email either way.",
+      },
     },
   },
 };

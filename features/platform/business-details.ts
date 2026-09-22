@@ -179,160 +179,6 @@ async function applySmsSenderId(
 // ── Newsletter sender ───────────────────────────────────────────────────────
 
 /**
- * Set the address this client's weekly digest is sent from.
- *
- * Saving an address does NOT enable sending. Verification is a separate,
- * deliberate act below, because the only thing that makes mail from a domain
- * deliverable is DNS the platform has actually looked at.
- */
-export async function updateNewsletterSender(formData: FormData): Promise<void> {
-  const { user, role } = await requirePlatformWriter();
-  const businessId = readBusinessId(formData);
-
-  const parsed = updateBusinessSchema
-    .pick({ newsletterFromEmail: true, newsletterFromName: true })
-    .safeParse({
-      newsletterFromEmail: formData.get("newsletterFromEmail"),
-      newsletterFromName: formData.get("newsletterFromName"),
-    });
-  if (!parsed.success) {
-    fail(
-      businessId,
-      parsed.error.issues[0]?.message ?? "Enter a valid sender address.",
-    );
-  }
-
-  // `?? null` rather than undefined: the repository skips undefined keys, so a
-  // cleared field would silently keep its old value — and clearing the sender
-  // is how a newsletter gets switched off.
-  const result = await applyNewsletterSender(
-    businessId,
-    parsed.data.newsletterFromEmail ?? null,
-    parsed.data.newsletterFromName ?? null,
-    user.id,
-    role,
-  );
-  if (result.error) fail(businessId, result.error);
-
-  revalidatePath(`/platform/businesses/${businessId}`);
-  // The signup box appears on the public site only for a VERIFIED sender, and
-  // changing the address clears verification (migration 0033) — so the tenant's
-  // cached pages have to go.
-  revalidateTenantSite(result.slug);
-}
-
-async function applyNewsletterSender(
-  businessId: string,
-  fromEmail: string | null,
-  fromName: string | null,
-  actorUserId: string,
-  actorRole: PlatformRole,
-): Promise<{ error?: string; slug: string | null }> {
-  try {
-    const admin = createServiceClient();
-    const repo = new BusinessRepository(admin);
-
-    const existing = await repo.findById(businessId);
-    if (!existing) return { error: "That business no longer exists.", slug: null };
-
-    await repo.update(businessId, {
-      newsletterFromEmail: fromEmail,
-      newsletterFromName: fromName,
-    });
-    await new AuditRepository(admin).record({
-      actorUserId,
-      actingBusinessId: businessId,
-      action: "business.updated",
-      entity: "business",
-      entityId: businessId,
-      metadata: {
-        field: "newsletterFromEmail",
-        from: existing.newsletterFromEmail,
-        to: fromEmail,
-        actorRole,
-      },
-    });
-
-    return { slug: existing.slug };
-  } catch (error) {
-    logError(error, { scope: "platform:updateNewsletterSender" });
-    return { error: "Could not update the newsletter sender.", slug: null };
-  }
-}
-
-/**
- * Clear a sender to send, or take that clearance away.
- *
- * SUPER ADMIN ONLY. Marking a domain verified authorises mail to be sent as
- * that domain to a list of real people; it is closer to "remove this client"
- * than to editing a field. It is also the one action here the database will not
- * let an owner perform for themselves.
- *
- * Audited either way — including revocation, which is what you reach for when a
- * client's list has gone wrong and sending has to stop now.
- */
-export async function setNewsletterVerified(formData: FormData): Promise<void> {
-  const { user, role } = await requireSuperAdmin();
-  const businessId = readBusinessId(formData);
-  const verified = formData.get("verified") === "true";
-
-  const result = await applyNewsletterVerified(
-    businessId,
-    verified,
-    user.id,
-    role,
-  );
-  if (result.error) fail(businessId, result.error);
-
-  revalidatePath(`/platform/businesses/${businessId}`);
-  revalidateTenantSite(result.slug);
-}
-
-async function applyNewsletterVerified(
-  businessId: string,
-  verified: boolean,
-  actorUserId: string,
-  actorRole: PlatformRole,
-): Promise<{ error?: string; slug: string | null }> {
-  try {
-    const admin = createServiceClient();
-    const repo = new BusinessRepository(admin);
-
-    const existing = await repo.findById(businessId);
-    if (!existing) return { error: "That business no longer exists.", slug: null };
-
-    // The database enforces this too; refusing here gives a message someone can
-    // act on rather than a constraint violation.
-    if (verified && !existing.newsletterFromEmail) {
-      return { error: "Set a sender address before verifying it.", slug: null };
-    }
-
-    await repo.update(businessId, { newsletterVerified: verified });
-    await new AuditRepository(admin).record({
-      actorUserId,
-      actingBusinessId: businessId,
-      action: "business.updated",
-      entity: "business",
-      entityId: businessId,
-      metadata: {
-        field: "newsletterVerified",
-        from: existing.newsletterVerified,
-        to: verified,
-        sender: existing.newsletterFromEmail,
-        actorRole,
-      },
-    });
-
-    return { slug: existing.slug };
-  } catch (error) {
-    logError(error, { scope: "platform:setNewsletterVerified" });
-    return { error: "Could not change the verification state.", slug: null };
-  }
-}
-
-// ── Owner login email ───────────────────────────────────────────────────────
-
-/**
  * Change the address the owner SIGNS IN with.
  *
  * This edits the Supabase auth user, not `businesses.email` — different things,
@@ -608,5 +454,220 @@ async function applyOwnerEmail(
   } catch (error) {
     logError(error, { scope: "platform:updateOwnerEmail" });
     return "Could not change the login email.";
+  }
+}
+
+/**
+ * The tenant's sending identity: one verified domain, one address per purpose.
+ *
+ * Supersedes `updateNewsletterSender`, which could only express a single
+ * address and verified it as though DNS said anything about the local part.
+ * See migration 0043.
+ *
+ * Platform-side, like the SMS sender ID and for the same reason: it is an
+ * arrangement with DNS and a mail provider, not a preference. A field the
+ * client could edit would look configurable and mostly send their mail to
+ * spam.
+ */
+export async function updateTenantSender(formData: FormData): Promise<void> {
+  const { user, role } = await requirePlatformWriter();
+  const businessId = readBusinessId(formData);
+
+  const parsed = updateBusinessSchema
+    .pick({
+      senderDomain: true,
+      senderFromName: true,
+      senderEnquiryEmail: true,
+      senderBookingEmail: true,
+      senderNewsletterEmail: true,
+    })
+    .safeParse({
+      senderDomain: formData.get("senderDomain"),
+      senderFromName: formData.get("senderFromName"),
+      senderEnquiryEmail: formData.get("senderEnquiryEmail"),
+      senderBookingEmail: formData.get("senderBookingEmail"),
+      senderNewsletterEmail: formData.get("senderNewsletterEmail"),
+    });
+  if (!parsed.success) {
+    fail(
+      businessId,
+      parsed.error.issues[0]?.message ?? "Check the sender details.",
+    );
+  }
+
+  const domain = parsed.data.senderDomain ?? null;
+  const addresses = {
+    senderEnquiryEmail: parsed.data.senderEnquiryEmail ?? null,
+    senderBookingEmail: parsed.data.senderBookingEmail ?? null,
+    senderNewsletterEmail: parsed.data.senderNewsletterEmail ?? null,
+  };
+
+  /*
+   * Caught here as well as in the database, because the constraint's message
+   * is a Postgres one. The rule is the point of the whole model: an address
+   * off the verified domain is an address nobody checked.
+   */
+  for (const [field, value] of Object.entries(addresses)) {
+    if (!value) continue;
+    if (!domain) {
+      fail(businessId, "Set the sending domain before adding an address on it.");
+    }
+    if (value.split("@")[1] !== domain) {
+      fail(
+        businessId,
+        `${value} is not on ${domain}. Every sending address must be on the verified domain.`,
+      );
+    }
+    void field;
+  }
+
+  const result = await applyTenantSender(
+    businessId,
+    { senderDomain: domain, senderFromName: parsed.data.senderFromName ?? null, ...addresses },
+    user.id,
+    role,
+  );
+  if (result.error) fail(businessId, result.error);
+
+  revalidatePath(`/platform/businesses/${businessId}`);
+  if (result.slug) revalidateTenantSite(result.slug);
+}
+
+interface TenantSenderPatch {
+  senderDomain: string | null;
+  senderFromName: string | null;
+  senderEnquiryEmail: string | null;
+  senderBookingEmail: string | null;
+  senderNewsletterEmail: string | null;
+}
+
+async function applyTenantSender(
+  businessId: string,
+  patch: TenantSenderPatch,
+  actorUserId: string,
+  actorRole: string,
+): Promise<{ error?: string; slug: string | null }> {
+  try {
+    const admin = createServiceClient();
+    const repo = new BusinessRepository(admin);
+
+    const existing = await repo.findById(businessId);
+    if (!existing) {
+      return { error: "That business no longer exists.", slug: null };
+    }
+
+    /*
+     * Clearing the domain clears the addresses with it.
+     *
+     * The database would refuse them anyway (an address must be on the
+     * domain), but failing the save with a constraint error when the intent is
+     * plain would be unhelpful: removing the domain IS how a tenant's own
+     * sending is switched off, and the addresses have nowhere left to be.
+     */
+    const cleared: TenantSenderPatch = patch.senderDomain
+      ? patch
+      : {
+          ...patch,
+          senderEnquiryEmail: null,
+          senderBookingEmail: null,
+          senderNewsletterEmail: null,
+        };
+
+    await repo.update(businessId, cleared);
+    await new AuditRepository(admin).record({
+      actorUserId,
+      actingBusinessId: businessId,
+      action: "business.updated",
+      entity: "business",
+      entityId: businessId,
+      metadata: {
+        field: "senderDomain",
+        from: existing.senderDomain,
+        to: cleared.senderDomain,
+        actorRole,
+      },
+    });
+
+    return { slug: existing.slug };
+  } catch (error) {
+    logError(error, { scope: "platform:updateTenantSender" });
+    return { error: "Could not update the sending identity.", slug: null };
+  }
+}
+
+/**
+ * Clear a DOMAIN to send, or take that clearance away.
+ *
+ * SUPER ADMIN ONLY, like `setNewsletterVerified` and for the same reason:
+ * marking a domain verified authorises mail to go out as that domain. It is
+ * also the one action here the database will not let an owner perform for
+ * themselves (migration 0043).
+ *
+ * Audited either way \u2014 revocation is what you reach for when sending has to
+ * stop now.
+ */
+export async function setSenderVerified(formData: FormData): Promise<void> {
+  const { user, role } = await requireSuperAdmin();
+  const businessId = readBusinessId(formData);
+  const verified = formData.get("verified") === "true";
+
+  /*
+   * `fail` redirects, and redirect() works by THROWING. Calling it inside a
+   * try/catch turns every validation failure into the catch-all message, and
+   * the person is told "could not change verification" when the real answer
+   * was "set a domain first". So the work is in a helper that returns its
+   * error, and fail is called out here.
+   */
+  const result = await applySenderVerified(
+    businessId,
+    verified,
+    user.id,
+    role,
+  );
+  if (result.error) fail(businessId, result.error);
+
+  revalidatePath(`/platform/businesses/${businessId}`);
+  if (result.slug) revalidateTenantSite(result.slug);
+}
+
+async function applySenderVerified(
+  businessId: string,
+  verified: boolean,
+  actorUserId: string,
+  actorRole: string,
+): Promise<{ error?: string; slug: string | null }> {
+  try {
+    const admin = createServiceClient();
+    const repo = new BusinessRepository(admin);
+    const existing = await repo.findById(businessId);
+    if (!existing) {
+      return { error: "That business no longer exists.", slug: null };
+    }
+    // Verified-without-a-domain is refused by a check constraint too; this is
+    // the version of that refusal a person can act on.
+    if (verified && !existing.senderDomain) {
+      return { error: "Set a sending domain before verifying it.", slug: null };
+    }
+
+    await repo.update(businessId, { senderVerified: verified });
+    await new AuditRepository(admin).record({
+      actorUserId,
+      actingBusinessId: businessId,
+      action: "business.updated",
+      entity: "business",
+      entityId: businessId,
+      metadata: {
+        field: "senderVerified",
+        from: existing.senderVerified,
+        to: verified,
+        domain: existing.senderDomain,
+        actorRole,
+      },
+    });
+
+    return { slug: existing.slug };
+  } catch (error) {
+    logError(error, { scope: "platform:setSenderVerified" });
+    return { error: "Could not change verification.", slug: null };
   }
 }

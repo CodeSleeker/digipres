@@ -1,6 +1,12 @@
 import { describe, it, expect } from "vitest";
 import {
+  bookingConfirmedEmailSubject,
+  bookingConfirmedEmailText,
   bookingConfirmedSms,
+  bookingReceivedEmailSubject,
+  bookingReceivedEmailText,
+  emailCustomerBookingConfirmed,
+  emailCustomerBookingReceived,
   bookingReceivedSms,
   canTextCustomer,
   notifyCustomerBookingConfirmed,
@@ -162,5 +168,74 @@ describe("bookingConfirmedSms", () => {
     expect(bookingConfirmedSms({ ...notice, customerName: "Juan" })).toContain(
       "Hi Juan,",
     );
+  });
+});
+
+/**
+ * The same two moments, in writing.
+ *
+ * Email is a SECOND channel, not a replacement: the text reaches someone in a
+ * queue, the mail is the copy they still have next week. What matters most
+ * here is that the RECEIVED mail does not read like a confirmation — the owner
+ * has accepted nothing yet, and a mail that says otherwise is the one that
+ * makes somebody turn up to a slot nobody kept for them.
+ */
+describe("customer booking email", () => {
+  const business = (over: Record<string, unknown> = {}) =>
+    ({
+      name: "Ronie's Barber",
+      senderFromName: null,
+      senderVerified: false,
+      senderEnquiryEmail: null,
+      senderBookingEmail: null,
+      senderNewsletterEmail: null,
+      notifyEmail: "shop@example.ph",
+      email: null,
+      ...over,
+    }) as never;
+
+  it("does not call a request a confirmation", () => {
+    const text = bookingReceivedEmailText(notice);
+    expect(text).toMatch(/not a confirmed booking/i);
+    expect(bookingReceivedEmailSubject(notice)).not.toMatch(/confirmed/i);
+  });
+
+  it("says confirmed only once it is", () => {
+    expect(bookingConfirmedEmailSubject(notice)).toMatch(/^Confirmed:/);
+    expect(bookingConfirmedEmailText(notice)).toMatch(/is confirmed/i);
+  });
+
+  it("carries the what and the when in both", () => {
+    for (const text of [
+      bookingReceivedEmailText(notice),
+      bookingConfirmedEmailText(notice),
+    ]) {
+      expect(text).toContain("Skin Fade");
+      expect(text).toContain("2099-01-15");
+      expect(text).toContain("14:30");
+    }
+  });
+
+  it("greets by first name, like the texts do", () => {
+    expect(bookingReceivedEmailText(notice)).toContain("Hi Juan,");
+    expect(bookingReceivedEmailText(notice)).not.toContain("Juan Dela Cruz");
+  });
+
+  it("skips silently when no address was given", async () => {
+    // Optional by design (schemas/booking.ts): demanding one would turn people
+    // away at the last field. No address is the ordinary case, not a failure.
+    await expect(
+      emailCustomerBookingReceived(business(), { email: null }, notice),
+    ).resolves.toBe("skipped");
+  });
+
+  it("sends when there is one", async () => {
+    await expect(
+      emailCustomerBookingConfirmed(
+        business(),
+        { email: "juan@example.ph" },
+        notice,
+      ),
+    ).resolves.toBe("sent");
   });
 });

@@ -7,6 +7,7 @@ import { tenantSlugForRequest } from "@/lib/tenant/request-tenant";
 import { enquiryRequestSchema } from "@/schemas/enquiry";
 import { notifyOwnerOfEnquiry } from "@/lib/notifications/enquiry-notice";
 import { enquiryReference } from "@/lib/enquiries/reference";
+import { acknowledgeEnquiry } from "@/lib/notifications/enquiry-ack";
 
 /**
  * Public enquiry endpoint — a question asked of a tenant, as opposed to a
@@ -123,8 +124,35 @@ export async function POST(request: NextRequest) {
      * their inbox for it and finds nothing. Derived from the saved row's id,
      * so the confirmation and the owner's inbox card cannot disagree.
      */
+    const reference = enquiryReference(saved.id);
+
+    /*
+     * The receipt to the person who asked.
+     *
+     * Awaited for the same reason as the owner's alert: on serverless the
+     * instance can be frozen the moment the response returns, which would drop
+     * an un-awaited send. `acknowledgeEnquiry` never throws, so this cannot
+     * fail an enquiry that is already saved.
+     */
+    const acknowledged = await acknowledgeEnquiry(supabase, business, {
+      reference,
+      name: saved.name,
+      email: saved.email,
+      phone: saved.phone,
+      topic: saved.topic,
+    });
+
+    console.info(
+      "[enquiry] business=%s enquiry=%s owner=%o ack-email=%s ack-sms=%s",
+      business.slug,
+      saved.id,
+      notified,
+      acknowledged.email,
+      acknowledged.sms,
+    );
+
     return NextResponse.json(
-      { ok: true, notified, reference: enquiryReference(saved.id) },
+      { ok: true, notified, reference },
       { status: 201 },
     );
   } catch (error) {

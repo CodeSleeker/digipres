@@ -3,6 +3,10 @@ import type { Database } from "@/types/database";
 import type { Business } from "@/types/business-entity";
 import type { Creation, SendableSubscriber } from "@/types/subscriber";
 import {
+  tenantSenderAddress,
+  tenantSenderName,
+} from "@/lib/email/tenant-sender";
+import {
   CreationRepository,
   DigestRepository,
   SubscriberRepository,
@@ -150,7 +154,7 @@ export class DigestService {
     recipient: SendableSubscriber,
     creations: Creation[],
   ): Promise<boolean> {
-    const name = business.newsletterFromName || business.name;
+    const name = tenantSenderName(business);
     const token = encodeURIComponent(recipient.unsubscribeToken);
     // Two URLs for the same act. The header one is POSTed by the mail provider
     // with nobody watching; the body one is opened by a person and explains
@@ -161,7 +165,7 @@ export class DigestService {
     try {
       const res = await this.email.send({
         to: recipient.email,
-        fromAddress: business.newsletterFromEmail ?? undefined,
+        fromAddress: tenantSenderAddress(business, "newsletter"),
         fromName: name,
         subject: digestSubject(name, creations),
         text: digestText(name, creations, readableUrl),

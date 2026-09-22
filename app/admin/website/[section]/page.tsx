@@ -78,7 +78,7 @@ export default async function SectionPage({
         content,
         templateFields(business?.templateCode),
         business?.id ?? null,
-        Boolean(business?.newsletterVerified),
+        Boolean(business?.senderVerified),
         {
           facebookUrl: business?.facebookUrl ?? "",
           instagramUrl: business?.instagramUrl ?? "",

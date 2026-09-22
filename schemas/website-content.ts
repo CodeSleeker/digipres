@@ -792,6 +792,23 @@ export const eventsSchema = z.object({
         arrow: z.boolean().optional(),
       })
       .optional(),
+    /**
+     * The consultation mode. `optionalBlock` on the title, so clearing it
+     * removes the whole switch and leaves a pure enquiry form — which is how
+     * a studio that does not take appointments turns it off.
+     */
+    consultation: optionalBlock(
+      {
+        enquiryLabel: text.max(40),
+        bookingLabel: text.max(40),
+        title: text.max(120),
+        intro: text.max(400),
+        topics: z.array(eventsOptionSchema).max(12, "Add at most 12."),
+        successTitle: text.max(120),
+        successText: text.max(600),
+      },
+      "title",
+    ),
   }),
 });
 

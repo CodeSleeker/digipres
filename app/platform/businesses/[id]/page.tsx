@@ -12,7 +12,7 @@ import { getPlatformRole } from "@/lib/auth/require-platform-admin";
 import { LifecyclePanel } from "./_components/lifecycle-panel";
 import { DetailsPanel } from "./_components/details-panel";
 import { SmsSenderPanel } from "./_components/sms-sender-panel";
-import { NewsletterPanel } from "./_components/newsletter-panel";
+import { SenderPanel } from "./_components/sender-panel";
 import { formatAddress } from "@/lib/businesses/address";
 import { OwnerLoginPanel } from "./_components/owner-login-panel";
 import { onboardingPercentage } from "@/types/onboarding";
@@ -153,7 +153,7 @@ export default async function PlatformBusinessDetailPage({
         <>
           <DetailsPanel business={business} />
           <SmsSenderPanel business={business} />
-          <NewsletterPanel business={business} />
+          <SenderPanel business={business} />
         </>
       )}
 

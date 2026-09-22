@@ -9,7 +9,10 @@ import { auditTenantAction } from "@/lib/audit/tenant-audit";
 import { AppointmentRepository } from "@/repositories/appointment-repository";
 import { CustomerRepository } from "@/repositories/customer-repository";
 import { AppointmentService } from "@/services/appointment-service";
-import { notifyCustomerBookingConfirmed } from "@/lib/notifications/customer-notice";
+import {
+  emailCustomerBookingConfirmed,
+  notifyCustomerBookingConfirmed,
+} from "@/lib/notifications/customer-notice";
 import type { Appointment } from "@/types/appointment";
 import type { Business } from "@/types/business-entity";
 import { makeReviewAutomationService } from "@/features/reviews/service";
@@ -183,18 +186,24 @@ async function tellCustomerItsConfirmed(
     );
     if (!customer) return;
 
-    const result = await notifyCustomerBookingConfirmed(business, customer, {
+    const notice = {
       businessName: business.name,
       smsSenderId: business.smsSenderId,
       customerName: customer.name,
       service: appointment.service,
       date: appointment.startsAt.slice(0, 10),
       time: appointment.startsAt.slice(11, 16),
-    });
+    };
+    // Both channels, independently — see the note in the booking route.
+    const [result, emailed] = await Promise.all([
+      notifyCustomerBookingConfirmed(business, customer, notice),
+      emailCustomerBookingConfirmed(business, customer, notice),
+    ]);
     console.info(
-      "[appointment:confirmed] appointment=%s customer-sms=%s",
+      "[appointment:confirmed] appointment=%s customer-sms=%s customer-email=%s",
       appointment.id,
       result,
+      emailed,
     );
   } catch (error) {
     console.error("[appointment:confirmed]", error);

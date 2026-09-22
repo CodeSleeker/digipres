@@ -84,8 +84,8 @@ export class BusinessRepository {
       .select("*")
       .is("deleted_at", null)
       .eq("status", "active")
-      .eq("newsletter_verified", true)
-      .not("newsletter_from_email", "is", null)
+      .eq("sender_verified", true)
+      .not("sender_newsletter_email", "is", null)
       .order("created_at", { ascending: true });
     if (error) throw error;
     return (data ?? []).map(toDomain);
@@ -199,6 +199,24 @@ export class BusinessRepository {
     if (input.newsletterVerified !== undefined) {
       patch.newsletter_verified = input.newsletterVerified;
       patch.newsletter_verified_at = input.newsletterVerified
+        ? new Date().toISOString()
+        : null;
+    }
+    if (input.senderDomain !== undefined)
+      patch.sender_domain = input.senderDomain;
+    if (input.senderFromName !== undefined)
+      patch.sender_from_name = input.senderFromName;
+    if (input.senderEnquiryEmail !== undefined)
+      patch.sender_enquiry_email = input.senderEnquiryEmail;
+    if (input.senderBookingEmail !== undefined)
+      patch.sender_booking_email = input.senderBookingEmail;
+    if (input.senderNewsletterEmail !== undefined)
+      patch.sender_newsletter_email = input.senderNewsletterEmail;
+    // Service-role only, like `newsletterVerified` above: the database refuses
+    // an owner session outright (migration 0043).
+    if (input.senderVerified !== undefined) {
+      patch.sender_verified = input.senderVerified;
+      patch.sender_verified_at = input.senderVerified
         ? new Date().toISOString()
         : null;
     }
@@ -344,6 +362,13 @@ function toDomain(row: BusinessRow): Business {
     notifyCustomerSms: row.notify_customer_sms ?? true,
     smsSenderId: row.sms_sender_id ?? null,
     newsletterFromEmail: row.newsletter_from_email ?? null,
+    senderDomain: row.sender_domain ?? null,
+    senderVerified: row.sender_verified ?? false,
+    senderVerifiedAt: row.sender_verified_at ?? null,
+    senderFromName: row.sender_from_name ?? null,
+    senderNewsletterEmail: row.sender_newsletter_email ?? null,
+    senderEnquiryEmail: row.sender_enquiry_email ?? null,
+    senderBookingEmail: row.sender_booking_email ?? null,
     newsletterFromName: row.newsletter_from_name ?? null,
     newsletterVerified: row.newsletter_verified ?? false,
     newsletterVerifiedAt: row.newsletter_verified_at ?? null,
