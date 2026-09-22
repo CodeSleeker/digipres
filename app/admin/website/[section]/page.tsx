@@ -270,7 +270,9 @@ function renderForm(
                 newsletter: base.footer.newsletter,
               }
             }
-            newsletterEnabled={newsletterEnabled}
+            /* Both halves: may they send, and does their footer
+               draw the box. See the prop's own note. */
+            showNewsletter={newsletterEnabled && Boolean(fields.footerNewsletter)}
           />
           {/* Social links live on the business record, not in footer_content —
               the contact card and JSON-LD `sameAs` read the same values. */}

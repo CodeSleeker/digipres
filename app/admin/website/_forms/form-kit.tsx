@@ -196,13 +196,25 @@ export function StringListField<T extends FieldValues>({
   label: string;
   hint?: string;
 }) {
+  /*
+   * `htmlFor`/`id`, like every other field in this kit. Without them the
+   * label was decoration: nothing tied "Title lines" to the box beneath it,
+   * so a screen reader announced an unlabelled text area and clicking the
+   * words did not focus it.
+   */
   return (
     <Controller
       control={form.control}
       name={name}
       render={({ field, fieldState }) => (
-        <Field label={label} error={fieldState.error?.message} hint={hint}>
+        <Field
+          label={label}
+          error={fieldState.error?.message}
+          hint={hint}
+          htmlFor={name}
+        >
           <Textarea
+            id={name}
             className={cn(fieldClass, "min-h-24 resize-y")}
             value={Array.isArray(field.value) ? field.value.join("\n") : ""}
             onChange={(e) => field.onChange(e.target.value.split("\n"))}

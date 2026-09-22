@@ -67,6 +67,10 @@ describe("retreat/lodge registration", () => {
       // figures row and no sign-off, so offering them would collect content
       // the page can't print.
       aboutParagraphs: true,
+      contactHeading: true,
+      // NOT `footerNewsletter`: this footer has no sign-up box, so a tenant
+      // whose sending domain is verified is still not asked to write copy for
+      // one.
     });
   });
 

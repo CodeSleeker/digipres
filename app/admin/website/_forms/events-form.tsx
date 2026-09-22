@@ -66,6 +66,7 @@ export function EventsForm({
     control: form.control,
     name: "inquiry.serviceNeeds",
   });
+  const legal = useFieldArray({ control: form.control, name: "footerLegal" });
 
   /*
    * `useWatch`, not the `watch()` returned by useForm: the latter hands back
@@ -476,6 +477,39 @@ export function EventsForm({
             placeholder="https://m.me/yourpage"
           />
         </div>
+      </section>
+
+      <section className="grid gap-3">
+        <SubHeading>Footer small print</SubHeading>
+        <p className="text-xs leading-relaxed text-admin-muted">
+          The links beside your copyright at the very bottom of the page — a
+          privacy policy, terms. Remove them all to show nothing there.
+        </p>
+        {legal.fields.map((field, i) => (
+          <RepeatableRow
+            key={field.id}
+            title={`Link ${i + 1}`}
+            onRemove={() => legal.remove(i)}
+          >
+            <div className="grid gap-3 sm:grid-cols-2">
+              <TextField
+                form={form}
+                name={`footerLegal.${i}.label`}
+                label="Link text"
+                placeholder="Privacy Policy"
+              />
+              <TextField
+                form={form}
+                name={`footerLegal.${i}.href`}
+                label="Where it goes"
+                placeholder="/privacy"
+              />
+            </div>
+          </RepeatableRow>
+        ))}
+        <AddButton onClick={() => legal.append({ label: "", href: "" })}>
+          Add link
+        </AddButton>
       </section>
 
       <SubmitBar pending={pending} result={result} />

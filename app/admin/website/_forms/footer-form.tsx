@@ -21,17 +21,21 @@ import {
  */
 export function FooterForm({
   defaultValues,
-  newsletterEnabled,
+  showNewsletter,
 }: {
   defaultValues: FooterFormValues;
   /**
-   * Whether this tenant's sending domain is verified.
+   * Whether the box will actually appear: this tenant's sending domain is
+   * verified AND their template's footer draws it.
    *
-   * The copy is only editable when the box will actually appear. Offering the
-   * fields to a tenant with no newsletter would be asking them to write for a
-   * form nobody will ever see, and inviting the question "why isn't it there?"
+   * Both halves matter, and the second was missing — only the patisserie's
+   * footer has a column for the sign-up, so a verified barber or retreat
+   * tenant was being offered copy for something their site would never render.
+   * That is exactly what this gate exists to prevent: asking someone to write
+   * for a form nobody will ever see, and inviting the question "why isn't it
+   * there?"
    */
-  newsletterEnabled: boolean;
+  showNewsletter: boolean;
 }) {
   const form = useForm<FooterFormValues>({
     resolver: zodResolver(footerSchema),
@@ -69,7 +73,7 @@ export function FooterForm({
         </AddButton>
       </div>
 
-      {newsletterEnabled && (
+      {showNewsletter && (
         <div className="grid gap-3">
           <SubHeading>Mailing list sign-up</SubHeading>
           <p className="text-xs leading-relaxed text-admin-muted">

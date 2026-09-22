@@ -53,6 +53,8 @@ import { ServicesForm } from "@/app/admin/website/_forms/services-form";
 import { ProductsForm } from "@/app/admin/website/_forms/products-form";
 import { GalleryForm } from "@/app/admin/website/_forms/gallery-form";
 import { EventsForm } from "@/app/admin/website/_forms/events-form";
+import { ContactForm } from "@/app/admin/website/_forms/contact-form";
+import { FooterForm } from "@/app/admin/website/_forms/footer-form";
 import { arah } from "@/lib/businesses/arah";
 import { bem } from "@/lib/businesses/bem";
 import { ronies } from "@/lib/businesses/ronies";
@@ -61,6 +63,7 @@ import type { BusinessProfile } from "@/types/business";
 
 const patisserie = templateFields("patisserie-boutique");
 const barber = templateFields("barber-luxury");
+const events = templateFields("events-elegance");
 
 beforeEach(() => saved.clear());
 afterEach(() => cleanup());
@@ -293,5 +296,61 @@ describe("CMS forms — the events template's own blocks", () => {
     // and a card whose filter is dropped silently stops narrowing the grid.
     render(<EventsForm defaultValues={bem.events!} businessId={null} />);
     expect(screen.getAllByLabelText(/jumps to/i).length).toBeGreaterThan(0);
+  });
+});
+
+describe("CMS forms — the inputs a template is NOT offered", () => {
+  /**
+   * The dangerous half of the `fields` mechanism.
+   *
+   * Hiding an input is only safe if the value behind it survives the save. The
+   * events template renders no contact heading and no newsletter box, so both
+   * sets of inputs are withheld from its owner — and if withholding them also
+   * blanked the stored values, an owner opening Contact and pressing Save
+   * would wipe copy they never saw.
+   */
+  const contact = {
+    label: bem.contact.label,
+    titleLines: bem.contact.titleLines,
+    intro: bem.contact.intro,
+    serviceOptions: bem.contact.serviceOptions,
+    barberOptions: bem.contact.barberOptions,
+  };
+
+  it("keeps the contact heading it never shows the events owner", async () => {
+    render(<ContactForm defaultValues={contact} fields={events} />);
+    // The inputs are gone — that is the point of the change.
+    expect(screen.queryByLabelText(/title lines/i)).toBeNull();
+    expect(screen.queryByLabelText(/intro text/i)).toBeNull();
+    // The value is not.
+    expectNoLoss(await save("contact"), contact);
+  });
+
+  it("still offers the heading to a template that draws one", async () => {
+    render(<ContactForm defaultValues={contact} fields={patisserie} />);
+    expect(screen.getByLabelText(/title lines/i)).toBeTruthy();
+    expect(screen.getByLabelText(/intro text/i)).toBeTruthy();
+  });
+
+  const footer = {
+    description: bem.footer.description,
+    columns: bem.footer.columns,
+    copyright: bem.footer.copyright,
+    credit: bem.footer.credit,
+    newsletter: {
+      title: "The list",
+      text: "One email a week.",
+      placeholder: "you@example.com",
+      buttonLabel: "Join",
+      consent: "We will only email about our own work.",
+    },
+  };
+
+  it("keeps newsletter copy it never shows a footer without the box", async () => {
+    // A verified sender on a template whose footer has no column for the
+    // sign-up. The copy stays stored, ready for the day they move template.
+    render(<FooterForm defaultValues={footer} showNewsletter={false} />);
+    expect(screen.queryByText(/mailing list sign-up/i)).toBeNull();
+    expectNoLoss(await save("footer"), footer);
   });
 });

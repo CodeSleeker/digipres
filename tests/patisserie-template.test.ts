@@ -60,6 +60,10 @@ describe("patisserie/boutique registration", () => {
       // NOT `staffOptions`. The form used to offer both to every tenant, which
       // is how a pastry kitchen came to be asked for its barbers.
       bookingOptions: true,
+      contactHeading: true,
+      // The ONLY template whose footer has a column for the sign-up box. The
+      // other three were offering the copy for something they never draw.
+      footerNewsletter: true,
     });
   });
 

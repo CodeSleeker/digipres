@@ -24,11 +24,11 @@ export function SiteFooter({ business }: { business: BusinessProfile }) {
   const { footer, contact } = business;
 
   // The mockup sets Privacy Policy and Terms apart from the link columns, on
-  // the bottom rule. There is no field for that, so a column TITLED "Legal"
-  // is lifted out of the grid and rendered there instead. Name it anything
-  // else and it stays an ordinary column.
-  const legal = footer.columns.find((c) => /^legal$/i.test(c.title));
-  const columns = footer.columns.filter((c) => c !== legal);
+  // the bottom rule. They live in the events content under their own name, so
+  // the CMS can label the field for what it is — this used to match a column
+  // TITLED "Legal", which meant renaming it moved the links with no warning.
+  const legal = business.events?.footerLegal ?? [];
+  const columns = footer.columns;
 
   /*
    * `buildContactDetails` adds a SOCIALS card listing the platforms as text
@@ -107,9 +107,9 @@ export function SiteFooter({ business }: { business: BusinessProfile }) {
           {footer.credit && (
             <p className="text-xs text-white/50">{footer.credit}</p>
           )}
-          {legal && (
+          {legal.length > 0 && (
             <ul className="flex list-none gap-6 p-0">
-              {legal.links.map((link) => (
+              {legal.map((link) => (
                 <li key={`${link.label}-${link.href}`}>
                   <a
                     href={link.href}

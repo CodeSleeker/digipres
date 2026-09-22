@@ -91,6 +91,26 @@ export interface TemplateFields {
    * beside `heroPhoto`.
    */
   aboutParagraphs?: boolean;
+  /**
+   * The contact section's own eyebrow, title and intro.
+   *
+   * A template whose contact area is a CTA banner rather than a headed section
+   * renders none of them — the events template uses only `contact.label`, as
+   * the heading of its footer's contact column. Offering the other two there
+   * gives an owner a headline and a paragraph that appear nowhere, and the
+   * first thing they do is type into them.
+   */
+  contactHeading?: boolean;
+  /**
+   * The mailing-list sign-up block in the footer.
+   *
+   * Separate from whether the tenant MAY send: `newsletterVerified` decides
+   * that, and both have to be true. Only the patisserie's footer draws the
+   * box; the other three have no column to put it in, so their owners were
+   * being offered copy for something their site would never render — which is
+   * the very thing the verification gate exists to prevent.
+   */
+  footerNewsletter?: boolean;
   /** A link set opposite a section heading ("See the full menu →"). */
   headingLinks?: boolean;
   /** A credit line on each gallery photograph ("By Ronie"). */
@@ -158,6 +178,7 @@ export const TEMPLATES: TemplateOption[] = [
       bookingOptions: true,
       staffOptions: true,
       galleryCredit: true,
+      contactHeading: true,
     },
   },
   {
@@ -202,6 +223,9 @@ export const TEMPLATES: TemplateOption[] = [
       headingLinks: true,
       /* An enquiry form, but no staff to route to — the kitchen is one person. */
       bookingOptions: true,
+      contactHeading: true,
+      /* The one template with a fourth footer column to put the box in. */
+      footerNewsletter: true,
     },
   },
   {
@@ -254,6 +278,7 @@ export const TEMPLATES: TemplateOption[] = [
        * figures row and no sign-off in this design.
        */
       aboutParagraphs: true,
+      contactHeading: true,
     },
   },
   {

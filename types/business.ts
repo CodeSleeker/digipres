@@ -521,6 +521,16 @@ export interface EventsSections {
     imageAlt: string;
     stats: HeroStat[];
   };
+  /**
+   * The small print on the footer's bottom rule, beside the copyright.
+   *
+   * Its own field rather than a footer COLUMN titled "Legal", which is what
+   * this was: the section lifted that column out of the grid by matching its
+   * title, so renaming it in the CMS silently moved the links somewhere else
+   * and nothing in the form said so. A named field is a thing the form can
+   * label.
+   */
+  footerLegal: NavLink[];
   /** The enquiry form beneath the closing invitation. */
   inquiry: {
     title: string;

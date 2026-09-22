@@ -48,14 +48,33 @@ export function ContactForm({
 
   return (
     <form onSubmit={form.handleSubmit(submit)} className="grid max-w-2xl gap-6">
-      <TextField form={form} name="label" label="Eyebrow label" />
-      <TextAreaField form={form} name="intro" label="Intro text" />
-      <StringListField
+      {/*
+       * The label is always drawn, because a template with no contact SECTION
+       * still uses it — the events footer heads its contact column with it.
+       * The title and intro belong to a headed section, and only a template
+       * that has one is asked for them.
+       */}
+      <TextField
         form={form}
-        name="titleLines"
-        label="Title lines"
-        hint="One line per row."
+        name="label"
+        label="Eyebrow label"
+        hint={
+          fields.contactHeading
+            ? undefined
+            : "Heads the contact details in your footer."
+        }
       />
+      {fields.contactHeading && (
+        <>
+          <TextAreaField form={form} name="intro" label="Intro text" />
+          <StringListField
+            form={form}
+            name="titleLines"
+            label="Title lines"
+            hint="One line per row."
+          />
+        </>
+      )}
 
       {/* Both dropdowns belong to an enquiry form. A template that has no such
           form renders neither, and is offered neither — otherwise an owner

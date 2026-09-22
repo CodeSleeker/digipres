@@ -73,6 +73,17 @@ describe("events/elegance registration", () => {
     }
   });
 
+  it("is not offered the inputs its page has nowhere to draw", () => {
+    /*
+     * The contact heading and the newsletter box. This template's contact
+     * area is a CTA banner, not a headed section, and its footer has no
+     * column for a sign-up — so an owner asked for that copy would type a
+     * headline and a paragraph that appear nowhere on their site.
+     */
+    expect(fields.contactHeading).toBeFalsy();
+    expect(fields.footerNewsletter).toBeFalsy();
+  });
+
   it("declares no pricing and no booking options", () => {
     // An event is quoted after a conversation, and the enquiry form's
     // dropdowns come from `events.inquiry` — so the shared booking options
@@ -129,11 +140,15 @@ describe("events/elegance default content", () => {
     expect(bem.events!.showcase.allLabel).toBeTruthy();
   });
 
-  it("keeps a Legal column for the footer's bottom rule", () => {
-    // SiteFooter lifts a column titled "Legal" out of the grid. Rename it and
-    // the links quietly move into the grid instead.
-    const legal = bem.footer.columns.find((c) => /^legal$/i.test(c.title));
-    expect(legal?.links.length).toBeGreaterThan(0);
+  it("keeps the footer's small print in its own field, not a column", () => {
+    // It used to be a footer column titled "Legal" that SiteFooter lifted out
+    // of the grid by matching the title — so renaming it in the CMS moved the
+    // links with no warning. A named field is a thing the form can label.
+    expect(bem.events!.footerLegal.length).toBeGreaterThan(0);
+    expect(
+      bem.footer.columns.some((c) => /^legal$/i.test(c.title)),
+      "the magic column is gone",
+    ).toBe(false);
   });
 
   it("has a diallable phone number for the closing banner", () => {

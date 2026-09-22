@@ -759,6 +759,15 @@ export const eventsSchema = z.object({
       )
       .max(4, "Add at most 4 figures."),
   }),
+  /** Empty renders nothing on the bottom rule, which is a legitimate choice. */
+  footerLegal: z
+    .array(
+      z.object({
+        label: requiredText("Link text is required.").max(60),
+        href: link,
+      }),
+    )
+    .max(4, "Add at most 4."),
   inquiry: z.object({
     title: requiredText("Form heading is required.").max(120),
     intro: requiredText("Intro is required.").max(400),

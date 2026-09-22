@@ -254,12 +254,6 @@ export const bem: BusinessProfile = {
           { label: "Book Consultation", href: "#inquiry" },
         ],
       },
-      {
-        // Lifted out of the grid onto the bottom rule — see SiteFooter. Rename
-        // it and it becomes an ordinary column.
-        title: "Legal",
-        links: [{ label: "Privacy Policy", href: "/privacy" }],
-      },
     ],
     copyright: "Elegance by Bem. All rights reserved.",
     credit: "Crafted by AliAmz Digital",
@@ -415,6 +409,7 @@ export const bem: BusinessProfile = {
         { value: "100%", label: "Bespoke Design" },
       ],
     },
+    footerLegal: [{ label: "Privacy Policy", href: "/privacy" }],
     inquiry: {
       title: "Tell us about your\ncelebration",
       intro:
