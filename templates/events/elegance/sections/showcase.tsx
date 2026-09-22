@@ -178,7 +178,19 @@ export function Showcase({ business }: { business: BusinessProfile }) {
 
         {cta?.label && (
           <div className={cn(reveal(), "mt-14 text-center")} style={delay(400)}>
-            <BtnOutline href={cta.href} className="px-10 py-4">
+            {/*
+             * The real home of a stylist's full body of work is usually
+             * somewhere else — an Instagram, a gallery page — so an off-site
+             * link opens in a new tab rather than navigating away from the
+             * page they were reading.
+             */}
+            <BtnOutline
+              href={cta.href}
+              className="px-10 py-4"
+              {...(/^https?:\/\//i.test(cta.href)
+                ? { target: "_blank", rel: "noopener noreferrer" }
+                : {})}
+            >
               {cta.label}
             </BtnOutline>
           </div>

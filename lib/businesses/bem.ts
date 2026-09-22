@@ -385,7 +385,17 @@ export const bem: BusinessProfile = {
           alt: "A crowd at a night-time concert under stage lights and falling confetti",
         },
       ],
-      cta: { label: "View All Events", href: "#inquiry" },
+      /*
+       * NO BUTTON. The mockup had a "View All Events" one pointing at `#`,
+       * and pointing it at the enquiry form was worse than leaving it dead:
+       * a button promising more work, that scrolls you to a contact form.
+       *
+       * The grid already shows every event and the "All" chip restores the
+       * unfiltered view, so there is nothing for it to do until there is
+       * somewhere real to send people. Set `cta` to the studio's Instagram or
+       * a gallery page and it renders again — an off-site link opens in a new
+       * tab (see the Showcase section).
+       */
     },
     /*
      * The mockup's "Our Approach" panel, carrying the brief's "how it works".
