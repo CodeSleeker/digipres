@@ -10,6 +10,7 @@ import type {
   Business,
   BusinessBrand,
   BusinessHours,
+  DayHours,
 } from "@/types/business-entity";
 import type { BarberEntry, TestimonialEntry } from "@/types/website-content";
 import { formatAddress } from "@/lib/businesses/address";
@@ -429,17 +430,69 @@ const SOCIAL_PLATFORMS: {
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-/** Render structured weekly hours into human lines (empty → no HOURS card). */
-function formatHours(hours: BusinessHours): string[] {
+/**
+ * Monday first, Sunday last — the order a business writes its own hours in.
+ *
+ * The stored `day` is 0=Sunday because that is what the date APIs use, but
+ * reading a week that opens on Sunday is not how anyone prints opening times.
+ * Only the display order changes; nothing about the stored shape does, and the
+ * JSON-LD builds from `business.hours` directly.
+ */
+const WEEK_ORDER: DayHours["day"][] = [1, 2, 3, 4, 5, 6, 0];
+
+/**
+ * Structured weekly hours as human lines (empty → no HOURS card).
+ *
+ * RUNS OF IDENTICAL DAYS ARE COLLAPSED. Printing seven near-identical lines —
+ * "Mon: 9 AM – 5 PM" six times over — is how a footer ends up with a wall of
+ * text saying one thing, and it is not how the approved designs write it
+ * either: the mockup's contact column says "Mon–Sat: 9AM – 6PM" on one line.
+ *
+ * A run only extends across days that are ADJACENT IN THE WEEK and present in
+ * the record. A business that stored Monday and Wednesday but not Tuesday gets
+ * two lines, not "Mon–Wed" — which would claim an opening time for a day they
+ * never gave.
+ */
+export function formatHours(hours: BusinessHours): string[] {
   if (!Array.isArray(hours) || hours.length === 0) return [];
-  return hours
-    .slice()
-    .sort((a, b) => a.day - b.day)
-    .map((d) => {
-      const name = DAY_NAMES[d.day] ?? "";
-      if (d.closed || !d.open || !d.close) return `${name}: Closed`;
-      return `${name}: ${to12h(d.open)} — ${to12h(d.close)}`;
-    });
+  const byDay = new Map(hours.map((entry) => [entry.day, entry]));
+
+  const lines: string[] = [];
+  let run: { start: number; end: number; value: string } | null = null;
+
+  const flush = () => {
+    if (!run) return;
+    const label =
+      run.start === run.end
+        ? DAY_NAMES[run.start]
+        : `${DAY_NAMES[run.start]}–${DAY_NAMES[run.end]}`;
+    lines.push(`${label}: ${run.value}`);
+    run = null;
+  };
+
+  for (const day of WEEK_ORDER) {
+    const entry = byDay.get(day);
+    // A day the record does not mention breaks the run: the next day printed
+    // is not adjacent to the last one.
+    if (!entry) {
+      flush();
+      continue;
+    }
+
+    const value =
+      entry.closed || !entry.open || !entry.close
+        ? "Closed"
+        : `${to12h(entry.open)} – ${to12h(entry.close)}`;
+
+    if (run && run.value === value) run.end = day;
+    else {
+      flush();
+      run = { start: day, end: day, value };
+    }
+  }
+  flush();
+
+  return lines;
 }
 
 function to12h(time: string): string {
@@ -448,5 +501,7 @@ function to12h(time: string): string {
   if (Number.isNaN(h)) return time;
   const period = h >= 12 ? "PM" : "AM";
   const hour = h % 12 === 0 ? 12 : h % 12;
-  return `${hour}:${mStr} ${period}`;
+  // "9 AM", not "9:00 AM": on the hour is the common case and the zeroes are
+  // noise repeated twice a line. Minutes appear when there are any.
+  return mStr === "00" ? `${hour} ${period}` : `${hour}:${mStr} ${period}`;
 }
