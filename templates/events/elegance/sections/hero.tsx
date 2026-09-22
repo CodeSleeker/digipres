@@ -132,8 +132,11 @@ export function Hero({ business }: { business: BusinessProfile }) {
 
                 {/* The booking pill. Rendered only when the profile carries
                     one — an empty glass card reads as a loading state. */}
+                {/* `glass-dark`, not `glass`: white text on a 6% white fill
+                    vanishes over a bright photograph, and the photograph here
+                    is whatever the tenant uploaded. See app/globals.css. */}
                 {hero.badge && (
-                  <div className="glass absolute bottom-8 left-8 rounded-2xl px-6 py-4">
+                  <div className="glass-dark absolute bottom-8 left-8 rounded-2xl px-6 py-4">
                     <p className="text-xs font-semibold uppercase tracking-widest text-white">
                       {hero.badge}
                     </p>

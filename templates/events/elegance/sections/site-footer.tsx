@@ -13,6 +13,12 @@ import { DetailIcon, SocialIcon } from "../components/icons";
  * column, which is how the mockup draws it — an icon per line, in gold, with
  * the address, the hours and the email. Keeping it derived means an owner who
  * corrects their opening hours in the CMS corrects them in both places.
+ *
+ * CONTRAST. The mockup sets this whole footer in white at 40% and 30% on the
+ * charcoal, which measure 3.8:1 and 2.7:1 — under AA for text this size, and
+ * the links are the ones people are trying to hit. Raised to 55% and 50%; the
+ * footer still recedes, it is simply readable. Same trade as the retreat's
+ * sage and clay tokens in app/globals.css.
  */
 export function SiteFooter({ business }: { business: BusinessProfile }) {
   const { footer, contact } = business;
@@ -40,7 +46,7 @@ export function SiteFooter({ business }: { business: BusinessProfile }) {
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-2">
             <Logo business={business} onDark />
-            <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/40">
+            <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/55">
               {footer.description}
             </p>
 
@@ -82,7 +88,7 @@ export function SiteFooter({ business }: { business: BusinessProfile }) {
                       name={detail.icon}
                       className="mt-0.5 h-4 w-4 flex-none text-gold-400"
                     />
-                    <span className="text-sm text-white/40">
+                    <span className="text-sm text-white/55">
                       {detail.lines.map((line, i) => (
                         <ContactLine key={line} line={line} first={i === 0} />
                       ))}
@@ -95,11 +101,11 @@ export function SiteFooter({ business }: { business: BusinessProfile }) {
         </div>
 
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/5 pt-8 md:flex-row">
-          <p className="text-xs text-white/30">
+          <p className="text-xs text-white/50">
             © {new Date().getFullYear()} {footer.copyright}
           </p>
           {footer.credit && (
-            <p className="text-xs text-white/30">{footer.credit}</p>
+            <p className="text-xs text-white/50">{footer.credit}</p>
           )}
           {legal && (
             <ul className="flex list-none gap-6 p-0">
@@ -107,7 +113,7 @@ export function SiteFooter({ business }: { business: BusinessProfile }) {
                 <li key={`${link.label}-${link.href}`}>
                   <a
                     href={link.href}
-                    className="text-xs text-white/30 transition-colors hover:text-gold-400"
+                    className="text-xs text-white/50 transition-colors hover:text-gold-400"
                   >
                     {link.label}
                   </a>
@@ -132,7 +138,7 @@ function LinkColumn({ column }: { column: FooterColumn }) {
           <li key={`${link.label}-${link.href}`}>
             <a
               href={link.href}
-              className="text-sm text-white/40 transition-colors hover:text-gold-400"
+              className="text-sm text-white/55 transition-colors hover:text-gold-400"
             >
               {link.label}
             </a>

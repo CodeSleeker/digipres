@@ -13,10 +13,18 @@ import { cn } from "@/lib/utils";
  * treatment rather than paper: a hairline gold border, a translucent fill, and
  * a gold focus ring at 3px — the same ring the rest of the template uses, so
  * keyboard focus looks the same everywhere.
+ *
+ * CONTRAST. The glass fill lifts the ground to roughly #282828, which is what
+ * the white opacities here are measured against — not the charcoal behind it.
+ * Labels and hints were originally set at the mockup's 45% and 30%, measuring
+ * 4.2:1 and 2.7:1; both are small text and both failed AA. They are raised to
+ * the smallest step that clears 4.5:1 with room to spare. Same trade the
+ * retreat's sage and clay tokens make in app/globals.css: the hue is the
+ * mockup's, the lightness is whatever legibility costs.
  */
 export const fieldClass = cn(
   "w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3",
-  "text-sm text-white placeholder:text-white/30",
+  "text-sm text-white placeholder:text-white/45",
   "transition-[border-color,box-shadow,background-color] duration-300 outline-none",
   "focus:border-gold-400/70 focus:bg-white/[0.07] focus:shadow-[0_0_0_3px_rgba(201,169,60,0.18)]",
   // 16px on small screens: anything less makes iOS Safari zoom the page on focus.
@@ -54,7 +62,7 @@ export function Field({
     <div className={className}>
       <label
         htmlFor={id}
-        className="mb-2 block text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-white/45"
+        className="mb-2 block text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-white/60"
       >
         {label}
         {/* The asterisk is decoration; `required` on the input is what actually
@@ -71,7 +79,7 @@ export function Field({
           the hint is read out with the label rather than sitting beside it
           unannounced. */}
       {hint && (
-        <p id={`${id}-hint`} className="mt-1.5 text-xs text-white/30">
+        <p id={`${id}-hint`} className="mt-1.5 text-xs text-white/55">
           {hint}
         </p>
       )}

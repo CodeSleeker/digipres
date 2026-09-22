@@ -20,6 +20,22 @@ const UNSPLASH = "https://images.unsplash.com";
  * number, the two social profiles and the Messenger link. The mockup shipped
  * dead `#` links for all of them; these are shaped correctly so the markup is
  * right, but none has been confirmed with the client.
+ *
+ * THE PHOTOGRAPHS DO NOT MATCH THEIR CAPTIONS, and that is inherited from the
+ * approved mockup rather than chosen here: its Unsplash ids were picked for
+ * mood and never checked against the events they sit under. One stock headshot
+ * of a man serves BOTH the founder's portrait and the "De Leon Golden
+ * Anniversary" card; "Maxine's Wonderland Party", a children's birthday, is a
+ * night-time concert crowd; the black-tie gala is a rustic banquet with
+ * sunflowers. Replacing these with the studio's own photography is the fix.
+ *
+ * The `alt` strings below describe WHAT EACH PHOTOGRAPH ACTUALLY SHOWS, which
+ * is why several read oddly against the caption beside them. They previously
+ * described the scene the caption implied — invented, because nobody had
+ * looked at the images. Alt text that narrates an imaginary photograph is
+ * worse than none: it tells a screen-reader user something that is not on the
+ * page. When the real photographs land, every one of these has to be rewritten
+ * with them.
  */
 export const bem: BusinessProfile = {
   slug: "bem",
@@ -64,7 +80,7 @@ export const bem: BusinessProfile = {
     stats: [],
     image: `${UNSPLASH}/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1920&q=80`,
     imageAlt:
-      "A reception hall dressed in ivory and gold, set for dinner under warm lights",
+      "White daisies in a green vase beside a champagne bottle, candles and cupcakes, against a whitewashed brick wall",
     badge: "Now Booking",
     card: {
       image: `${UNSPLASH}/photo-1478146059778-26028b07395a?auto=format&fit=crop&w=800&h=1067&q=80`,
@@ -130,8 +146,7 @@ export const bem: BusinessProfile = {
     features: [],
     cta: { label: "", href: "" },
     image: `${UNSPLASH}/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&h=800&q=80`,
-    imageAlt:
-      "Bem arranging ivory roses and taper candles along a long banquet table",
+    imageAlt: "A man in a white t-shirt smiling at the camera",
     badgeValue: "Award Winning",
     badgeLabel: "Best Event Stylist '25",
     signature: { name: "Bem", role: "Founder & Lead Event Designer" },
@@ -274,7 +289,7 @@ export const bem: BusinessProfile = {
           description:
             "Wedding designs from intimate ceremonies to full receptions, styled around the two people at the centre of them.",
           image: `${UNSPLASH}/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=600&h=800&q=80`,
-          alt: "A wedding aisle lined with white roses and hanging glass lanterns",
+          alt: "A bride and groom holding hands, her lace sleeve against his dark suit",
           // Narrows the grid below on the way past. Must match a category
           // used by a showcase item, or the click scrolls without filtering.
           filter: "Weddings",
@@ -285,7 +300,7 @@ export const bem: BusinessProfile = {
           description:
             "Debut and birthday styling for the moments a family remembers for the rest of their lives.",
           image: `${UNSPLASH}/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=600&h=800&q=80`,
-          alt: "A debut ballroom in blush and gold, with a crystal chandelier over the dance floor",
+          alt: "A canopy of brightly coloured balloons filling the ceiling",
           filter: "Birthdays",
         },
         {
@@ -294,7 +309,7 @@ export const bem: BusinessProfile = {
           description:
             "Event design for galas, launches and private company celebrations that have to look effortless.",
           image: `${UNSPLASH}/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=600&h=800&q=80`,
-          alt: "A black-tie gala room with gold draping and round tables under warm uplighting",
+          alt: "Banquet tables with white chair covers and sunflowers in burlap-wrapped jars",
           filter: "Corporate",
         },
       ],
@@ -323,7 +338,7 @@ export const bem: BusinessProfile = {
           description:
             "A garden ceremony with cascading ivory roses, gold candelabras, and 300 guests under a canopy of fairy lights.",
           image: `${UNSPLASH}/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&h=450&q=80`,
-          alt: "Bride and groom beneath an arch of ivory roses at dusk",
+          alt: "A bride holding a bouquet of pale roses, backlit against a dark background",
         },
         {
           category: "Debuts",
@@ -333,7 +348,7 @@ export const bem: BusinessProfile = {
           description:
             "A whimsical enchanted-garden theme with blush peonies, crystal chandeliers, and an ethereal fog-lit dance floor.",
           image: `${UNSPLASH}/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=600&h=450&q=80`,
-          alt: "A debut ballroom in blush and cream with a chandelier above the dance floor",
+          alt: "A canopy of brightly coloured balloons filling the ceiling",
         },
         {
           category: "Corporate",
@@ -343,7 +358,7 @@ export const bem: BusinessProfile = {
           description:
             "A black-tie celebration with dramatic gold draping, geometric installations, and a live jazz ensemble.",
           image: `${UNSPLASH}/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=600&h=450&q=80`,
-          alt: "A gala dinner room with gold draping and round tables set for a black-tie evening",
+          alt: "Banquet tables with white chair covers and sunflowers in burlap-wrapped jars",
         },
         {
           category: "Other Events",
@@ -353,7 +368,7 @@ export const bem: BusinessProfile = {
           description:
             "A golden 50th anniversary dinner with heritage tablescapes, monogrammed linens, and an intimate 80-person gathering.",
           image: `${UNSPLASH}/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&h=450&q=80`,
-          alt: "A long anniversary table dressed in gold and ivory with candles down its centre",
+          alt: "A man in a white t-shirt smiling at the camera",
         },
         {
           category: "Weddings",
@@ -363,7 +378,7 @@ export const bem: BusinessProfile = {
           description:
             "A beachfront sunset wedding with flowing white drapery, tropical blooms, and barefoot elegance for 150 guests.",
           image: `${UNSPLASH}/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=600&h=450&q=80`,
-          alt: "A beachfront ceremony with white drapery against the sunset",
+          alt: "A ballroom of round tables and gold chiavari chairs under lit chandeliers",
         },
         {
           category: "Birthdays",
@@ -373,7 +388,7 @@ export const bem: BusinessProfile = {
           description:
             "A pastel wonderland birthday with balloon sculptures, custom dessert displays, and play zones for the little guests.",
           image: `${UNSPLASH}/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=600&h=450&q=80`,
-          alt: "A pastel children's party with balloon arches and a dessert table",
+          alt: "A crowd at a night-time concert under stage lights and falling confetti",
         },
       ],
       cta: { label: "View All Events", href: "#inquiry" },
@@ -393,7 +408,7 @@ export const bem: BusinessProfile = {
       text: "It starts with a conversation about the day you have in mind, the room and the budget. We come back with a concept — palette, florals, lighting, layout — and refine it with you until it is right. On the day, we install, style and stay until the last detail is in place, so you can be a guest at your own celebration.",
       image: `${UNSPLASH}/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=800&h=600&q=80`,
       imageAlt:
-        "A styling team laying out florals and glassware on a banquet table before guests arrive",
+        "A long dining table set with glassware and a bright floral centrepiece",
       stats: [
         { value: "500+", label: "Events Styled" },
         { value: "12+", label: "Years of Artistry" },

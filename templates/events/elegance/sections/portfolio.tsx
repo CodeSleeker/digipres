@@ -49,7 +49,18 @@ export function Portfolio({ business }: { business: BusinessProfile }) {
               )}
               style={delay(100 * (i + 1))}
             >
-              <div className="relative aspect-[3/4] overflow-hidden rounded-2xl">
+              <div
+                className={cn(
+                  "relative overflow-hidden rounded-2xl",
+                  // The spanning card is twice as wide as its neighbours, so
+                  // holding it to their 3:4 made a single ~1000px-tall
+                  // photograph at tablet. Wide while it spans, 3:4 again once
+                  // the grid gives every card its own column.
+                  i === 2
+                    ? "aspect-[3/4] md:aspect-[16/9] lg:aspect-[3/4]"
+                    : "aspect-[3/4]",
+                )}
+              >
                 <TenantImage
                   src={item.image}
                   alt={item.alt ?? item.title}

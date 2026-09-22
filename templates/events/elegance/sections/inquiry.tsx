@@ -232,7 +232,7 @@ export function Inquiry({ business }: { business: BusinessProfile }) {
                     that failed halfway. */}
                 {reference && (
                   <>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/55">
                       Your reference
                     </p>
                     {/* select-all because this gets copied into a chat
@@ -397,7 +397,7 @@ export function Inquiry({ business }: { business: BusinessProfile }) {
 
                   {form.serviceNeeds.length > 0 && (
                     <fieldset className="sm:col-span-2">
-                      <legend className="mb-3 block text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-white/45">
+                      <legend className="mb-3 block text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-white/60">
                         Services needed
                       </legend>
                       <div className="grid gap-3 sm:grid-cols-2">
@@ -450,7 +450,7 @@ export function Inquiry({ business }: { business: BusinessProfile }) {
                       {sending ? "Sending" : "Send enquiry"}
                     </BtnGoldSubmit>
                     <FormMessage message={message} />
-                    <p className="mt-4 text-xs text-white/30">
+                    <p className="mt-4 text-xs text-white/55">
                       This is an enquiry, not a confirmed booking. We will come
                       back to you to talk it through.
                     </p>

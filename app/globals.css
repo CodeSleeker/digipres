@@ -1031,6 +1031,23 @@ body:has(.tpl-events)::after {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
+/*
+ * The same frosting, over a dark ground of its own.
+ *
+ * `.glass` is a 6% WHITE fill. On the charcoal it was drawn for that reads as
+ * frosted; over a pale photograph it is very nearly nothing, and the white
+ * text on it disappears — which is what the hero badge did the moment the
+ * picture behind it was a bright one. A tenant uploads their own photograph,
+ * so the badge cannot depend on that photograph being dark.
+ */
+.tpl-events .glass-dark {
+  background: rgba(20, 20, 20, 0.62);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(201, 169, 60, 0.22);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+}
+
 /* The header, once it has left the top of the page. */
 .tpl-events .nav-scrolled {
   background: rgba(250, 248, 244, 0.97);

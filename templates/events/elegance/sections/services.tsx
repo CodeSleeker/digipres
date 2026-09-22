@@ -103,7 +103,7 @@ export function Services({ business }: { business: BusinessProfile }) {
                         <span className="stat-number block cursor-default font-serif text-4xl font-semibold text-gold-400">
                           {stat.value}
                         </span>
-                        <span className="mt-1 block text-sm text-white/40">
+                        <span className="mt-1 block text-sm text-white/55">
                           {stat.label}
                         </span>
                       </dd>
