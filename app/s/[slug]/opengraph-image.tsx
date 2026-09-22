@@ -3,7 +3,7 @@ import { ImageResponse } from "next/og";
 import { loadTenantBySlug } from "@/lib/tenant/profile";
 import { themePalette } from "@/templates/themes";
 import { iconInitial } from "@/lib/tenant/icons";
-import { fetchLogoDataUri } from "@/lib/tenant/og-logo";
+import { cardPhoto, fetchCardImage } from "@/lib/tenant/og-image";
 import { formatLocality } from "@/lib/businesses/address";
 
 /**
@@ -21,6 +21,13 @@ import { formatLocality } from "@/lib/businesses/address";
  *
  * Colours come from the tenant's own template + theme (templates/themes.ts), so
  * a client's card looks like their site rather than like the platform's.
+ *
+ * TWO LAYOUTS, chosen by whether the tenant has a hero photograph. With one,
+ * the card IS that photograph, the name set over a scrim — which is what a
+ * trade sold on images (an event stylist, a patisserie) needs a share card to
+ * do. Without one, the typographic card: logo or initial tile, name, place.
+ * The barber's hero is a scrubbed frame sequence with no still behind it, so
+ * that template keeps the card it has always had.
  *
  * NOTE ON CACHING: this is a distinct route from the page, so
  * `revalidatePath("/s/<slug>")` does NOT clear it. lib/tenant/revalidate.ts
@@ -105,8 +112,110 @@ export default async function Image({
   const place = tenant?.business
     ? (formatLocality(tenant.business) ?? "")
     : "";
-  const logo = await fetchLogoDataUri(tenant?.business.logoUrl);
+  const logo = await fetchCardImage(tenant?.business.logoUrl);
   const initial = iconInitial(tenant?.profile.brand.initial || name);
+
+  /*
+   * The photograph, when the tenant has one the card can stand on. Capped at
+   * 2.5s by `fetchCardImage`, which hands back null on anything going wrong —
+   * a crawler is waiting, and the typographic card below is a fine answer.
+   */
+  const photo = await fetchCardImage(cardPhoto(tenant?.profile ?? null));
+
+  if (photo) {
+    return new ImageResponse(
+      (
+        /*
+         * NO ABSOLUTE POSITIONING, deliberately. Satori supports it only
+         * partially: with several absolute children the accent bar was laid
+         * out as a flex ITEM instead, stretching into a gold stripe down the
+         * left edge. Plain flow does the same job — the photograph is the
+         * root's background, the caption sits at the end of the column, and
+         * the rule is the last thing after it.
+         */
+        <div
+          style={{
+            width: size.width,
+            height: size.height,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            fontFamily: "Inter",
+            backgroundImage: `url(${photo})`,
+            backgroundSize: `${size.width}px ${size.height}px`,
+            backgroundPosition: "center",
+          }}
+        >
+          {/*
+           * An OPAQUE band, and both halves of that are the result of testing
+           * rather than taste.
+           *
+           * Satori flattens `linear-gradient` into a single hard-edged wash,
+           * which reads as a rendering fault rather than a scrim. And it does
+           * not honour `rgba()` alpha here — a band asked for at 72% black
+           * came out nearer 25%, with the photograph showing straight through
+           * the text. `backgroundColor` with a solid hex is what it renders
+           * faithfully.
+           *
+           * Opaque is also the safer design. This has to carry white text over
+           * ANY photograph an owner uploads — a dim reception or a white
+           * marquee at noon — and a fixed dark band is the only version whose
+           * contrast does not depend on the picture. Same lesson as the hero
+           * badge.
+           *
+           * Not from the palette: `palette.background` is cream on this
+           * template, and white on cream is unreadable. The band is dark for
+           * every tenant precisely because the text on it is always white.
+           */}
+          <div
+            style={{
+              width: size.width,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-end",
+              padding: "52px 72px 52px 72px",
+              backgroundColor: "#121212",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                fontSize: name.length > 26 ? 62 : 78,
+                fontWeight: 700,
+                color: "#ffffff",
+                lineHeight: 1.1,
+              }}
+            >
+              {name || "Website"}
+            </div>
+            {place && (
+              <div
+                style={{
+                  display: "flex",
+                  marginTop: 16,
+                  fontSize: 32,
+                  color: "rgba(255,255,255,0.85)",
+                }}
+              >
+                {clip(place, 60)}
+              </div>
+            )}
+          </div>
+
+          {/* The brand rule, flush to the bottom edge. */}
+          <div
+            style={{
+              display: "flex",
+              width: size.width,
+              height: 12,
+              background: palette.accent,
+            }}
+          />
+        </div>
+      ),
+      { ...size, fonts: fonts() },
+    );
+  }
 
   return new ImageResponse(
     (

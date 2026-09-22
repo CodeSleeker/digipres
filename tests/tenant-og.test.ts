@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { themePalette, PALETTE_KEYS } from "@/templates/themes";
 import { TEMPLATES } from "@/templates/registry";
-import { fetchLogoDataUri } from "@/lib/tenant/og-logo";
+import { cardPhoto, fetchCardImage } from "@/lib/tenant/og-image";
 
 describe("themePalette", () => {
   it("returns the registered palette for a known template + theme", () => {
@@ -61,7 +61,7 @@ describe("themePalette", () => {
   });
 });
 
-describe("fetchLogoDataUri", () => {
+describe("fetchCardImage", () => {
   afterEach(() => vi.restoreAllMocks());
 
   const png = (bytes = 32) =>
@@ -74,7 +74,7 @@ describe("fetchLogoDataUri", () => {
     const f = vi.fn();
     vi.stubGlobal("fetch", f);
     for (const v of [null, undefined, "", "not a url", "/relative/logo.png"]) {
-      expect(await fetchLogoDataUri(v)).toBeNull();
+      expect(await fetchCardImage(v)).toBeNull();
     }
     expect(f).not.toHaveBeenCalled();
   });
@@ -88,14 +88,14 @@ describe("fetchLogoDataUri", () => {
       "file:///etc/passwd",
       "ftp://example.com/logo.png",
     ]) {
-      expect(await fetchLogoDataUri(v)).toBeNull();
+      expect(await fetchCardImage(v)).toBeNull();
     }
     expect(f).not.toHaveBeenCalled();
   });
 
   it("returns a data URI for a real raster", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => png()));
-    const result = await fetchLogoDataUri("https://cdn.example.com/logo.png");
+    const result = await fetchCardImage("https://cdn.example.com/logo.png");
     expect(result).toMatch(/^data:image\/png;base64,/);
   });
 
@@ -111,7 +111,7 @@ describe("fetchLogoDataUri", () => {
       ),
     );
     expect(
-      await fetchLogoDataUri("https://cdn.example.com/logo.svg"),
+      await fetchCardImage("https://cdn.example.com/logo.svg"),
     ).toBeNull();
   });
 
@@ -121,7 +121,7 @@ describe("fetchLogoDataUri", () => {
       vi.fn(async () => new Response("nope", { status: 404 })),
     );
     expect(
-      await fetchLogoDataUri("https://cdn.example.com/gone.png"),
+      await fetchCardImage("https://cdn.example.com/gone.png"),
     ).toBeNull();
   });
 
@@ -139,7 +139,7 @@ describe("fetchLogoDataUri", () => {
           }),
       ),
     );
-    expect(await fetchLogoDataUri("https://cdn.example.com/huge.png")).toBeNull();
+    expect(await fetchCardImage("https://cdn.example.com/huge.png")).toBeNull();
 
     // content-length is a hint, not a promise — the real length is re-checked.
     vi.stubGlobal(
@@ -152,13 +152,13 @@ describe("fetchLogoDataUri", () => {
           }),
       ),
     );
-    expect(await fetchLogoDataUri("https://cdn.example.com/lying.png")).toBeNull();
+    expect(await fetchCardImage("https://cdn.example.com/lying.png")).toBeNull();
   });
 
   it("returns null on an empty body rather than an empty data URI", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => png(0)));
     expect(
-      await fetchLogoDataUri("https://cdn.example.com/empty.png"),
+      await fetchCardImage("https://cdn.example.com/empty.png"),
     ).toBeNull();
   });
 
@@ -170,8 +170,42 @@ describe("fetchLogoDataUri", () => {
     ]) {
       vi.stubGlobal("fetch", vi.fn(boom));
       await expect(
-        fetchLogoDataUri("https://cdn.example.com/slow.png"),
+        fetchCardImage("https://cdn.example.com/slow.png"),
       ).resolves.toBeNull();
     }
+  });
+});
+
+describe("cardPhoto", () => {
+  it("prefers the hero's own card image over the backdrop", () => {
+    // The order the hero renders them: the card image is the picture a
+    // visitor actually sees, the backdrop is a wash behind the copy.
+    expect(
+      cardPhoto({
+        hero: { image: "https://x/back.jpg", card: { image: "https://x/card.jpg" } },
+      }),
+    ).toBe("https://x/card.jpg");
+  });
+
+  it("falls back to the backdrop when that is all there is", () => {
+    expect(cardPhoto({ hero: { image: "https://x/back.jpg" } })).toBe(
+      "https://x/back.jpg",
+    );
+  });
+
+  it("returns null when the template has no still photograph", () => {
+    // The barber's hero is a scrubbed frame sequence. Null is the answer that
+    // keeps it on the typographic card rather than breaking its share image.
+    expect(cardPhoto({ hero: {} })).toBeNull();
+    expect(cardPhoto(null)).toBeNull();
+  });
+
+  it("treats a blank string as absent", () => {
+    // An owner clearing the field in the CMS stores "", not undefined — and
+    // "" would otherwise be passed to fetch as a URL.
+    expect(cardPhoto({ hero: { image: "" } })).toBeNull();
+    expect(cardPhoto({ hero: { image: "https://x/b.jpg", card: { image: "" } } })).toBe(
+      "https://x/b.jpg",
+    );
   });
 });
