@@ -86,6 +86,26 @@ export const CATEGORY_TYPE: Record<BusinessCategory, string> = {
   // a small lodge and a guest house, and claiming the narrow type would be
   // wrong for two of the three.
   lodging: "LodgingBusiness",
+  /*
+   * LocalBusiness, deliberately — and the same value as `other`, which is why
+   * it needs saying here rather than being left to look like an oversight.
+   *
+   * schema.org has no event-planning, event-styling or wedding-planning type.
+   * The two that look like fits are not:
+   *
+   *   ProfessionalService  DEPRECATED. schema.org retired it "due to confusion
+   *                        with Service".
+   *   EntertainmentBusiness  Means a business PROVIDING entertainment — its
+   *                        subtypes are AmusementPark, Casino, ComedyClub,
+   *                        MovieTheater, NightClub. A stylist who dresses
+   *                        someone else's venue is not one of those, and
+   *                        claiming it would be the mistake the `lodging` note
+   *                        above avoids.
+   *
+   * So this stays honest and generic. If schema.org ever adds a type for the
+   * trade, this is the only line that changes.
+   */
+  events: "LocalBusiness",
   other: "LocalBusiness",
 };
 

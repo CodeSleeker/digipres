@@ -47,6 +47,7 @@ export type BusinessCategoryEnum =
   | "automotive"
   | "fitness"
   | "lodging"
+  | "events"
   | "other";
 
 export type CustomerReviewStatusEnum = "pending" | "requested" | "received";

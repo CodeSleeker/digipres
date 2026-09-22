@@ -1,0 +1,45 @@
+-- ═══════════════════════════════════════════════════════════════════════════
+-- 0042_business_category_events.sql
+-- A category for event stylists: planning, styling and coordination.
+--
+-- Added alongside the events/elegance template, which until now registered as
+-- 'other' (templates/registry.ts) — wrong to the agency reading the platform
+-- list, wrong to the owner reading their own settings, and wrong in the picker
+-- at /platform/businesses/new, where onboarding an event stylist meant
+-- choosing "Other".
+--
+-- WHAT THIS DOES NOT BUY, stated plainly because the bakery and lodging
+-- migrations before it both bought exactly this and it is the obvious thing to
+-- assume. It does NOT improve the structured data. Those two categories earned
+-- their place by unlocking a more specific schema.org type — Bakery,
+-- LodgingBusiness — and there is no such type here:
+--
+--   * schema.org has no event-planning, event-styling or wedding-planning type.
+--   * ProfessionalService, the apparent fit, is DEPRECATED — schema.org
+--     retired it "due to confusion with Service".
+--   * EntertainmentBusiness, the other apparent fit, means a business
+--     PROVIDING entertainment: its subtypes are AmusementPark, Casino,
+--     ComedyClub, MovieTheater, NightClub. A stylist who dresses someone
+--     else's venue is not one, and claiming it would be the same error as
+--     publishing the lodge as a VacationRental.
+--
+-- So 'events' maps to LocalBusiness, exactly as 'other' does, and the map in
+-- lib/seo/json-ld.ts says why at the line itself. The category is worth having
+-- for the humans reading it; the structured data is unchanged and honest.
+--
+-- Placed after 'lodging' so the stored enum reads in the same order as the list
+-- the pickers render (BUSINESS_CATEGORIES in schemas/business.ts) — which keeps
+-- 'other' last, where it belongs. Nothing depends on `enumsortorder`; the
+-- ordering is for whoever next runs `\dT+` and compares the two.
+--
+-- NOTE ON RUNNING THIS. `alter type ... add value` cannot run inside a
+-- transaction block in PostgreSQL before 12, and even on 12+ the new value is
+-- not usable by other statements in the SAME transaction. This file therefore
+-- adds the value and nothing else — any migration that WRITES 'events' must be
+-- a separate file, or it will fail with "unsafe use of new value".
+-- ═══════════════════════════════════════════════════════════════════════════
+
+alter type public.business_category add value if not exists 'events' after 'lodging';
+
+-- No table, policy or index changes: `category` already exists and its column
+-- default ('other') is unaffected by a new member.

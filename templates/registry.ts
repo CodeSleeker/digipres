@@ -260,14 +260,13 @@ export const TEMPLATES: TemplateOption[] = [
     code: "events-elegance",
     name: "Events — Elegance",
     /*
-     * `other`, not an `events` value: business_category has none, and adding
-     * one is a database migration, which this change deliberately does not
-     * make. The consequence is narrow and worth naming — `lib/seo/json-ld.ts`
-     * maps `other` to schema.org LocalBusiness rather than a narrower type.
-     * Add the enum value (see 0032/0034 for the pattern) when the backend
-     * work for this template is picked up.
+     * The category added in migration 0042. It does NOT buy better structured
+     * data — schema.org has no event-planning type, so this still publishes as
+     * LocalBusiness (see the note in lib/seo/json-ld.ts). It buys a truthful
+     * word in the platform list, the owner's settings and the onboarding
+     * picker, where this template used to register as "Other".
      */
-    industry: "other",
+    industry: "events",
     description:
       "Cream and gold single page for an event stylist: hero, portfolio, filterable event grid, services, story, enquiry.",
     themes: [{ code: "default", name: "Cream & Gold" }],

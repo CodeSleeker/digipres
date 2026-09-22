@@ -59,6 +59,25 @@ describe("business categories", () => {
     expect(CATEGORY_TYPE.bakery).not.toBe(CATEGORY_TYPE.cafe);
   });
 
+  it("publishes an event stylist as a plain LocalBusiness, on purpose", () => {
+    /*
+     * The exception to the two above, asserted so the equality reads as a
+     * decision rather than as the omission the next person should fix.
+     *
+     * schema.org has no event-planning type. ProfessionalService is
+     * DEPRECATED ("due to confusion with Service") and EntertainmentBusiness
+     * means a business PROVIDING entertainment — AmusementPark, Casino,
+     * ComedyClub, MovieTheater, NightClub. A stylist who dresses someone
+     * else's venue is none of those.
+     *
+     * If this test ever fails because someone mapped it to something more
+     * specific, check that the type actually exists and actually describes the
+     * trade before believing the new value.
+     */
+    expect(CATEGORY_TYPE.events).toBe("LocalBusiness");
+    expect(CATEGORY_TYPE.events).toBe(CATEGORY_TYPE.other);
+  });
+
   it("publishes a private stay as lodging, not as a bare LocalBusiness", () => {
     // Same reasoning as the bakery: 'other' resolves to LocalBusiness, which
     // says nothing about what the place is. LodgingBusiness is the umbrella

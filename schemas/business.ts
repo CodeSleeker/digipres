@@ -35,6 +35,7 @@ export const BUSINESS_CATEGORIES = [
   "automotive",
   "fitness",
   "lodging",
+  "events",
   "other",
 ] as const satisfies readonly BusinessCategoryEnum[];
 
