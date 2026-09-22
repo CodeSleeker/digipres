@@ -52,14 +52,21 @@ export function SiteHeader({ business }: { business: BusinessProfile }) {
           <div className="flex h-20 items-center justify-between lg:h-24">
             <Logo business={business} />
 
-            <div className="hidden items-center gap-10 lg:flex">
+            {/*
+             * Tighter until xl. Five nav items plus the button is more than
+             * the mockup's four, and at the 1024px the desktop bar first
+             * appears the old 2.5rem gaps pushed "Our Story" and the button
+             * onto second lines. `whitespace-nowrap` below is the other half:
+             * a label may be dropped from the bar, never split mid-phrase.
+             */}
+            <div className="hidden items-center gap-6 lg:flex xl:gap-10">
               {business.nav.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
                   aria-current={active === link.href ? "true" : undefined}
                   className={cn(
-                    "nav-link text-sm font-medium uppercase tracking-widest transition-colors",
+                    "nav-link whitespace-nowrap text-sm font-medium uppercase tracking-widest transition-colors",
                     active === link.href
                       ? "text-gold-500"
                       : "text-charcoal/70 hover:text-gold-500",
@@ -68,7 +75,10 @@ export function SiteHeader({ business }: { business: BusinessProfile }) {
                   {link.label}
                 </a>
               ))}
-              <BtnGold href={business.navCta.href} className="px-7 py-3">
+              <BtnGold
+                href={business.navCta.href}
+                className="whitespace-nowrap px-7 py-3"
+              >
                 {business.navCta.label}
               </BtnGold>
             </div>

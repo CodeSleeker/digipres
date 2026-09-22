@@ -46,8 +46,8 @@ export function Logo({
       ) : (
         <span
           className={cn(
-            "font-serif font-semibold tracking-wide",
-            onDark ? "text-2xl" : "text-2xl lg:text-3xl",
+            "whitespace-nowrap font-serif font-semibold tracking-wide",
+            onDark ? "text-2xl" : "text-2xl xl:text-3xl",
           )}
         >
           <span className={onDark ? "text-gold-400" : "text-gold-500"}>

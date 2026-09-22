@@ -60,6 +60,12 @@ export const bem: BusinessProfile = {
     { label: "Events", href: "#events" },
     { label: "Services", href: "#services" },
     { label: "Our Story", href: "#story" },
+    /*
+     * Dropped from the nav automatically when a tenant has no questions:
+     * `buildBusinessProfile` filters `#faq` out of this list rather than
+     * leaving an anchor that scrolls nowhere.
+     */
+    { label: "FAQ", href: "#faq" },
   ],
   navCta: { label: "Book Consultation", href: "#inquiry" },
   hero: {
@@ -300,7 +306,7 @@ export const bem: BusinessProfile = {
           { label: "Services", href: "#services" },
           { label: "Our Story", href: "#story" },
           { label: "Client Love", href: "#testimonials" },
-          { label: "Questions", href: "#faq" },
+          { label: "FAQ", href: "#faq" },
           { label: "Book Consultation", href: "#inquiry" },
         ],
       },
