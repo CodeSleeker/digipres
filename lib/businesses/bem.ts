@@ -186,9 +186,56 @@ export const bem: BusinessProfile = {
       },
     ],
   },
-  // The approved design has no questions block. Empty `items` renders nothing
-  // and keeps the shape a CMS can fill later.
-  faq: { heading: { label: "", title: "" }, items: [] },
+  /*
+   * Five to start with, and they are meant to be replaced.
+   *
+   * These are published as FAQPage structured data — the format answer
+   * engines quote from most readily, which is the reason the section exists.
+   * Note that Google restricted FAQ RICH RESULTS in August 2023 to government
+   * and health sites, so this will not produce expandable snippets in ordinary
+   * search; the value is in being quotable, not in the listing.
+   *
+   * The AI visibility check scores still-default wording as a WARN rather than
+   * a pass, deliberately: these are the template's generic answers, and full
+   * marks would tell an owner they had finished the single highest-value thing
+   * they can do. Rewriting them in Bem's own words is what earns the pass.
+   */
+  faq: {
+    heading: {
+      label: "Before You Ask",
+      title: "Common Questions",
+      subtitle:
+        "The things people usually want to know before getting in touch.",
+    },
+    items: [
+      {
+        question: "How far in advance should I book?",
+        answer:
+          "For a wedding or a debut, six to twelve months gives us room to design properly and to hold the suppliers your day needs. Smaller celebrations often come together in six to eight weeks. If your date is sooner than that, ask anyway — we sometimes have room.",
+      },
+      {
+        question: "What does event styling actually include?",
+        answer:
+          "Concept and colour direction, florals, tablescapes, lighting, draping and any installations, plus the setup on the day and the pack-down afterwards. We can also run the timeline and coordinate your other suppliers if you would rather not.",
+      },
+      {
+        question: "Do you have a minimum spend?",
+        answer:
+          "No fixed minimum. What a celebration costs depends on the size of the room, the number of guests and how much of it is built rather than hired, so we quote after a conversation rather than from a price list.",
+      },
+      {
+        question:
+          "Can you work with a venue or suppliers we have already booked?",
+        answer:
+          "Yes, and often we are brought in exactly that way. Tell us who you are working with and we will design around their rules on access, timings and what may be fixed to the walls.",
+      },
+      {
+        question: "How many events do you take at once?",
+        answer:
+          "A small number, on purpose. Styling is done by the same people who designed it, so we limit the diary rather than hand your day to a team you have never met.",
+      },
+    ],
+  },
   ctaBanner: {
     label: "Let's Create Together",
     // Asterisks mark the shimmering gold phrase inside the line — see
@@ -253,6 +300,7 @@ export const bem: BusinessProfile = {
           { label: "Services", href: "#services" },
           { label: "Our Story", href: "#story" },
           { label: "Client Love", href: "#testimonials" },
+          { label: "Questions", href: "#faq" },
           { label: "Book Consultation", href: "#inquiry" },
         ],
       },

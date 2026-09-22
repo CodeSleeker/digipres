@@ -343,6 +343,7 @@ export const TEMPLATES: TemplateOption[] = [
       "services",
       "about",
       "testimonials",
+      "faq",
       "contact",
       "footer",
     ],

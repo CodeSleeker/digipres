@@ -36,10 +36,15 @@ describe("events/elegance registration", () => {
   });
 
   it("offers every section it renders, and none it doesn't", () => {
-    // No team, shop, gallery, journal or FAQ. The portfolio strip and the
-    // event grid are the template's OWN content (`EventsSections`), not the
-    // shared gallery section, so offering `gallery` would give an owner a form
-    // whose photographs never reach the page.
+    // No team, shop, gallery or journal. The portfolio strip and the event
+    // grid are the template's OWN content (`EventsSections`), not the shared
+    // gallery section, so offering `gallery` would give an owner a form whose
+    // photographs never reach the page.
+    //
+    // `faq` IS offered: the questions are published as FAQPage structured
+    // data, which is the format answer engines quote from — and Google's
+    // policy requires that markup to match content visible on the page, so
+    // the section renders them too.
     expect(template!.sections).toEqual([
       // First, beside Branding: the template's own blocks aren't an ordinary
       // page section. Everything after runs top-to-bottom down the page.
@@ -48,6 +53,7 @@ describe("events/elegance registration", () => {
       "services",
       "about",
       "testimonials",
+      "faq",
       "contact",
       "footer",
     ]);

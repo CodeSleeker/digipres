@@ -7,6 +7,7 @@ import { Showcase } from "./sections/showcase";
 import { Services } from "./sections/services";
 import { Story } from "./sections/story";
 import { Testimonials } from "./sections/testimonials";
+import { Faq } from "./sections/faq";
 import { Inquiry } from "./sections/inquiry";
 import { SiteFooter } from "./sections/site-footer";
 
@@ -64,6 +65,9 @@ export function EleganceEventsTemplate({
         <Services business={business} />
         <Story business={business} />
         <Testimonials business={business} />
+        {/* Objections answered immediately before the enquiry form, which is
+            where a reader meets them. Renders nothing without questions. */}
+        <Faq business={business} />
         <Inquiry business={business} />
       </main>
 
