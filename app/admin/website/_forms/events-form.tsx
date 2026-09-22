@@ -111,6 +111,33 @@ export function EventsForm({
       </p>
 
       <section className="grid gap-3">
+        <SubHeading>Hero extras</SubHeading>
+        <p className="text-xs leading-relaxed text-admin-muted">
+          Two parts of the top of your page that are particular to this design.
+          The main photograph, its description and the status pill are under
+          Hero.
+        </p>
+        <ImageField
+          form={form}
+          name="hero.backdrop"
+          label="Background wash"
+          businessId={businessId}
+        />
+        <p className="text-[0.65rem] text-admin-muted">
+          Sits behind your opening words at a fifth of its strength, under a
+          cream tint. It is decoration, so it needs no description — pick
+          something soft rather than something to look at.
+        </p>
+        <TextField
+          form={form}
+          name="hero.badgeLine"
+          label="Second line of the badge"
+          placeholder="Season 2026"
+          hint="Under the status pill on the photograph. Blank shows the pill alone."
+        />
+      </section>
+
+      <section className="grid gap-3">
         <SubHeading>Portfolio cards</SubHeading>
         <p className="text-xs leading-relaxed text-admin-muted">
           The three tall cards under your hero. Each one is its photograph, so

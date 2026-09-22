@@ -49,8 +49,33 @@ export interface ThemeOption {
 export interface TemplateFields {
   /** Scroll-scrubbed hero driven by a frame sequence or a video. */
   heroScrub?: boolean;
-  /** A still hero photograph, with its status pill, proof strip and slot card. */
+  /** A still hero photograph, its alt text and the small status pill on it. */
   heroPhoto?: boolean;
+  /**
+   * The social-proof strip under the hero copy: faces, stars and a sentence.
+   *
+   * Split out of `heroPhoto`, which used to mean the photograph AND the proof
+   * strip AND the slot card — nine inputs for a hero that might draw three.
+   * An owner on the events template was being asked for customer avatars and
+   * a star rating that appear nowhere on their page.
+   */
+  heroProof?: boolean;
+  /**
+   * The floating card over the hero photograph: title, subtitle, picture, a
+   * progress bar and a note.
+   *
+   * Also split out of `heroPhoto`. A template that draws a simple badge rather
+   * than an availability card declares this and leaves the rest alone.
+   */
+  heroCard?: boolean;
+  /**
+   * The availability half of that card: a subtitle, a fill bar and a note.
+   *
+   * Only a template that draws a DIARY card has anywhere to put them. A hero
+   * whose card is a two-line badge does not, and a progress bar offered to an
+   * event stylist is an input they fill in once and never find again.
+   */
+  heroCardAvailability?: boolean;
   /**
    * A full-bleed hero photograph the copy sits ON, rather than beside.
    *
@@ -206,6 +231,11 @@ export const TEMPLATES: TemplateOption[] = [
     ],
     fields: {
       heroPhoto: true,
+      // Both were part of `heroPhoto` before it was split; this template is
+      // the one that actually draws them, so its form is unchanged.
+      heroProof: true,
+      heroCard: true,
+      heroCardAvailability: true,
       itemPhotos: true,
       itemPricing: true,
       aboutEditorial: true,
@@ -325,6 +355,14 @@ export const TEMPLATES: TemplateOption[] = [
        * ignores merely goes unused.
        */
       heroPhoto: true,
+      /*
+       * ONLY `heroPhoto`. Not `heroProof` — no faces-and-stars strip — and no
+       * longer `heroCard` either: the glass badge used to borrow a floating
+       * availability card's picture and title, which is what had an event
+       * stylist being asked for a diary progress bar. Those two parts now live
+       * in this template's own content (`EventsSections.hero`), where the form
+       * can label them for what they are.
+       */
       /* A glyph on each service card, and no price — an event is quoted. */
       itemIcons: true,
       /* The story's second paragraph, figures row and sign-off. */

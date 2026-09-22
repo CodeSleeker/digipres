@@ -199,7 +199,8 @@ describe("CMS forms — the per-template inputs", () => {
       />,
     );
     expect(screen.getByText(/proof strip/i)).toBeTruthy();
-    expect(screen.getByText(/availability card/i)).toBeTruthy();
+    expect(screen.getByText(/card over the photograph/i)).toBeTruthy();
+    expect(screen.getByLabelText(/progress bar/i)).toBeTruthy();
     // The scrub hero's video field belongs to the other template.
     expect(screen.queryByText(/stats/i)).toBeNull();
     unmount();
@@ -352,5 +353,60 @@ describe("CMS forms — the inputs a template is NOT offered", () => {
     render(<FooterForm defaultValues={footer} showNewsletter={false} />);
     expect(screen.queryByText(/mailing list sign-up/i)).toBeNull();
     expectNoLoss(await save("footer"), footer);
+  });
+});
+
+describe("CMS forms — the hero a template actually draws", () => {
+  /**
+   * `heroPhoto` used to mean the photograph AND the proof strip AND the whole
+   * availability card — nine inputs for a hero that might draw three. An
+   * events owner was being asked for customer avatars, a star rating and a
+   * diary fill bar, none of which appear anywhere on their page.
+   */
+  it("offers an events hero only its photograph and badge", async () => {
+    render(
+      <HeroForm defaultValues={bem.hero} fields={events} businessId={null} />,
+    );
+
+    // Drawn: the photograph, its description and the status pill. That is the
+    // whole of what this hero takes from the shared section.
+    expect(screen.getByLabelText(/hero photograph/i)).toBeTruthy();
+    expect(screen.getByLabelText(/describe the photograph/i)).toBeTruthy();
+    expect(screen.getByLabelText(/status pill/i)).toBeTruthy();
+
+    // Not drawn, and no longer asked for. The card group is gone entirely now
+    // that the badge's picture and second line live in the events content.
+    expect(screen.queryByText(/proof strip/i)).toBeNull();
+    expect(screen.queryByText(/card over the photograph/i)).toBeNull();
+    expect(screen.queryByLabelText(/progress bar/i)).toBeNull();
+    expect(screen.queryByLabelText(/note under the bar/i)).toBeNull();
+  });
+
+  it("keeps the hero values it no longer shows an events owner", async () => {
+    /*
+     * The other half of the rule. Hiding an input is only safe if the value
+     * behind it survives the save — otherwise an owner opening Hero and
+     * pressing Save would blank content they never saw, which is the most
+     * ordinary thing anybody does in a CMS.
+     */
+    const hero = {
+      ...bem.hero,
+      proof: {
+        avatars: ["https://x/a.jpg"],
+        rating: 5,
+        highlight: "4.9 average",
+        text: "from 380 reviews.",
+      },
+      card: {
+        image: "https://x/card.jpg",
+        title: "Season 2026",
+        subtitle: "Consultations open",
+        progress: 60,
+        note: "A limited number of dates each month.",
+      },
+    };
+
+    render(<HeroForm defaultValues={hero} fields={events} businessId={null} />);
+    expectNoLoss(await save("hero"), hero);
   });
 });

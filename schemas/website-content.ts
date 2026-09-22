@@ -693,6 +693,11 @@ const eventsOptionSchema = z.object({
 });
 
 export const eventsSchema = z.object({
+  /** See `EventsSections.hero` — the two hero parts unique to this design. */
+  hero: z.object({
+    backdrop: optionalImageRef,
+    badgeLine: text.max(60),
+  }),
   portfolio: z.object({
     heading: eventsHeadingSchema,
     items: z

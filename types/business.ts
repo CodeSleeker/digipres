@@ -498,6 +498,25 @@ export interface EventCategoryCard {
  * never render.
  */
 export interface EventsSections {
+  /**
+   * The two parts of the hero that belong to this design alone.
+   *
+   * The main photograph and its description stay on the shared `hero`, where
+   * they are the same idea every template has. What lives here is the wash
+   * BEHIND the copy — decorative, so it needs no alt text and would only ever
+   * be an unanswerable question in the shared form — and the second line of
+   * the glass badge.
+   *
+   * Both used to be borrowed from `hero.card`, which is a floating
+   * availability card on the template it was designed for. That borrow is why
+   * an events owner was being asked for a progress bar.
+   */
+  hero: {
+    /** Behind the copy at 20%, under a cream wash. Decorative. */
+    backdrop: string;
+    /** The gold line under the status pill, e.g. "Season 2026". */
+    badgeLine: string;
+  };
   /** The three large category cards under the hero. */
   portfolio: {
     heading: SectionHeading;

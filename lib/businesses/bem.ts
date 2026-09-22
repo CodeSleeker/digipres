@@ -78,17 +78,19 @@ export const bem: BusinessProfile = {
     secondaryCta: { label: "Our Story", href: "#story" },
     // The events hero carries no figures row; the approach panel holds them.
     stats: [],
-    image: `${UNSPLASH}/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1920&q=80`,
+    /*
+     * The MAIN photograph — the tall portrait a visitor actually looks at.
+     *
+     * It used to be `hero.card.image`, borrowed from a floating availability
+     * card this design does not have, while `hero.image` held the decorative
+     * wash. That had the shared form asking for a diary progress bar and
+     * labelling the backdrop as "the hero photograph". The wash now lives in
+     * `events.hero.backdrop`, where it needs no alt text and no explanation.
+     */
+    image: `${UNSPLASH}/photo-1478146059778-26028b07395a?auto=format&fit=crop&w=800&h=1067&q=80`,
     imageAlt:
       "White daisies in a green vase beside a champagne bottle, candles and cupcakes, against a whitewashed brick wall",
     badge: "Now Booking",
-    card: {
-      image: `${UNSPLASH}/photo-1478146059778-26028b07395a?auto=format&fit=crop&w=800&h=1067&q=80`,
-      title: "Season 2026",
-      subtitle: "Consultations open",
-      progress: 60,
-      note: "A limited number of dates each month.",
-    },
   },
   marquee: [],
   services: {
@@ -274,6 +276,10 @@ export const bem: BusinessProfile = {
   },
   floatingCta: { label: "Enquire", href: "#inquiry" },
   events: {
+    hero: {
+      backdrop: `${UNSPLASH}/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1920&q=80`,
+      badgeLine: "Season 2026",
+    },
     portfolio: {
       heading: { label: "Our Signature Events", title: "Featured Portfolio" },
       items: [

@@ -49,7 +49,11 @@ export function HeroForm({
       )}
 
       {fields.heroPhoto && (
-        <HeroPhotoFields form={form} businessId={businessId} />
+        <HeroPhotoFields
+            form={form}
+            businessId={businessId}
+            fields={fields}
+          />
       )}
 
       {/* A full-bleed backdrop: the picture and its description, and nothing
@@ -157,12 +161,22 @@ function StatsFields({ form }: { form: UseFormReturn<HeroFormValues> }) {
  * say so, because "leave this blank and it disappears" is not something an
  * owner should have to discover by saving.
  */
+/**
+ * The three groups that used to travel together under one flag.
+ *
+ * A template declares only the ones it draws: the photograph is common, the
+ * proof strip and the floating card are not. Before the split, an events
+ * owner was shown customer avatars, a star rating and a progress bar for a
+ * hero that renders none of them.
+ */
 function HeroPhotoFields({
   form,
   businessId,
+  fields,
 }: {
   form: UseFormReturn<HeroFormValues>;
   businessId: string | null;
+  fields: TemplateFields;
 }) {
   return (
     <>
@@ -188,6 +202,7 @@ function HeroPhotoFields({
         />
       </div>
 
+      {fields.heroProof && (
       <div className="grid gap-3">
         <SubHeading>Proof strip</SubHeading>
         <RepeatableRow title="Reviews summary">
@@ -213,9 +228,11 @@ function HeroPhotoFields({
           <AvatarListField form={form} name="proof.avatars" />
         </RepeatableRow>
       </div>
+      )}
 
+      {fields.heroCard && (
       <div className="grid gap-3">
-        <SubHeading>Availability card</SubHeading>
+        <SubHeading>Card over the photograph</SubHeading>
         <RepeatableRow title="Card">
           <TextField
             form={form}
@@ -223,34 +240,46 @@ function HeroPhotoFields({
             label="Title — leave blank to hide the card"
             placeholder="Custom cake slots"
           />
-          <TextField
-            form={form}
-            name="card.subtitle"
-            label="Subtitle"
-            placeholder="Next opening: 19 August"
-          />
           <ImageField
             form={form}
             name="card.image"
-            label="Thumbnail"
+            label="Picture"
             businessId={businessId}
           />
-          <NumberField
-            form={form}
-            name="card.progress"
-            label="Progress bar (%)"
-            min={0}
-            max={100}
-            hint="How full the diary is — 70 fills the bar to seven tenths."
-          />
-          <TextField
-            form={form}
-            name="card.note"
-            label="Note under the bar"
-            placeholder="7 of 10 August slots booked"
-          />
+          {/*
+           * The availability half: a subtitle, a fill bar and a note under
+           * it. Only a template that draws a diary card has anywhere to put
+           * them — a hero whose card is a two-line badge does not, and a
+           * progress bar offered to an event stylist is an input they would
+           * fill in once and never find.
+           */}
+          {fields.heroCardAvailability && (
+            <>
+              <TextField
+                form={form}
+                name="card.subtitle"
+                label="Subtitle"
+                placeholder="Next opening: 19 August"
+              />
+              <NumberField
+                form={form}
+                name="card.progress"
+                label="Progress bar (%)"
+                min={0}
+                max={100}
+                hint="How full the diary is — 70 fills the bar to seven tenths."
+              />
+              <TextField
+                form={form}
+                name="card.note"
+                label="Note under the bar"
+                placeholder="7 of 10 August slots booked"
+              />
+            </>
+          )}
         </RepeatableRow>
       </div>
+      )}
     </>
   );
 }

@@ -46,6 +46,11 @@ describe("patisserie/boutique registration", () => {
     // not declare is a field the form won't render — and a save then drops it.
     expect(template!.fields).toEqual({
       heroPhoto: true,
+      // All three used to travel under `heroPhoto`. This template draws every
+      // one of them, so declaring them keeps its form exactly as it was.
+      heroProof: true,
+      heroCard: true,
+      heroCardAvailability: true,
       itemPhotos: true,
       // Added when the rules became per-template: these three used to be
       // unconditional, so declaring them here is what KEEPS this template's

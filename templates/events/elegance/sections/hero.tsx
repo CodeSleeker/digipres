@@ -16,6 +16,9 @@ import { delay, reveal } from "../lib/reveal";
  */
 export function Hero({ business }: { business: BusinessProfile }) {
   const { hero } = business;
+  // The wash behind the copy and the badge's second line — this design's own,
+  // rather than borrowed from a card it does not have. See EventsSections.hero.
+  const own = business.events?.hero;
 
   return (
     <section
@@ -25,9 +28,9 @@ export function Hero({ business }: { business: BusinessProfile }) {
       {/* Backdrop. Held at 20% under a cream wash: it is atmosphere, not
           content, which is why it carries no alt text. */}
       <div aria-hidden="true" className="absolute inset-0">
-        {hero.image && (
+        {own?.backdrop && (
           <div className="absolute inset-0 opacity-20">
-            <TenantImage src={hero.image} alt="" sizes="100vw" priority />
+            <TenantImage src={own.backdrop} alt="" sizes="100vw" />
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-br from-cream via-cream/95 to-gold-50/80" />
@@ -120,7 +123,7 @@ export function Hero({ business }: { business: BusinessProfile }) {
               />
               <div className="relative aspect-[3/4] overflow-hidden rounded-3xl shadow-2xl">
                 <TenantImage
-                  src={hero.card?.image ?? hero.image}
+                  src={hero.image}
                   alt={hero.imageAlt ?? ""}
                   sizes="(max-width: 1024px) 92vw, 45vw"
                   priority
@@ -140,9 +143,9 @@ export function Hero({ business }: { business: BusinessProfile }) {
                     <p className="text-xs font-semibold uppercase tracking-widest text-white">
                       {hero.badge}
                     </p>
-                    {hero.card?.title && (
+                    {own?.badgeLine && (
                       <p className="mt-1 font-serif text-xl text-gold-300">
-                        {hero.card.title}
+                        {own.badgeLine}
                       </p>
                     )}
                   </div>
