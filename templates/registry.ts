@@ -207,9 +207,6 @@ export const TEMPLATES: TemplateOption[] = [
       "products",
       "testimonials",
       "faq",
-      // Beside Contact, which is what they are: two forms a visitor fills in.
-      "enquiry",
-      "booking",
       "contact",
       "footer",
     ],
@@ -356,8 +353,9 @@ export const TEMPLATES: TemplateOption[] = [
       /*
        * FIRST, beside Branding — the same placement the retreat's own blocks
        * get, and for the same reason: this is not an ordinary page section.
-       * It carries the portfolio cards, the event grid, the approach panel
-       * and the enquiry form's dropdowns (migration 0041).
+       * It carries the hero extras, the portfolio cards and the event grid
+       * (migration 0041). The approach panel moved to Services and the two
+       * forms to menus of their own; what is left here is the photographs.
        */
       "events",
       "hero",
@@ -365,6 +363,10 @@ export const TEMPLATES: TemplateOption[] = [
       "about",
       "testimonials",
       "faq",
+      // Beside Contact, which is what they are: two forms a visitor fills
+      // in. Split out of the Events menu by migration 0044.
+      "enquiry",
+      "booking",
       "contact",
       "footer",
     ],

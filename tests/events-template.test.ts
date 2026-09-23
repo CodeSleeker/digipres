@@ -54,6 +54,11 @@ describe("events/elegance registration", () => {
       "about",
       "testimonials",
       "faq",
+      // Their own menus since migration 0044. They used to be one key inside
+      // the events content, which put "what my booking form asks" under a
+      // heading about photographs.
+      "enquiry",
+      "booking",
       "contact",
       "footer",
     ]);
